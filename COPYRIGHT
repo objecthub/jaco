@@ -1,0 +1,24 @@
+____    /   _ _     JaCo                                            ____
+    \  //\ / / \    -- an extensible compiler                      /
+     \//  \\_\_/                                                  /
+           \_____________________________________________________/
+
+
+  COPYRIGHT
+  
+  Copyright (C) 1997-2002 Matthias Zenger (matthias@objecthub.com)
+  
+  Permission is hereby granted to modify and use this software for
+  research and teaching purposes. The use or modification for
+  commercial purposes requires prior written permission by the
+  author.
+  
+  The software, or modifications thereof, may be redistributed only
+  if this copyright notice stays attached.
+  
+  Distributions of compilers derived from Jaco may only contain
+  binary code. For redistributing source code, written permission
+  from the author is required.
+
+ ______________________________________________________________________
+/                                                                      \

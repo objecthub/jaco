@@ -1,0 +1,45 @@
+# generated makefile for jaco extension Wrapper
+# Matthias Zenger, 30/05/99
+
+JC = java -ms24m -mx40m jaco.pizza.Main
+CLASSES = ../../../classes
+NEWCLASSES = ../../../tmp/new
+
+note:
+	@echo ''
+	@echo '---- Wrapper -- extension of JACO'
+	@echo '---- generated makefile'
+	@echo '-- '
+	@echo '-- make compiler        generates the compiler in ./../../../tmp/new'
+	@echo '-- make cup             updates the parser sources'
+	@echo '-- make parser          compiles and installs the parser in ./../../../classes'
+	@echo '-- make rsrc            updates the resources in ./../../../classes'
+	@echo '-- make swap            installs the generated compiler'
+	@echo ''
+
+./grammar/Parser.tables: ./grammar/Grammar.cup
+	java -ms16m -mx64m jcup.Main -package jaco.wrapper.grammar -parser Parser -symbols Symbols \
+         -o ./grammar/ -f ./grammar/Grammar.cup
+
+cup: ./grammar/Parser.tables
+
+parser: cup
+	$(JC) -d $(CLASSES) ./grammar/*.java
+	cp ./grammar/Parser.tables $(CLASSES)/jaco/wrapper/grammar
+
+rsrc:
+	cp -r ./resources $(CLASSES)/jaco/java
+
+compiler:
+	-mkdir -p $(NEWCLASSES)/jaco/wrapper/component
+	$(JC) -d $(NEWCLASSES) ./struct/*.java ./component/*.java ./context/*.java ./grammar/*.java \
+          ./Main.java
+	cp ./grammar/Parser.tables $(NEWCLASSES)/jaco/wrapper/grammar
+	cp -r ./resources $(NEWCLASSES)/jaco/wrapper
+
+swap:
+	-mkdir -p $(NEWCLASSES)/jaco/wrapper/component
+	-mkdir -p $(CLASSES)/jaco/wrapper/component
+	mv $(CLASSES)/jaco/wrapper $(NEWCLASSES)/tempclasses
+	mv $(NEWCLASSES)/jaco/wrapper $(CLASSES)/jaco
+	mv $(NEWCLASSES)/tempclasses $(NEWCLASSES)/jaco/wrapper

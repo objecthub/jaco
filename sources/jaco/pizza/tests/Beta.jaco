@@ -1,0 +1,29 @@
+public class Beta extends Alpha
+{
+	public case C4(Beta b, String str);
+	public case C5;
+	
+	public int getInt()
+	{
+		switch (this)
+		{
+			case C3(C1, Object x):
+				return 1;
+			
+			case C4(C5, "case"):
+				return 2;
+			
+			case C5:
+			case C4(_, _):
+				return 3;
+			
+			default:
+				return 4;
+		}
+	}
+	
+	public static class Inner
+	{
+		
+	}
+}

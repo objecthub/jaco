@@ -1,0 +1,15 @@
+public class Alpha
+{
+	protected int	i;
+	
+	public case C1 { i = 1; }
+	public case C2(int j) { i = j; }
+	public case C3(Alpha a, Object x);
+	
+	public int getInt()
+	{
+		return i;
+	}
+	
+	public case C0 { i = -1; }
+}

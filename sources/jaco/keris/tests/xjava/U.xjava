@@ -1,0 +1,6 @@
+abstract module U {
+    interface I {}
+    virtual class C implements I {
+        void foo(C d, int j);
+    }
+}

@@ -1,0 +1,37 @@
+module P requires A, B {
+
+    void main(B.D a, A::O::B.D b) {
+        A::O.test(b);
+        A.bar(B.foo());
+    }
+}
+
+module A requires B {
+    module O;
+    class C with Object;
+    void bar(C c) {}
+}
+
+module S {
+    interface I {
+        void fun();
+    }
+    class D with {
+        void fun() {}
+    }
+}
+
+module B extends S requires A {
+    class D implements S.I with super.D {
+        void trig() {
+            this.fun();
+        }
+    }
+    A.C foo() { return null; }
+}
+
+module O {
+    module B;
+    module A;
+    void test(O::B.D a) {}
+}

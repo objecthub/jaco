@@ -1,0 +1,18 @@
+import keris.lang.*;
+import keris.io.*;
+
+module DEMO requires OUT {
+	
+    public void main(String[] args) {
+        OUT.println("hello world!");
+    }
+}
+
+module MYDEMO {
+    module DEMO;
+    module CONSOLE;
+    
+    public void main(String[] args) {
+        DEMO.main(args);
+    }
+}

@@ -1,0 +1,9 @@
+module A {}
+
+module MSub extends MSuper requires A {
+
+}
+
+module MSuper extends MSub {
+	
+}

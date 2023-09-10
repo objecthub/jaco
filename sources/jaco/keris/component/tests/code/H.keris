@@ -1,0 +1,44 @@
+module interface MI {
+    void bar();
+}
+
+module interface NI {
+	void foo();
+}
+
+module interface OI {
+	module PI;
+}
+
+module interface PI refines NI, MI {
+    void baz();
+}
+
+module M implements MI, NI {
+    public void bar() {
+    	System.out.println("m.bar");
+    }
+    public void foo() {
+    	System.out.println("m.foo");
+    }
+}
+
+module N refines M implements PI {
+    public void baz() {
+        MI.bar();
+        NI.foo();
+    }
+}
+
+module O implements OI {
+    module N implements PI;
+}
+
+module P {
+    module O implements OI;
+    public void main(String[] args) {
+    	OI::MI.bar();
+    	OI::NI.foo();
+    	OI::PI.baz();
+    }
+}

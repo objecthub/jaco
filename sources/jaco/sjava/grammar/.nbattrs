@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<attributes version="1.0">
+   <fileobject name="Parser.java">
+      <attr name="class_dependency_jaco.framework.parser.ActionInterface" stringvalue="ParserActions"/>
+      <attr name="class_dependency_jaco.framework.parser.LRParser" stringvalue="Parser"/>
+   </fileobject>
+   <fileobject name="grammar.cup">
+      <attr name="org.netbeans.modules.text.IsTextFile" boolvalue="true"/>
+   </fileobject>
+   <fileobject name="Scanner.java">
+      <attr name="class_dependency_jaco.java.grammar.Scanner" stringvalue="Scanner"/>
+   </fileobject>
+</attributes>

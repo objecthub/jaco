@@ -1,0 +1,5 @@
+{ f x = if (true) g x else f x,
+  h x = x,
+  g x = if (true) 0 else f x };
+  (f 5, g 4, h 3)
+  

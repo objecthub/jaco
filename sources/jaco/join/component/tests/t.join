@@ -1,0 +1,11 @@
+{ id x = x,
+  val = true,
+  succ x = x + 1,
+  append x = if (true) x else (append x) };
+if (false)
+	(((1 + 2 * 3 / 4), val || val), succ)
+else
+	(if (true)
+		(id 1, true)
+	 else
+	 	((1 + 2), id false), id)

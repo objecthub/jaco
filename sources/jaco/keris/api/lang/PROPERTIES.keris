@@ -1,0 +1,71 @@
+//                 _
+//   _  _____ _ __(_)___     Keris API
+//  | |/ / _ \ '__| / __|    (c) 2001 Matthias Zenger
+//  |   <  __/ |  | \__ \
+//  |_|\_\___|_|  |_|___/    Properties module
+//                           
+//  [OPTIONS.keris (6262) 6-Jul-01 12:03 -> 6-Jul-01 16:09]
+
+package keris.lang;
+
+import java.io.*;
+import java.util.*;
+
+
+public module PROPERTIES {
+
+    protected Properties props = (Properties)System.getProperties().clone();
+
+
+    public void setProperties(Properties props) {
+        this.props = props;
+    }
+    
+    public Properties getProperties() {
+        return props;
+    }
+    
+    public String getProperty(String key) {
+        return props.getProperty(key);
+    }
+    
+    public String getProperty(String key, String defaultVal) {
+        return props.getProperty(key, defaultVal);
+    }
+    
+    public void setProperty(String key, String value) {
+        props.setProperty(key, value);
+    }
+    
+    public Enumeration propertyNames() {
+        return props.propertyNames();
+    }
+    
+    public String[] propertyKeys() {
+        Enumeration enum = props.propertyNames();
+        Set set = new HashSet();
+        while (enum.hasMoreElements())
+            set.add(enum.nextElement());
+        return (String[])set.toArray(new String[set.size()]);
+    }
+    
+    public void load(InputStream in) throws IOException {
+        props.load(in);
+    }
+    
+    public void load(String filename) throws IOException {
+        InputStream in = new FileInputStream(filename);
+        props.load(in);
+        in.close();
+    }
+    
+    public void store(OutputStream out, String header) throws IOException {
+        props.store(out, header);
+    }
+    
+    public void store(String filename, String header) throws IOException {
+        OutputStream out = new FileOutputStream(filename);
+        props.store(out, header);
+        out.close();
+    }
+}

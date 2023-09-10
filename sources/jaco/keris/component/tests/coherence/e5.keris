@@ -1,0 +1,10 @@
+module M {}
+module N requires M {}
+module O requires N {}
+module P requires N {}
+module Q requires O, N {
+	module P;
+	module M;
+	module R;
+}
+module R requires N {}

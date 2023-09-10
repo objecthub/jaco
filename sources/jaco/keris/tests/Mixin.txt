@@ -1,0 +1,69 @@
+class C implements I {
+    int bar() { return 0; }
+    void foo() {}
+}
+
+interface I {
+    void foo();
+    int bar();
+}
+
+module M {
+    class A implements I with C;
+    class B extends A {
+        
+    }
+}
+
+
+class A {
+    
+    interface A extends I {}
+    
+    class $A$This implements A extends C {
+        $A$This(...) {
+            super(...);
+        }
+    }
+    
+    class $A$Super implements A extends C {
+        private A $sub;
+        
+        C(A $sub, ...) {
+            super(...);
+            this.$sub = $sub;
+        }
+        
+        void foo() {
+            $sub.foo();
+        }
+        
+        void $foo() {
+            super.foo();
+        }
+        
+        int bar() {
+            return $sub.bar();
+        }
+        
+        int $bar() {
+            return super.bar();
+        }
+    }
+    
+    class B implements A {
+        $A$Super $super;
+        
+        B(...) {
+            $super = new $A$Super(this, ...)
+        }
+        
+        void foo() {
+            $super.$foo();
+        }
+        
+        int bar() {
+            return $super.$bar();
+        }
+    }
+}

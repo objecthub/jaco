@@ -1,0 +1,504 @@
+firstUndef(<init>: void () in M$I, M$CI) = void (`M)
+H in M: {} =={K, M}=> {H}
+I in N: {} =={K, N}=> {I}
+J in O: {} =={L, O}=> {J}
+H in O: {} =={L, O}=> {H}
+////// A.keris //////
+class H implements $H {
+   java.lang.Object $encl;
+   public H(java.lang.Object $encl) {
+      super();
+      this.$encl = $encl;
+   }
+   H $self;
+   public H $H() {
+      return $self;
+   }
+   public class Connector$ extends java.lang.Object implements $H {
+      public H $H() {
+         return $self;
+      }
+   }
+   public H() {
+      super();
+   }
+   public H $setup() {
+      if ($self == null) {
+         this.$self = this;
+         $init();
+         return this;
+      } else 
+         return this;
+   }
+   protected void $connect(Connector$ $c) {
+      this.$self = this;
+   }
+   protected void $init() {
+   }
+   public static void main(java.lang.String[] args) {
+      throw new Error("module not executable");
+   }
+}
+interface $H {
+   public abstract H $H();
+}
+class I extends H implements $H, $I {
+   java.lang.Object $encl;
+   public I(java.lang.Object $encl) {
+      super($encl);
+      this.$encl = $encl;
+   }
+   I $self;
+   public H $H() {
+      return $self;
+   }
+   public I $I() {
+      return $self;
+   }
+   public class Connector$ extends H.Connector$ implements $H, $I {
+      public H $H() {
+         return $self;
+      }
+      public I $I() {
+         return $self;
+      }
+   }
+   public void $main(String[] args) {
+   }
+   public I() {
+      super();
+   }
+   public I $setup() {
+      if ($self == null) {
+         this.$self = this;
+         super.$connect(new Connector$());
+         $init();
+         return this;
+      } else 
+         return this;
+   }
+   protected void $connect(Connector$ $c) {
+      this.$self = this;
+      super.$connect(new Connector$());
+   }
+   protected void $init() {
+      super.$init();
+   }
+   public static void main(java.lang.String[] args) {
+      new I(null).$setup().$main(args);
+   }
+}
+interface $I extends $H {
+   public abstract I $I();
+}
+class J extends I implements $J {
+   java.lang.Object $encl;
+   public J(java.lang.Object $encl) {
+      super($encl);
+      this.$encl = $encl;
+   }
+   J $self;
+   public J $J() {
+      return $self;
+   }
+   public class Connector$ extends I.Connector$ implements $J {
+      public H $H() {
+         return $self;
+      }
+      public J $J() {
+         return $self;
+      }
+      public I $I() {
+         return $self;
+      }
+   }
+   public J() {
+      super();
+   }
+   public J $setup() {
+      if ($self == null) {
+         this.$self = this;
+         super.$connect(new Connector$());
+         $init();
+         return this;
+      } else 
+         return this;
+   }
+   protected void $connect(Connector$ $c) {
+      this.$self = this;
+      super.$connect(new Connector$());
+   }
+   protected void $init() {
+      super.$init();
+   }
+   public static void main(java.lang.String[] args) {
+      new J(null).$setup().$main(args);
+   }
+}
+interface $J {
+   public abstract J $J();
+}
+class K implements $K {
+   java.lang.Object $encl;
+   public K(java.lang.Object $encl) {
+      super();
+      this.$encl = $encl;
+   }
+   K $self;
+   public K $K() {
+      return $self;
+   }
+   public class Connector$ extends java.lang.Object implements $K {
+      public K $K() {
+         return $self;
+      }
+   }
+   public K() {
+      super();
+   }
+   public K $setup() {
+      if ($self == null) {
+         this.$self = this;
+         $init();
+         return this;
+      } else 
+         return this;
+   }
+   protected void $connect(Connector$ $c) {
+      this.$self = this;
+   }
+   protected void $init() {
+   }
+   public static void main(java.lang.String[] args) {
+      throw new Error("module not executable");
+   }
+}
+interface $K {
+   public abstract K $K();
+}
+class L extends K implements $L {
+   java.lang.Object $encl;
+   public L(java.lang.Object $encl) {
+      super($encl);
+      this.$encl = $encl;
+   }
+   L $self;
+   public L $L() {
+      return $self;
+   }
+   public class Connector$ extends K.Connector$ implements $L {
+      public K $K() {
+         return $self;
+      }
+      public L $L() {
+         return $self;
+      }
+   }
+   public L() {
+      super();
+   }
+   public L $setup() {
+      if ($self == null) {
+         this.$self = this;
+         super.$connect(new Connector$());
+         $init();
+         return this;
+      } else 
+         return this;
+   }
+   protected void $connect(Connector$ $c) {
+      this.$self = this;
+      super.$connect(new Connector$());
+   }
+   protected void $init() {
+      super.$init();
+   }
+   public static void main(java.lang.String[] args) {
+      throw new Error("module not executable");
+   }
+}
+interface $L {
+   public abstract L $L();
+}
+class M implements $K, $H, $M {
+   java.lang.Object $encl;
+   public M(java.lang.Object $encl) {
+      super();
+      this.$encl = $encl;
+   }
+   K $req0;
+   public K $K() {
+      return $req0.$setup();
+   }
+   H $nes0;
+   public H $H() {
+      return $nes0.$setup();
+   }
+   M $self;
+   public M $M() {
+      return $self;
+   }
+   public class Connector$ extends java.lang.Object implements $M {
+      public M $M() {
+         return $self;
+      }
+      public K $K() {
+         return $req0;
+      }
+      public H $H() {
+         return $nes0;
+      }
+   }
+   interface I {
+   }
+   class CI implements I {
+      public CI() {
+         super();
+      }
+   }
+   public M.A $new$A() {
+      return new A$Impl();
+   }
+   interface A extends I {
+   }
+   class A$Impl extends M.CI implements M.A {
+      public A$Impl() {
+         $M().super();
+      }
+   }
+   public void $main(String[] args) {
+      $M().$new$A();
+   }
+   public H $create$H() {
+      return new H(this);
+   }
+   public M() {
+      super();
+   }
+   public M $setup() {
+      if ($self == null) {
+         this.$self = this;
+         this.$req0 = (($K)$encl).$K();
+         $nes0 = $create$H();
+         $init();
+         return this;
+      } else 
+         return this;
+   }
+   protected void $connect(Connector$ $c) {
+      this.$self = this;
+      this.$req0 = $c.$K();
+      this.$nes0 = $c.$H();
+   }
+   protected void $init() {
+   }
+   public static void main(java.lang.String[] args) {
+      throw new Error("module not executable");
+   }
+}
+interface $M {
+   public abstract M $M();
+}
+class N extends M implements $K, $H, $I, $N, $M {
+   java.lang.Object $encl;
+   public N(java.lang.Object $encl) {
+      super($encl);
+      this.$encl = $encl;
+   }
+   K $req0;
+   public K $K() {
+      return $req0.$setup();
+   }
+   I $nes0;
+   public H $H() {
+      return $nes0.$setup();
+   }
+   public I $I() {
+      return $nes0.$setup();
+   }
+   N $self;
+   public N $N() {
+      return $self;
+   }
+   public M $M() {
+      return $self;
+   }
+   public class Connector$ extends M.Connector$ implements $N, $M {
+      public N $N() {
+         return $self;
+      }
+      public M $M() {
+         return $self;
+      }
+      public K $K() {
+         return $req0;
+      }
+      public H $H() {
+         return $nes0;
+      }
+      public I $I() {
+         return $nes0;
+      }
+   }
+   public I $create$I() {
+      return new I(this);
+   }
+   public N() {
+      super();
+   }
+   public N $setup() {
+      if ($self == null) {
+         this.$self = this;
+         this.$req0 = (($K)$encl).$K();
+         $nes0 = $create$I();
+         super.$connect(new Connector$());
+         $init();
+         return this;
+      } else 
+         return this;
+   }
+   protected void $connect(Connector$ $c) {
+      this.$self = this;
+      this.$req0 = $c.$K();
+      this.$nes0 = $c.$I();
+      super.$connect(new Connector$());
+   }
+   protected void $init() {
+      super.$init();
+   }
+   public static void main(java.lang.String[] args) {
+      throw new Error("module not executable");
+   }
+}
+interface $N extends $M {
+   public abstract N $N();
+}
+class O extends N implements $L, $J, $H, $O {
+   java.lang.Object $encl;
+   public O(java.lang.Object $encl) {
+      super($encl);
+      this.$encl = $encl;
+   }
+   L $req0;
+   public L $L() {
+      return $req0.$setup();
+   }
+   J $nes0;
+   public J $J() {
+      return $nes0.$setup();
+   }
+   H $nes1;
+   public H $H() {
+      return $nes1.$setup();
+   }
+   O $self;
+   public O $O() {
+      return $self;
+   }
+   public class Connector$ extends N.Connector$ implements $O {
+      public N $N() {
+         return $self;
+      }
+      public M $M() {
+         return $self;
+      }
+      public O $O() {
+         return $self;
+      }
+      public K $K() {
+         return $req0;
+      }
+      public H $H() {
+         return $nes0;
+      }
+      public I $I() {
+         return $nes0;
+      }
+      public L $L() {
+         return $req0;
+      }
+      public J $J() {
+         return $nes0;
+      }
+   }
+   public J $create$J() {
+      return new J(this);
+   }
+   public H $create$H() {
+      return new H(this);
+   }
+   public O() {
+      super();
+   }
+   public O $setup() {
+      if ($self == null) {
+         this.$self = this;
+         this.$req0 = (($L)$encl).$L();
+         $nes0 = $create$J();
+         $nes1 = $create$H();
+         super.$connect(new Connector$());
+         $init();
+         return this;
+      } else 
+         return this;
+   }
+   protected void $connect(Connector$ $c) {
+      this.$self = this;
+      this.$req0 = $c.$L();
+      this.$nes0 = $c.$J();
+      this.$nes1 = $c.$H();
+      super.$connect(new Connector$());
+   }
+   protected void $init() {
+      super.$init();
+   }
+   public static void main(java.lang.String[] args) {
+      throw new Error("module not executable");
+   }
+}
+interface $O {
+   public abstract O $O();
+}
+*** suspicious error message
+there might be something wrong with jaco's translation.
+please file a bug report by sending your
+program and the following output to
+matthias.zenger@epfl.ch -- thank you!
+A.keris:29: $I can't override $I with a incompatible return type
+  found   : jaco.java.struct.Type$PackageType@70b4f6->M$I
+  required: jaco.java.struct.Type$PackageType@70b4f6->I
+module N refines M {
+^
+*** suspicious error message
+there might be something wrong with jaco's translation.
+please file a bug report by sending your
+program and the following output to
+matthias.zenger@epfl.ch -- thank you!
+*** suspicious error message
+there might be something wrong with jaco's translation.
+please file a bug report by sending your
+program and the following output to
+matthias.zenger@epfl.ch -- thank you!
+*** suspicious error message
+there might be something wrong with jaco's translation.
+please file a bug report by sending your
+program and the following output to
+matthias.zenger@epfl.ch -- thank you!
+*** suspicious error message
+there might be something wrong with jaco's translation.
+please file a bug report by sending your
+program and the following output to
+matthias.zenger@epfl.ch -- thank you!
+A.keris:30: M$I is abstract and cannot be instantiated.
+    module I;
+    ^
+*** suspicious error message
+there might be something wrong with jaco's translation.
+please file a bug report by sending your
+program and the following output to
+matthias.zenger@epfl.ch -- thank you!
+A.keris:33: incompatible types
+  found   : jaco.java.struct.Type$PackageType@70b4f6->J
+  required: jaco.java.struct.Type$PackageType@70b4f6->M$I
+module O specializes N requires L as K {
+^

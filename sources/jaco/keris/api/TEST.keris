@@ -1,0 +1,41 @@
+import keris.util.*;
+import keris.lang.*;
+
+module STRATTR extends ATTRIBUTES {
+
+    public interface StrAttrib {
+        String getStr();
+        int getInt();
+    }
+    
+    protected int counter = 0;
+    
+    public class Attribute implements AttribConstr, StrAttrib with {
+        protected int c;
+        
+        public Attribute(Object o) {
+            c = counter++;
+        }
+        
+        public String getStr() {
+            return "STRING-" + c;
+        }
+        
+        public int getInt() {
+            return c;
+        }
+    }
+}
+
+module TEST {
+    module STRATTR;
+    module CONSOLE;
+    
+    public void main(String[] args) {
+        Object o1 = new Object();
+        Object o2 = new Object();
+        CONSOLE.println(STRATTR.get(o1).getStr() + " | " +
+                        STRATTR.get(o2).getStr() + " | " +
+                        STRATTR.get(o1).getInt());
+    }
+}

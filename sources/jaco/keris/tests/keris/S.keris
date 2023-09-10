@@ -1,0 +1,15 @@
+module interface MI {
+    interface AI {
+        AI(int i);
+        void foo();
+    }
+    class A implements AI;
+}
+
+public module M implements MI {
+    public class AImpl implements MI.AI {
+        public AImpl(int i) {}
+        public void foo() { }
+    }
+    abstract class A implements MI.AI;
+}

@@ -1,0 +1,204 @@
+//                 _
+//   _  _____ _ __(_)___     Keris API
+//  | |/ / _ \ '__| / __|    (c) 2001 Matthias Zenger
+//  |   <  __/ |  | \__ \
+//  |_|\_\___|_|  |_|___/    Input/Output on terminals
+//                           
+//  [OPTIONS.keris (6262) 6-Jul-01 12:03 -> 6-Jul-01 16:09]
+
+package keris.lang;
+
+import keris.io.*;
+import java.io.*;
+
+
+public module CONSOLE implements IN, OUT {
+    
+    protected DataInputStream in = new DataInputStream(System.in);
+    protected PrintStream out = System.out;
+    
+    
+    public DataInputStream setInput(DataInputStream in) {
+        DataInputStream oldin = this.in;
+        this.in = in;
+        return oldin;
+    }
+    
+    public DataInputStream setInput(String filename) throws IOException {
+        DataInputStream oldin = this.in;
+        this.in = new DataInputStream(new FileInputStream(filename));
+        return oldin;
+    }
+    
+    public DataInputStream getInput() {
+        return in;
+    }
+    
+    public PrintStream setOutput(PrintStream out) {
+        PrintStream oldout = this.out;
+        this.out = out;
+        return oldout;
+    }
+    
+    public PrintStream setOutput(String filename) throws IOException {
+        PrintStream oldout = this.out;
+        this.out = new PrintStream(new FileOutputStream(filename));
+        return oldout;
+    }
+    
+    public PrintStream getOutput() {
+        return out;
+    }
+    
+    public void write(int b) {
+        out.write(b);
+    }
+
+    public void write(byte buf[], int off, int len) {
+        out.write(buf, off, len);
+    }
+
+    public void print(boolean b) {
+        out.print(b);
+    }
+
+    public void print(char c) {
+        out.print(c);
+    }
+
+    public void print(int i) {
+        out.print(i);
+    }
+
+    public void print(long l) {
+        out.print(l);
+    }
+
+    public void print(float f) {
+        out.print(f);
+    }
+
+    public void print(double d) {
+        out.print(d);
+    }
+
+    public void print(char s[]) {
+        out.print(s);
+    }
+
+    public void print(String s) {
+        out.print(s);
+    }
+
+    public void print(Object obj) {
+        out.print(obj);
+    }
+
+    public void println() {
+        out.println();
+    }
+
+    public void println(boolean x) {
+        out.println(x);
+    }
+
+    public void println(char x) {
+        out.println(x);
+    }
+
+    public void println(int x) {
+        out.println(x);
+    }
+
+    public void println(long x) {
+        out.println(x);
+    }
+
+    public void println(float x) {
+        out.println(x);
+    }
+
+    public void println(double x) {
+        out.println(x);
+    }
+
+    public void println(char x[]) {
+        out.println(x);
+    }
+
+    public void println(String x) {
+        out.println(x);
+    }
+
+    public void println(Object x) {
+        out.println(x);
+    }
+
+    public int read() throws IOException {
+        return in.read();
+    }
+
+    public int read(byte b[]) throws IOException {
+        return in.read(b);
+    }
+    
+    public int read(byte b[], int off, int len) throws IOException {
+        return in.read(b, off, len);
+    }
+
+    public long skip(long n) throws IOException {
+        return in.skip(n);
+    }
+    
+    public int available() throws IOException {
+        return in.available();
+    }
+    
+    public boolean readBoolean() throws IOException {
+        return in.readBoolean();
+    }
+
+    public byte readByte() throws IOException {
+        return in.readByte();
+    }
+
+    public int readUnsignedByte() throws IOException {
+        return in.readUnsignedByte();
+    }
+
+    public short readShort() throws IOException {
+        return in.readShort();
+    }
+
+    public int readUnsignedShort() throws IOException {
+        return in.readUnsignedShort();
+    }
+
+    public char readChar() throws IOException {
+        return in.readChar();
+    }
+
+    public int readInt() throws IOException {
+        return in.readInt();
+    }
+
+    public long readLong() throws IOException {
+        return in.readLong();
+    }
+
+    public float readFloat() throws IOException {
+        return in.readFloat();
+    }
+
+    public double readDouble() throws IOException {
+        return in.readDouble();
+    }
+
+    public String readLine() throws IOException {
+        return in.readLine();
+    }
+    
+    public String readUTF() throws IOException {
+        return in.readUTF();
+    }
+}

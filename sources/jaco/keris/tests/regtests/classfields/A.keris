@@ -1,0 +1,3 @@
+module M {
+    final class A;
+}

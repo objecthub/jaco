@@ -1,0 +1,44 @@
+module M requires N {
+	module Q;
+	interface I {}
+    class C extends N.D, Q.E implements I = {}
+    module U;
+}
+/*
+module S refines M {
+	module R;
+}
+*/
+module N {
+	interface J {}
+	class D = {}
+}
+
+module O refines N {
+	class D implements J = {}
+}
+
+module Q {
+	interface K {}
+	class E = {}
+}
+
+module R refines Q {
+	class E implements K = {}
+}
+
+module T requires M, U {
+	class F extends M.C implements M.I, U.L = {}
+}
+
+module U requires M {
+	interface L {}
+	module T;
+}
+
+/*
+module P {
+	module M;
+	module O;
+}
+*/

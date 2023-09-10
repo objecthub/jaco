@@ -1,0 +1,21 @@
+module interface I {
+    public module J;
+}
+
+module interface J {
+    public class T;
+}
+
+module interface H refines I {
+    
+}
+
+module L {}
+
+module K refines L implements H {
+    module M;
+}
+
+module M implements J {
+    public class T = Object;
+}

@@ -1,0 +1,66 @@
+/* module M requires A, B {
+
+}
+
+module A requires B, M {
+
+}
+
+module B requires A {
+
+}
+
+module AX for A requires BX for B, MX for M {
+
+}
+
+module BX for B requires AX for A {
+
+}
+
+module MX for M requires AX for A, BX for B {
+
+}
+*/
+/*
+module A requires B {}
+module B requires C {}
+module C requires A, D {}
+module D {}
+
+module N {
+}
+
+module M requires D {
+    module A;
+    module B;
+    module C;
+}
+
+module AX for A requires BX for B {}
+module BX for B requires CX for C {}
+module CX for C requires AX for A, DX for D {}
+module DX for D {}
+
+module MX extends M requires DX {
+    module AX for A;
+    module BX for B;
+    module CX for C;
+}
+*/
+
+module M {
+    module N;
+}
+
+module N requires M {
+
+}
+
+module NX for N requires MX for M {
+
+}
+
+module MX for M {
+    module NX for N;
+}

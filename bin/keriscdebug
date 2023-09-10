@@ -1,0 +1,2 @@
+#!/bin/sh
+java -ms10m -mx48m -noclassgc -Djava.compiler=NONE jaco.keris.Main $*

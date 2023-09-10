@@ -1,0 +1,17 @@
+class A {
+    A dup() {
+        System.out.println("A");
+        return this;
+    }
+    public static void main(String[] args) {
+        B b = new B();
+        b = b.dup();
+        System.out.println(b);
+    }
+}
+class B extends A {
+    B dup() {
+        System.out.println("B");
+        return this;
+    }
+}

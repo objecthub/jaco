@@ -1,0 +1,405 @@
+<project name="Jaco" default="usage" basedir=".">
+
+  <!-- the bootstrap compiler jar archive -->
+  <property name="bootstrap.jar" value="bootstrap/jaco.jar"/>
+  
+  <!-- task definitions for the pico and jaco compilers -->
+  <taskdef name="jacoc"
+           classname="jaco.java.AntTask"
+           classpath="${bootstrap.jar}"/>
+  <taskdef name="picoc"
+           classname="jaco.pizza.AntTask"
+           classpath="${bootstrap.jar}"/>
+
+  <!-- the target directory -->
+  <property name="classes" value="classes" />
+  
+  <!-- the source directory -->
+  <property name="sources" value="sources" />
+  
+  <!-- the classpath in the compilation process -->
+  <property name="classpath" value="${classes}:lib/ant.jar" />
+  
+  <!-- the directory with distribution templates in sub-directories -->
+  <property name="template.root" value="template" />
+  
+  <!-- the directory in which distributions are generated
+    -  (in sub-directories) -->
+  <property name="distrib.root" value="distrib" />
+  
+  <!-- the directory of the extension template -->  
+  <property name="wrapper.root" value="${sources}/jaco/wrapper"/>
+  
+  <!-- prefix of bootclasses jar file -->  
+  <property name="boot.root" value="bootstrap/jaco_"/>
+  
+  <!-- prefix of backup files -->  
+  <property name="backup.root" value="archive"/>
+
+  <!-- print out the usage message
+    -->
+  <target name="usage">
+    <echo message="---- JACO -- extensible compiler"/>
+    <echo message="---- (c) 31-12-2001, Matthias Zenger"/>
+    <echo message="--"/>
+    <echo message="-- compile.jcup          compile the JCup parser generator"/>
+    <echo message="-- make.parsers          update the parser sources"/>
+    <echo message="-- compile.parsers       compile the parser sources"/>
+    <echo message="-- make.resources        update the compiler resources"/>
+    <echo message="-- compile.jaco          compile jaco and pico"/>
+    <echo message="-- compile               compile jaco, pico and jcup"/>
+    <echo message="-- make.bootcompiler     create a new bootcompiler jar file"/>
+    <echo message="-- backup.all            backup all source files"/>
+    <echo message="-- backup -Dpackage=?    backup all source files of package ?"/>
+    <echo message="-- normalize             cleanup source code"/>
+    <echo message="-- distrib -Dpackage=?   create a distribution for package ?"/>
+    <echo message="-- extend -Dpackage=?    create a new compiler extension in the"/>
+    <echo message="--        -Dprefix=?     given package with the given name prefix"/>
+  </target>
+
+  <!-- compile the jcup parser generator
+    -->
+  <target name="compile.jcup">
+    <javac srcdir="${sources}" destdir="${classes}">
+      <include name="jcup/*.java"/>
+      <include name="jcup/runtime/*.java"/>
+    </javac>
+    <copy file="${sources}/jcup/parser.tables" todir="${classes}/jcup" />
+  </target>
+
+  <!-- apply the jcup parser generator;
+    -  uses parameters: parser.package, parser.class, parser.spec,
+    -                   parser.sym, parser.target
+    -->
+  <target name="jcup" unless="uptodate" depends="compile.jcup">
+    <java classname="jcup.Main" fork="true">
+      <classpath path="${classpath}"/>
+      <arg value="-package" />
+      <arg value="${parser.package}" />
+      <arg value="-parser" />
+      <arg value="${parser.class}" />
+      <arg value="-symbols" />
+      <arg value="${parser.sym}" />
+      <arg value="-o" />
+      <arg value="${parser.target}" />
+      <arg value="-f" />
+      <arg value="${parser.spec}" />
+    </java>
+  </target>
+
+  <!-- only apply parser generator if necessary;
+    -  uses parameters: parser.package, parser.class, parser.spec,
+    -                   parser.sym, parser.target
+    -->
+  <target name="check.jcup">
+    <uptodate property="uptodate" value="true"
+              targetfile="${parser.target}/${parser.class}.java" >
+      <srcfiles dir="." includes="${parser.spec}" />
+    </uptodate>
+    <antcall target="jcup">
+    </antcall>
+  </target>
+
+  <!-- make the jaco parser
+    -->
+  <target name="make.java.parser">
+    <antcall target="check.jcup">
+      <param name="parser.package" value="jaco.java.grammar" />
+      <param name="parser.class" value="Parser" />
+      <param name="parser.spec"
+             value="${sources}/jaco/java/grammar/Grammar.cup" />
+      <param name="parser.sym" value="Symbols" />
+      <param name="parser.target" value="${sources}/jaco/java/grammar/" />
+    </antcall>
+  </target>
+
+  <!-- make the pico parser
+    -->
+  <target name="make.pizza.parser">
+    <antcall target="check.jcup">
+      <param name="parser.package" value="jaco.pizza.grammar" />
+      <param name="parser.class" value="PizzaParser" />
+      <param name="parser.spec"
+             value="${sources}/jaco/pizza/grammar/Grammar.cup" />
+      <param name="parser.sym" value="PizzaSymbols" />
+      <param name="parser.target" value="${sources}/jaco/pizza/grammar/" />
+    </antcall>
+  </target>
+
+  <!-- make both, the parser for jaco and pico
+    -->
+  <target name="make.parsers" depends="make.java.parser, make.pizza.parser"/>
+
+  <!-- copy the parser tables to the target directory
+    -->
+  <target name="copy.tables" depends="prepare.classes, make.parsers">
+    <copy file="${sources}/jaco/java/grammar/Parser.tables"
+          todir="${classes}/jaco/java/grammar/"/>
+    <copy file="${sources}/jaco/pizza/grammar/PizzaParser.tables"
+          todir="${classes}/jaco/pizza/grammar/"/>
+  </target>
+  
+  <!-- compile the parsers for jaco and pico
+    -->
+  <target name="compile.parsers" depends="copy.tables">
+    <picoc srcdir="${sources}" destdir="${classes}" >
+      <classpath path="${classpath}"/>
+      <include name="jaco/java/grammar/*.java"/>
+      <include name="jaco/pizza/grammar/*.java"/>
+    </picoc>
+  </target>
+
+  <!-- copy the compiler resources into the target directory
+    -->
+  <target name="make.resources" depends="prepare.classes">
+    <copy todir="${classes}/jaco/java/resources">
+      <fileset dir="${sources}/jaco/java/resources"/>
+    </copy>
+    <copy todir="${classes}/jaco/pizza/resources">
+      <fileset dir="${sources}/jaco/pizza/resources"/>
+    </copy>
+  </target>
+  
+  <!-- prepare the target directory by creating some directories
+    -->
+  <target name="prepare.classes">
+    <mkdir dir="${classes}/jaco/java/component"/>
+    <mkdir dir="${classes}/jaco/java/grammar"/>
+    <mkdir dir="${classes}/jaco/pizza/component"/>
+    <mkdir dir="${classes}/jaco/pizza/grammar"/>
+    <mkdir dir="${classes}/jaco/framework/parser"/>
+  </target>
+  
+  <!-- compile jaco and pico
+    -->
+  <target name="compile.jaco" depends="copy.tables, make.resources">
+    <picoc srcdir="${sources}"
+           destdir="${classes}"
+           force="true"
+           suffixes="java, pizza">
+      <classpath path="${classpath}"/>
+      <include name="jaco/framework/*.java"/>
+      <include name="jaco/framework/parser/*.java"/>
+      <include name="jaco/framework/ant/*.java"/>
+      <include name="jaco/java/struct/*.java"/>
+      <include name="jaco/java/component/*.java"/>
+      <include name="jaco/java/context/*.java"/>
+      <include name="jaco/java/grammar/*.java"/>
+      <include name="jaco/java/*.pizza"/>
+      <include name="jaco/pizza/struct/*.java"/>
+      <include name="jaco/pizza/component/*.java"/>
+      <include name="jaco/pizza/context/*.java"/>
+      <include name="jaco/pizza/grammar/*.java"/>
+      <include name="jaco/pizza/*.java"/>
+    </picoc>
+  </target>
+  
+  <!-- compile everything
+    -->
+  <target name="compile" depends="compile.jcup, compile.jaco"/>
+  
+  <!-- create a new bootstrap compiler jar file
+    -->
+  <target name="make.bootcompiler">
+  	<tstamp>
+      <format property="boot.date" pattern="yy-MM-dd"/>
+    </tstamp>
+    <jar jarfile="${boot.root}${boot.date}.jar"
+         basedir="${classes}"
+         manifest="${sources}/jaco/pizza/MANIFEST">
+    	<include name="jcup/**"/>
+    	<include name="jaco/framework/**"/>
+    	<include name="jaco/java/**"/>
+    	<include name="jaco/pizza/**"/>
+    </jar>
+  </target>
+  
+  <!-- create a distribution directory
+    -  uses parameters: package
+    -->
+  <target name="distrib">
+    <available property="package.exists" file="${template.root}/${package}"/>
+    <antcall target="single.distrib"/>
+  </target>
+  
+  <target name="single.distrib" if="package.exists">
+    <echo message="cleaning up..."/>
+    <delete dir="${distrib.root}/${package}" verbose="false" quiet="true" failonerror="false"/>
+    <delete file="${distrib.root}/${package}.zip" verbose="false" quiet="true" failonerror="false"/>
+    <delete file="${distrib.root}/${package}.tar.gz" verbose="false" quiet="true" failonerror="false"/>
+    <echo message="creating directory..."/>
+    <mkdir dir="${distrib.root}/${package}/lib"/>
+    <echo message="copying template..."/>
+    <copy todir="${distrib.root}/${package}" preservelastmodified="true">
+      <fileset dir="${template.root}/${package}"/>
+    </copy>
+    <echo message="setting permissions..."/>
+    <chmod dir="${distrib.root}/${package}/bin" perm="ugo+rx" includes="**"/>
+    <echo message="creating jar file..."/>
+    <jar jarfile="${distrib.root}/${package}/lib/jaco.jar"
+         basedir="${classes}"
+         manifest="${sources}/jaco/${package}/MANIFEST">
+    	<include name="jaco/framework/**"/>
+    	<include name="jaco/java/**"/>
+    	<include name="jaco/${package}/**"/>
+    </jar>
+    <zip zipfile="${distrib.root}/${package}.zip"
+         basedir="${distrib.root}"
+         includes="${package}/**"/>
+    <tar tarfile="${distrib.root}/${package}.tar">
+         <tarfileset dir="${distrib.root}" mode="755">
+             <include name="${package}/bin/**"/>
+         </tarfileset>
+         <tarfileset dir="${distrib.root}">
+             <include name="${package}/**"/>
+             <exclude name="${package}/bin/**"/>
+         </tarfileset>
+    </tar>
+    <gzip src="${distrib.root}/${package}.tar" zipfile="${distrib.root}/${package}.tar.gz"/>
+    <delete file="${distrib.root}/${package}.tar"/>
+  </target>
+  
+  <!-- create a new jaco extension
+    -  uses parameters: package, prefix
+    -->
+  <target name="extend">
+    <available property="package.exists" file="${sources}/jaco/${package}"/>
+    <antcall target="single.extend"/>
+  </target>
+  
+  <target name="single.extend" unless="package.exists">
+    <echo message="creating source directory..."/>
+    <mkdir dir="${sources}/jaco/${package}"/>
+    <copy todir="${sources}/jaco/${package}" preservelastmodified="true">
+      <fileset dir="${wrapper.root}">
+        <include name="**"/>
+      </fileset>
+    </copy>
+    <echo message="updating files..."/>
+    <replace dir="${sources}/jaco/${package}"
+             token="wrapper"
+             value="${package}"
+             summary="true"/>
+    <replace dir="${sources}/jaco/${package}"
+             excludes="grammar/**/*.cup"
+             token="Wrapper"
+             value="${prefix}"
+             summary="true"/>
+    <echo message="renaming files..."/>
+    <move todir="${sources}/jaco/${package}/context">
+      <fileset dir="${sources}/jaco/${package}/context">
+        <include name="**/*.java"/>
+      </fileset>
+      <mapper type="glob" from="Wrapper*" to="${prefix}*"/>
+    </move>
+    <move todir="${sources}/jaco/${package}/component">
+      <fileset dir="${sources}/jaco/${package}/component">
+        <include name="**/*.java"/>
+      </fileset>
+      <mapper type="glob" from="Wrapper*" to="${prefix}*"/>
+    </move>
+	<move file="${sources}/jaco/${package}/component/TransWrapper.java"
+	      tofile="${sources}/jaco/${package}/component/Trans${prefix}.java"/>
+	<move file="${sources}/jaco/${package}/component/WCompiler.java"
+	      tofile="${sources}/jaco/${package}/component/Compiler.java"/>
+	<move file="${sources}/jaco/${package}/WrapperMain.java"
+	      tofile="${sources}/jaco/${package}/Main.java"/>
+	<move file="${sources}/jaco/${package}/grammar/WrapperGrammar.cup"
+	      tofile="${sources}/jaco/${package}/grammar/Grammar.cup"/>
+	<move file="${sources}/jaco/${package}/grammar/WrapperScanner.java"
+	      tofile="${sources}/jaco/${package}/grammar/Scanner.java"/>
+	<move file="${sources}/jaco/${package}/resources/WrapperSettings.properties"
+	      tofile="${sources}/jaco/${package}/resources/Settings.properties"/>
+	<move file="${sources}/jaco/${package}/Make.file"
+	      tofile="${sources}/jaco/${package}/Makefile"/>
+	<move file="${sources}/jaco/${package}/bin/wrapperc"
+	      tofile="${sources}/jaco/${package}/bin/${package}c"/>
+	<echo message="setting permissions..."/>
+	<chmod dir="${sources}/jaco/${package}/bin" perm="ugo+rx" includes="**"/>
+	<echo message="creating parser..."/>
+    <antcall target="check.jcup">
+      <param name="parser.package" value="jaco.${package}.grammar"/>
+      <param name="parser.class" value="Parser"/>
+      <param name="parser.spec"
+             value="${sources}/jaco/${package}/grammar/Grammar.cup"/>
+      <param name="parser.sym" value="Symbols"/>
+      <param name="parser.target" value="${sources}/jaco/${package}/grammar/"/>
+    </antcall>
+    <echo message="compiling compiler..."/>
+    <picoc srcdir="${sources}"
+           destdir="${classes}"
+           force="true"
+           suffixes="java, pizza">
+      <classpath path="${classpath}"/>
+      <include name="jaco/${package}/struct/*.java"/>
+      <include name="jaco/${package}/component/*.java"/>
+      <include name="jaco/${package}/context/*.java"/>
+      <include name="jaco/${package}/grammar/*.java"/>
+      <include name="jaco/${package}/Main.java"/>
+    </picoc>
+    <echo message="installing resources..."/>
+    <copy file="${sources}/jaco/${package}/grammar/Parser.tables"
+          todir="${classes}/jaco/${package}/grammar/"/>
+    <copy todir="${classes}/jaco/${package}/resources">
+      <fileset dir="${sources}/jaco/${package}/resources"/>
+    </copy>
+  </target>
+  
+  <!-- backup the sources of a single compiler
+    -  uses parameters: package
+    -->
+  <target name="backup">
+    <available property="package.exists" file="${sources}/jaco/${package}"/>
+    <antcall target="single.backup"/>
+  </target>
+  
+  <target name="single.backup" if="package.exists">
+    <tstamp>
+      <format property="date" pattern="yy-MM-dd"/>
+    </tstamp>
+    <mkdir dir="${backup.root}/${package}"/>
+    <zip zipfile="${backup.root}/${package}/${package}_${date}.zip" basedir="${sources}/jaco/${package}"/>
+  </target>
+  
+  <!-- backup sources in archive
+    -->
+  <target name="backup.all" depends="normalize">
+    <tstamp>
+      <format property="date" pattern="yy-MM-dd"/>
+    </tstamp>
+    <uptodate property="sources.uptodate" targetfile="${backup.root}/src_${date}.zip">
+      <srcfiles dir= "${sources}" includes="**/*.java"/>
+    </uptodate>
+    <antcall target="force.backup"/>
+  </target>
+  
+  <target name="force.backup" unless="sources.uptodate">
+    <tstamp>
+      <format property="force.date" pattern="yy-MM-dd"/>
+    </tstamp>
+    <zip zipfile="${backup.root}/src_${force.date}.zip" basedir="${sources}"/>
+  </target>
+  
+  <!-- normalize source files
+    -->
+  <target name="normalize">
+    <condition property="tabsize" value="4">
+      <os family="mac"/>
+    </condition>
+    <condition property="tabsize" value="8">
+      <not>
+        <os family="mac"/>
+      </not>
+    </condition>
+    <antcall target="import"/>
+  </target>
+  
+  <target name="import" if="tabsize">
+    <fixcrlf srcdir="${sources}"
+             tab="remove"
+             eol="lf"
+             tablength="${tabsize}"
+             javafiles="yes"
+             includes="**/*.java"/>
+  </target>
+</project>

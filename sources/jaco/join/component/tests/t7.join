@@ -1,0 +1,5 @@
+{
+	get() & state(x) = x & state(x),
+	set(x) & state(_) = () & state(x)
+};
+(get, set, state)

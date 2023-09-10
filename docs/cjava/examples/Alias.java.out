@@ -1,0 +1,18 @@
+public class aI1I2 {
+   public aI1I2() {
+      super();
+   }
+}
+public class Test {
+   I4 a;
+   I2 dummy$cj$XPLI3$LI4$$XPLI1$LI2$$(I4 arg) {
+      a = arg;
+      return (I2)((I1)arg);
+   }
+   void dummy(Object i) {
+      I3 w = (I3)((I1)i);
+   }
+   public Test() {
+      super();
+   }
+}

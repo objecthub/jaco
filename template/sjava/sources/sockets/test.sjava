@@ -1,0 +1,38 @@
+import java.net.*;
+import java.io.*;
+
+public active class test {
+
+	MySocket s;
+	String host="";
+	int port = -1;
+
+	public test(String host, int port) {
+		this.host = host;
+		this.port = port;		
+	}
+	
+	public static void main(String[] argv) {
+		new test(argv[0],Integer.valueOf(argv[1]).intValue());
+	}
+
+	public String read(String prompt) {
+	try {
+	    System.out.print(prompt);
+	    BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+	    return(reader.readLine());
+	}
+	catch(Exception e) {return (e.getClass()+" : "+e.getMessage());}
+    }
+	
+	public void run() {
+     	try {s = new MySocket(host,port);
+			select {
+				s.read();
+			||
+				s.send(read("/>"));
+			}
+		}
+		catch(Throwable th) {th.printStackTrace();}
+	}
+}

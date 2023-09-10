@@ -1,0 +1,25 @@
+package pack;
+
+module M {
+    module O;
+}
+
+module N refines M {
+    module Q;
+    module P;
+    void foo() {
+        Q::P::M::O::P.bar();
+    }
+}
+
+module O requires M {
+    module P;
+}
+
+module P {
+    module M;
+    void bar() {}
+}
+
+module Q refines O {
+}

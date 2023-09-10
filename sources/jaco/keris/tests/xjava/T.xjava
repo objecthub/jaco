@@ -1,0 +1,26 @@
+module interface M1 {}
+module interface M2 {}
+module interface M3 {}
+
+context B requires Lib {
+    
+}
+
+context C extends B {
+    import L1;
+    import L2;
+}
+
+context L1 {
+    import Lib;
+    M1 = null;
+}
+
+context L2 requires Lib {
+    M2 = null;
+}
+
+context Lib {
+    import L2;
+    M3 = null;
+}

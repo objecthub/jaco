@@ -1,0 +1,1827 @@
+//      /   _ _      JaCo
+//  \  //\ / / \     - java 1.2 syntax specification for jcup
+//   \//  \\_\_/     
+//         \         Matthias Zenger, 24/01/99
+//                   Modified by Yacine Saidji, 22/05/00 : added operator overloading
+
+package jaco.javaop.grammar;
+
+import jaco.java.struct.*;
+import jaco.java.component.*;
+import jaco.framework.*;
+import Constant.*;
+import Tree.*;
+
+import jaco.javaop.component.*;
+
+
+/************ parser customization
+ */
+
+action code
+{:
+    Trees                   trees;
+    Tree.Factory                make;
+    jaco.java.grammar.Scanner       lexer;
+    ErrorHandler                report;
+    OPOperators                 oper;
+    
+    
+    Tree replaceArrayType(ArrayTypeTerm idx, Tree newType)
+    {
+        while ((idx.elemtype != null) &&
+                (idx.elemtype instanceof ArrayTypeTerm))
+            idx = (ArrayTypeTerm)idx.elemtype;
+        Tree    oldType = idx.elemtype;
+        idx.elemtype = newType;
+        return oldType;
+    }
+    
+    VarDecl[] varDeclArray(Tree[] trees)
+    {
+        if (trees == null)
+            return null;
+        else
+        {
+            VarDecl[]   decls = new VarDecl[trees.length];
+            for (int i = 0; i < decls.length; i++)
+                decls[i] = (VarDecl)trees[i];
+            return decls;
+        }
+    }
+:};
+
+parser code
+{:
+/* other components of the jaco compiler
+ */
+    jaco.java.grammar.Scanner       lexer;
+    ErrorHandler                report;
+        OPOperators             oper;
+    Trees                   trees;
+    Constant.Factory            mkConst;
+    
+    
+    public Parser(jaco.java.grammar.Scanner lexer)
+    {
+        this.trees = lexer.trees;
+        this.lexer = lexer;
+            this.oper = ((jaco.javaop.grammar.Scanner)lexer).oper;
+        this.report = lexer.report;
+        this.mkConst = lexer.constants.make;
+    }
+    
+    public void report_error(String message, Object info)
+    {
+        if ((info instanceof jaco.framework.parser.Symbol) &&
+            (((jaco.framework.parser.Symbol)info).sym > 0))
+        {
+            if (((jaco.framework.parser.Symbol)info).left != -1)
+                report.error(((jaco.framework.parser.Symbol)info).left,
+                        message + " (" +
+                        ((jaco.framework.parser.Symbol)info).sym + ")");
+            else
+                report.error(Position.NOPOS, message);
+        }
+        else
+            report.error(Position.NOPOS, message);
+    }
+    
+    public void report_fatal_error(String message, Object info) throws Exception
+    {
+        done_parsing();
+        report_error("fatal error: " + message, info);
+        throw new Exception();
+    }
+    
+    public void syntax_error(jaco.framework.parser.Symbol cur_token)
+    {
+        report_error("syntax error", cur_token);
+    }
+    
+    protected int error_sync_size()
+    {
+        return 2;
+    }
+:};
+
+init with
+{:
+    action_obj.lexer = lexer;
+    action_obj.trees = lexer.trees;
+    action_obj.oper = oper;
+    action_obj.make = trees.make;
+    action_obj.report = report;
+:};
+
+scan with
+{:
+    Object  obj;
+    switch (lexer.token)
+    {
+        case Symbols.IDENTIFIER:
+            obj = lexer.name;
+            break;
+
+        case Symbols.OPERATOR:
+            obj = lexer.name;
+            break;
+                
+        case Symbols.CHARLITERAL:
+            obj = mkConst.IntConst((int)lexer.intVal, TypeConst.CHAR);
+            break;
+            
+        case Symbols.INTLITERAL:
+            obj = mkConst.IntConst((int)lexer.intVal);
+            break;
+            
+        case Symbols.LONGLITERAL:
+            obj = mkConst.LongConst(lexer.intVal);
+            break;
+            
+        case Symbols.FLOATLITERAL:
+            obj = mkConst.FloatConst((float)lexer.floatVal);
+            break;
+            
+        case Symbols.DOUBLELITERAL:
+            obj = mkConst.DoubleConst(lexer.floatVal);
+            break;
+            
+        case Symbols.STRINGLITERAL:
+            obj = mkConst.StringConst(lexer.name);
+            break;
+        
+        default:
+            obj = null;
+    }
+    jaco.framework.parser.Symbol    sym =
+        new jaco.framework.parser.Symbol(lexer.token,
+                                    lexer.pos,
+                                    Position.encode(lexer.cline, lexer.ccol),
+                                    obj);
+    lexer.nextToken();
+    return sym;
+:};
+
+
+
+/************ terminal symbols
+ */
+
+terminal                 ABSTRACT, AMP, AMPAMP, AMPEQ, BANG, BANGEQ,
+                         BAR, BARBAR, BAREQ, BOOLEAN, BREAK, BYTE,
+                         CARET, CARETEQ, CASE, CATCH, CHAR, CLASS,
+                         COLON, COMMA, CONST, CONTINUE, DEFAULT, DO,
+                         DOT, DOUBLE, ELSE, EQ, EQEQ, EXTENDS, FINAL,
+                         FINALLY, FLOAT, FOR, GOTO, GT, GTEQ, GTGT,
+                         GTGTEQ, GTGTGT, GTGTGTEQ, IF, IMPLEMENTS,
+                         IMPORT, INSTANCEOF, INT, INTERFACE,
+                         LBRACE, LBRACKET, LONG, LPAREN, LT, LTEQ,
+                         LTLT, LTLTEQ, NATIVE, NEW, PACKAGE, PERCENT,
+                         PERCENTEQ, PLUS, PLUSEQ, PLUSPLUS, PRIVATE,
+                         PROTECTED, PUBLIC, QUES, RBRACE, RBRACKET,
+                         RETURN, RPAREN, SEMI, SHORT, SLASH, SLASHEQ,
+                         STAR, STAREQ, STATIC, STRICTFP, SUB, SUBEQ,
+                         SUBSUB, SUPER, SWITCH, SYNCHRONIZED, THIS,
+                         THROW, THROWS, TILDE, TRANSIENT, TRY, USUB,
+                         VOID, VOLATILE, WHILE;
+                         
+terminal Constant        CHARLITERAL, INTLITERAL, LONGLITERAL,
+                         FLOATLITERAL, DOUBLELITERAL, STRINGLITERAL;
+
+terminal Name            IDENTIFIER, OPERATOR;
+
+
+
+/************ non terminal symbols
+ */
+
+non terminal CompilationUnit     Goal, TopLevel;
+
+non terminal Modifiers.Wrapper   Modifiersopt, Modifiers, Modifier;
+                         
+non terminal ClassDecl   ClassDeclaration, InterfaceDeclaration;
+                         
+
+non terminal MethodDecl  MethodDeclaration, MethodHeader,
+                         MethodDeclarator, ConstructorDeclaration,
+                         ConstructorDeclarator,
+                         AbstractMethodDeclaration;
+                         
+non terminal VarDecl     FormalParameter, VariableDeclarator;
+                         
+non terminal ArrayTypeTerm   Dims, Dimsopt;
+                         
+non terminal TreeList    ImportDeclarationsopt, TypeDeclarationsopt,
+                         ImportDeclarations, TypeDeclarations,
+                         InterfaceTypeList, ClassBodyDeclarations,
+                         ClassBodyDeclaration, FieldDeclaration,
+                         VariableDeclarators, ClassTypeList,
+                         ExtendsInterfaces, ClassMemberDeclaration,
+                         InterfaceMemberDeclarations,
+                         InterfaceMemberDeclaration, ConstantDeclaration,
+                         VariableInitializers, BlockStatements,
+                         BlockStatement, FormalParameterList,
+                         LocalVariableDeclarationStatement, DimExprs,
+                         LocalVariableDeclaration, BlockStatementsopt,
+                         SwitchBlockStatementGroups, SwitchLabels,
+                         StatementExpressionList, Catches, ArgumentList;
+
+non terminal VarDecl[]   FormalParameterListopt;
+
+non terminal Tree[]      Interfacesopt, Interfaces, ConstructorBody,
+                         ClassBodyDeclarationsopt, ClassBody, MethodBody,
+                         Throwsopt, Throws, ExtendsInterfacesopt,
+                         InterfaceBody, InterfaceMemberDeclarationsopt,
+                         ForInit, ForInitopt, ForUpdate, ForUpdateopt,
+                         ArgumentListopt;
+                         
+non terminal Catch[]     Catchesopt;
+                         
+non terminal Case[]      SwitchBlock;
+
+non terminal Case        SwitchBlockStatementGroup, SwitchLabelsopt;
+
+non terminal Name        SimpleName;
+
+non terminal Integer     AssignmentOperator;
+
+non terminal Tree        Literal, Type, PrimitiveType, NumericType,
+                         IntegralType, FloatingPointType, ReferenceType,
+                         ClassOrInterfaceType,
+                         ArrayType, Name, QualifiedName,
+                         PackageDeclarationopt, PackageDeclaration,
+                         ImportDeclaration, SingleTypeImportDeclaration,
+                         TypeImportOnDemandDeclaration, TypeDeclaration,
+                         Superopt, Super, VariableInitializer,
+                         VariableDeclaratorId, StaticInitializer,
+                         ClassOrArray, ExplicitConstructorInvocation,
+                         ArrayInitializer, Block, EmptyStatement, 
+                         Statement, StatementNoShortIf,
+                         StatementWithoutTrailingSubstatement,
+                         LabeledStatement, LabeledStatementNoShortIf,
+                         ExpressionStatement, StatementExpression,
+                         IfThenStatement, IfThenElseStatement,
+                         IfThenElseStatementNoShortIf, SwitchStatement,    
+                         SwitchLabel, WhileStatement,
+
+                         WhileStatementNoShortIf, DoStatement,
+                         ForStatement, ForStatementNoShortIf,
+                         BreakStatement, ContinueStatement,
+                         ReturnStatement,
+                         ThrowStatement, SynchronizedStatement,
+                         TryStatement, CatchClause, Finally,Primary,
+                         PrimaryNoNewArray,
+                         ClassInstanceCreationExpression,
+                         ArrayCreationExpression, DimExpr,
+                         FieldAccess, MethodInvocation,
+                         ArrayAccess, PostfixExpression,
+                         PostIncrementExpression, PostDecrementExpression,
+                         UnaryExpression, PreIncrementExpression,
+                         PreDecrementExpression,
+                         UnaryExpressionNotPlusMinus,
+                         CastExpression, ConditionalExpression,
+                         Assignment, LeftHandSide,
+                         Expression, Expressionopt,
+                         InnerClassDeclaration,
+                         BinaryExpression, BinaryExpressionInclEq,
+                         RecoverAtSemi, RecoverAtBrace, RecoverAtComma,
+                         RecoverAtParen;             
+
+
+non terminal Integer         PredefinedOperator;
+non terminal Integer         Operator;
+non terminal Tree            TypeButNoSimpleName;
+
+/************ operator precedences
+ */
+
+precedence left         OPERATOR;
+precedence left         BARBAR;
+precedence left         AMPAMP;
+precedence left         BAR;
+precedence left         CARET;
+precedence left         AMP;
+precedence left         EQEQ, BANGEQ;
+precedence nonassoc     LT, GT, LTEQ, GTEQ, INSTANCEOF;
+precedence left         LTLT, GTGT, GTGTGT;
+precedence left         PLUS, SUB;
+precedence left         STAR, SLASH, PERCENT;
+precedence left         USUB;
+
+
+
+/************ jaco grammar
+ */
+
+start with Goal;
+
+Goal ::=
+        TopLevel                    {: ACCEPT;                              :}
+;
+
+Literal ::=
+        INTLITERAL:c                {: RESULT = make.Literal(c).at(cleft);  :}
+      | LONGLITERAL:c               {: RESULT = make.Literal(c).at(cleft);  :}
+      | FLOATLITERAL:c              {: RESULT = make.Literal(c).at(cleft);  :}
+      | DOUBLELITERAL:c             {: RESULT = make.Literal(c).at(cleft);  :}
+      | CHARLITERAL:c               {: RESULT = make.Literal(c).at(cleft);  :}
+      | STRINGLITERAL:c             {: RESULT = make.Literal(c).at(cleft);  :}
+;
+
+Type ::=
+        PrimitiveType               {: ACCEPT;                              :}
+      | ReferenceType               {: ACCEPT;                              :}
+;
+
+PrimitiveType ::=
+        NumericType                 {: ACCEPT;                              :}
+      | BOOLEAN:t                   {: RESULT = make.BasicType(TypeConst.
+                                                BOOLEAN).at(tleft);         :}
+;
+
+NumericType ::=
+        IntegralType                {: ACCEPT;                              :}
+      | FloatingPointType           {: ACCEPT;                              :}
+;
+
+IntegralType ::=
+        BYTE:t      {: RESULT = make.BasicType(TypeConst.BYTE).at(tleft);   :}
+      | SHORT:t     {: RESULT = make.BasicType(TypeConst.SHORT).at(tleft);  :}
+      | INT:t       {: RESULT = make.BasicType(TypeConst.INT).at(tleft);    :}
+      | LONG:t      {: RESULT = make.BasicType(TypeConst.LONG).at(tleft);   :}
+      | CHAR:t      {: RESULT = make.BasicType(TypeConst.CHAR).at(tleft);   :}
+;
+
+FloatingPointType ::=
+        FLOAT:t     {: RESULT = make.BasicType(TypeConst.FLOAT).at(tleft);  :}
+      | DOUBLE:t    {: RESULT = make.BasicType(TypeConst.DOUBLE).at(tleft); :}
+;
+
+ReferenceType ::=
+        ClassOrInterfaceType        {: ACCEPT;                              :}
+      | ArrayType                   {: ACCEPT;                              :}
+;
+
+ClassOrInterfaceType ::=
+        Name                        {: ACCEPT;                              :}
+;
+
+ArrayType ::=
+        PrimitiveType:e Dims:d
+        {:
+            replaceArrayType(d, e);
+            RESULT = d;
+        :}
+      | Name:e Dims:d
+        {:
+            replaceArrayType(d, e);
+            RESULT = d;
+        :}
+;
+
+Name ::=
+        SimpleName:t            {: RESULT = make.Ident(t).at(tleft);        :}
+      | QualifiedName           {: ACCEPT;                                  :}
+;
+
+SimpleName ::=
+        IDENTIFIER              {: ACCEPT;                                  :}
+      | GOTO:g                  {: RESULT = lexer.tokenName[Symbols.GOTO];  :}
+      | CONST:c                 {: RESULT = lexer.tokenName[Symbols.CONST]; :}
+;
+
+QualifiedName ::=
+        Name:n DOT IDENTIFIER:i {: RESULT = make.Select(n, i).at(nleft);    :}
+      | Name:n DOT CLASS:c      {: RESULT = make.Select(n,
+                                                lexer.tokenName[Symbols.CLASS]).
+                                                at(nleft);                  :}
+;
+
+TopLevel ::=
+        PackageDeclarationopt:p ImportDeclarationsopt:i TypeDeclarationsopt:t
+        {:
+            RESULT = (CompilationUnit)make.CompilationUnit(
+                        trees.TreeList(p).append(i).append(t).toArray(),
+                        report.getCurrentEnv()).
+                     at(pleft);
+        :}
+;
+
+ImportDeclarationsopt ::=
+        /* empty */                     {: RESULT = null;                   :}
+      | ImportDeclarations              {: ACCEPT;                          :}
+;
+
+ImportDeclarations ::=
+        ImportDeclaration:i             {: RESULT = trees.TreeList(i);      :}
+      | ImportDeclaration:i ImportDeclarations:d
+        {:
+            RESULT = d.prepend(i);
+        :}
+;
+
+TypeDeclarationsopt ::=
+        /* empty */                     {: RESULT = trees.TreeList();       :}
+      | TypeDeclarations                {: ACCEPT;                          :}
+;
+
+TypeDeclarations ::=
+         TypeDeclaration:d              {: RESULT = trees.TreeList(d);      :}
+      | TypeDeclaration:d TypeDeclarations:ds
+        {:
+            RESULT = ds.prepend(d);
+        :}
+;
+
+PackageDeclarationopt ::=
+        /* empty */                     {: RESULT = null;                   :}
+      | PackageDeclaration              {: ACCEPT;                          :}
+;
+
+PackageDeclaration ::=
+        PACKAGE:k Name:n SEMI
+        {:
+            RESULT = make.PackageDecl(n).at(kleft);
+        :}
+;
+
+ImportDeclaration ::=
+        SingleTypeImportDeclaration     {: ACCEPT;                          :}
+      | TypeImportOnDemandDeclaration   {: ACCEPT;                          :}
+;
+
+SingleTypeImportDeclaration ::=
+        IMPORT:k Name:n SEMI
+        {:
+            RESULT = make.Import(TreeConst.IMPORT, n).at(kleft);
+        :}
+;
+
+TypeImportOnDemandDeclaration ::=
+        IMPORT:k Name:n DOT STAR SEMI
+        {:
+            RESULT = make.Import(TreeConst.IMPORTSTAR, n).at(kleft);
+        :}
+;
+
+TypeDeclaration ::=
+        ClassDeclaration                {: ACCEPT;                          :}
+      | InterfaceDeclaration            {: ACCEPT;                          :}
+      | SEMI                            {: RESULT = null;                   :}
+/**/  | RecoverAtBrace                  {: ACCEPT;                          :}
+;
+
+Modifiersopt ::=
+        /* empty */
+        {:
+            if (lexer.deprecatedFlag)
+            {
+                lexer.deprecatedFlag = false;
+                RESULT = trees.Modifiers(ModifierConst.DEPRECATED);
+            }
+            else
+                RESULT = trees.Modifiers(0);
+        :}
+      | Modifiers:mods
+        {:
+            if (lexer.deprecatedFlag)
+            {
+                lexer.deprecatedFlag = false;
+                RESULT = mods.add(ModifierConst.DEPRECATED);
+            }
+            else
+                    RESULT = mods;
+        :}
+;
+
+Modifiers ::=
+        Modifier                    {: ACCEPT;                              :}
+      | Modifiers:mods Modifier:m   {: RESULT = mods.add(m);                :}
+;
+
+Modifier ::=
+        PUBLIC      {: RESULT = trees.Modifiers(ModifierConst.PUBLIC);      :}
+      | PROTECTED   {: RESULT = trees.Modifiers(ModifierConst.PROTECTED);   :}
+      | PRIVATE     {: RESULT = trees.Modifiers(ModifierConst.PRIVATE);     :}
+      | STATIC      {: RESULT = trees.Modifiers(ModifierConst.STATIC);      :}
+      | ABSTRACT    {: RESULT = trees.Modifiers(ModifierConst.ABSTRACT);    :}
+      | FINAL       {: RESULT = trees.Modifiers(ModifierConst.FINAL);       :}
+      | NATIVE      {: RESULT = trees.Modifiers(ModifierConst.NATIVE);      :}
+      | SYNCHRONIZED{: RESULT = trees.Modifiers(ModifierConst.SYNCHRONIZED);:}
+      | TRANSIENT   {: RESULT = trees.Modifiers(ModifierConst.TRANSIENT);   :}
+      | VOLATILE    {: RESULT = trees.Modifiers(ModifierConst.VOLATILE);    :}
+      | STRICTFP    {: RESULT = trees.Modifiers(ModifierConst.STRICTFP);    :}
+;
+
+ClassDeclaration ::=
+        Modifiersopt:m CLASS IDENTIFIER:n
+        Superopt:s Interfacesopt:i ClassBody:ds
+        {:
+            RESULT = (ClassDecl)make.ClassDecl(n, m.intValue(), s, i, ds).
+                        at(mleft);
+        :}
+;
+
+Superopt ::=
+        /* empty */                     {: RESULT = null;                   :}
+      | Super                           {: ACCEPT;                          :}
+;
+
+Super ::=
+        EXTENDS ClassOrInterfaceType:s  {: RESULT = s;                      :}
+;
+
+Interfacesopt ::=
+        /* empty */                     {: RESULT = trees.noTrees;          :}
+      | Interfaces                      {: ACCEPT;                          :}
+;
+
+Interfaces ::=
+        IMPLEMENTS InterfaceTypeList:i  {: RESULT = i.toArray();            :}
+;
+
+InterfaceTypeList ::=
+        ClassOrInterfaceType:i          {: RESULT = trees.TreeList(i);      :}
+      | InterfaceTypeList:is COMMA ClassOrInterfaceType:i
+        {:
+            RESULT = is.append(i);
+        :}
+;
+
+ClassBody ::=
+        LBRACE ClassBodyDeclarationsopt:ds RBRACE       {: RESULT = ds;     :}
+/**/  | LBRACE RecoverAtBrace:err       {: RESULT = new Tree[]{err};        :}
+;
+
+ClassBodyDeclarationsopt ::=
+        /* empty */                     {: RESULT = trees.noTrees;          :}
+      | ClassBodyDeclarations:ds        {: RESULT = ds.toArray();           :}
+;
+
+ClassBodyDeclarations ::=
+        ClassBodyDeclaration            {: ACCEPT;                          :}
+      | ClassBodyDeclarations:ds ClassBodyDeclaration:d
+        {:
+            RESULT = ds.append(d);
+        :}
+;
+
+ClassBodyDeclaration ::=
+        ClassMemberDeclaration      {: ACCEPT;                              :}
+      | StaticInitializer:d         {: RESULT = trees.TreeList(d);          :}
+      | ConstructorDeclaration:d    {: RESULT = trees.TreeList(d);          :}
+      | Block:d                     {: RESULT = trees.TreeList(d);          :}
+;
+
+ClassMemberDeclaration ::=
+        FieldDeclaration                {: ACCEPT;                          :}
+      | MethodDeclaration:d             {: RESULT = trees.TreeList(d);      :}
+      | InnerClassDeclaration:d         {: RESULT = trees.TreeList(d);      :}
+;
+
+InnerClassDeclaration ::=
+        ClassDeclaration                {: ACCEPT;                          :}
+      | InterfaceDeclaration            {: ACCEPT;                          :}
+;
+
+FieldDeclaration ::=
+        Modifiersopt:m Type:t VariableDeclarators:ds SEMI
+        {:
+            int     mods = m.intValue();
+            Tree[]  decls = ds.toArray();
+            for (int i = 0; i < decls.length; i++)
+            {
+                VarDecl vd = (VarDecl)decls[i]; // fix declarations
+                vd.mods = mods;
+                if (vd.vartype instanceof ArrayTypeTerm)
+                    vd.name = ((Ident)replaceArrayType(
+                                    (ArrayTypeTerm)vd.vartype, t)).name;
+                else
+                {
+                    vd.name = ((Ident)vd.vartype).name;
+                    vd.vartype = t;
+                }
+            }
+            RESULT = ds;
+        :}
+;
+
+VariableDeclarators ::=
+        VariableDeclarator:v                    {: RESULT = trees.TreeList(v);:}
+      | VariableDeclarators:vs COMMA VariableDeclarator:v
+        {:
+            RESULT = vs.append(v);
+        :}
+;
+
+VariableDeclarator ::=
+        VariableDeclaratorId:n
+        {:
+            RESULT = (VarDecl)make.VarDecl(null, 0, n, null).at(nleft);
+        :}
+      | VariableDeclaratorId:n EQ VariableInitializer:i
+        {:
+            RESULT = (VarDecl)make.VarDecl(null, 0, n, i).at(nleft);
+        :}
+;
+
+VariableDeclaratorId ::=
+        IDENTIFIER:n                {: RESULT = make.Ident(n).at(nleft);:}
+      | VariableDeclaratorId:n LBRACKET RBRACKET
+        {:
+            RESULT = make.ArrayTypeTerm(n).at(nleft);
+        :}
+;
+
+VariableInitializer ::=
+        Expression                          {: ACCEPT;                      :}
+      | ArrayInitializer                    {: ACCEPT;                      :}
+;
+
+MethodDeclaration ::=
+        MethodHeader:h MethodBody:s             {: h.stats = s; RESULT = h; :}
+;
+
+PredefinedOperator ::= STAR    {: RESULT = new Integer(OperatorConst.TIMES);  :}
+                     | SLASH   {: RESULT = new Integer(OperatorConst.DIV);    :}
+                     | PERCENT {: RESULT = new Integer(OperatorConst.MOD);    :}
+                     | PLUS    {: RESULT = new Integer(OperatorConst.PLUS);   :}
+                     | SUB     {: RESULT = new Integer(OperatorConst.MINUS);  :}
+                     | LTLT    {: RESULT = new Integer(OperatorConst.SL);     :}
+                     | GTGT    {: RESULT = new Integer(OperatorConst.SR);     :}
+                     | GTGTGT  {: RESULT = new Integer(OperatorConst.USR);    :}
+                     | LT      {: RESULT = new Integer(OperatorConst.LT);     :}
+                     | GT      {: RESULT = new Integer(OperatorConst.GT);     :}
+                     | LTEQ    {: RESULT = new Integer(OperatorConst.LE);     :}
+                     | GTEQ    {: RESULT = new Integer(OperatorConst.GE);     :}
+                     | AMP     {: RESULT = new Integer(OperatorConst.BITAND); :}
+                     | BAR     {: RESULT = new Integer(OperatorConst.BITOR);  :}
+                     | CARET   {: RESULT = new Integer(OperatorConst.BITXOR); :}
+                     ;
+
+Operator ::= OPERATOR:o          {: RESULT = new Integer(oper.getopcode(o)); :} // <----- TODO : check this line of code
+           | PredefinedOperator  {: ACCEPT; :}
+              ;
+
+MethodHeader ::=
+        Modifiersopt:m Type:t MethodDeclarator:d Throwsopt:e
+        {:
+            // fix method declaration
+            d.mods = m.intValue();
+            if (d.restype instanceof ArrayTypeTerm)
+                replaceArrayType((ArrayTypeTerm)d.restype, t);
+            else
+                d.restype = t;
+            d.thrown = e;
+            RESULT = d;
+        :}
+      | Modifiersopt:m VOID:v MethodDeclarator:d Throwsopt:e
+        {:
+            d.mods = m.intValue();
+            if (d.restype instanceof ArrayTypeTerm)
+                replaceArrayType((ArrayTypeTerm)d.restype,
+                                make.BasicType(TypeConst.VOID).at(vleft));
+            else
+                d.restype = make.BasicType(TypeConst.VOID).at(vleft);
+            d.thrown = e;
+            RESULT = d;
+        :}
+      | Modifiersopt:m Type:t THIS Operator:o LPAREN FormalParameter:p RPAREN Throwsopt:e
+        {:
+            TreeList l = trees.TreeList(p);
+            VarDecl[] f = varDeclArray(l.toArray());
+            Name mangledName = oper.mangleName(Name.fromString(oper.toString(o.intValue())), true);
+            MethodDecl d = (MethodDecl)make.MethodDecl(mangledName, 0, null, f, null, null).at(oleft);
+
+            // fix method declaration
+            d.mods = m.intValue();
+
+            d.mods |= OPModifierConst.LEFT_OPERAND;
+            d.mods |= OPModifierConst.OPERATOR;
+
+            d.restype = t;
+            d.thrown = e;
+            RESULT = d;
+        :}
+      | Modifiersopt:m VOID:v THIS Operator:o LPAREN FormalParameter:p RPAREN Throwsopt:e
+        {:
+            TreeList l = trees.TreeList(p);
+            VarDecl[] f = varDeclArray(l.toArray());
+            Name mangledName = oper.mangleName(Name.fromString(oper.toString(o.intValue())), true);
+            MethodDecl d = (MethodDecl)make.MethodDecl(mangledName, 0, null, f, null, null).at(oleft);
+
+            d.mods = m.intValue();
+    
+            d.mods |= OPModifierConst.LEFT_OPERAND;
+            d.mods |= OPModifierConst.OPERATOR;
+
+            d.restype = make.BasicType(TypeConst.VOID).at(vleft);
+            d.thrown = e;
+            RESULT = d;
+        :}
+      | Modifiersopt:m TypeButNoSimpleName:t LPAREN FormalParameter:p RPAREN Operator:o THIS Throwsopt:e
+        {:
+            TreeList l = trees.TreeList(p);
+            VarDecl[] f = varDeclArray(l.toArray());
+            Name mangledName = oper.mangleName(Name.fromString(oper.toString(o.intValue())), false);
+            MethodDecl d = (MethodDecl)make.MethodDecl(mangledName, 0, null, f, null, null).at(oleft);
+
+            // fix method declaration
+            d.mods = m.intValue();
+
+            d.mods |= OPModifierConst.OPERATOR; 
+            //d.restype = make.BasicType(TypeConst.VOID).at(tleft);
+            d.restype = t;
+            d.thrown = e;
+            RESULT = d;
+        :}
+      | Modifiersopt:m VOID:v LPAREN FormalParameter:p RPAREN Operator:o THIS Throwsopt:e
+        {:
+            TreeList l = trees.TreeList(p);
+            VarDecl[] f = varDeclArray(l.toArray());
+            Name mangledName = oper.mangleName(Name.fromString(oper.toString(o.intValue())), false);
+            MethodDecl d = (MethodDecl)make.MethodDecl(mangledName, 0, null, f, null, null).at(oleft);
+
+            d.mods = m.intValue();
+    
+            d.mods |= OPModifierConst.OPERATOR;
+
+            d.restype = make.BasicType(TypeConst.VOID).at(vleft);
+            d.thrown = e;
+            RESULT = d;
+        :}
+
+;
+
+TypeButNoSimpleName ::= PrimitiveType   {: ACCEPT;  :}
+        | QualifiedName         {: ACCEPT;  :}
+        | ArrayType             {: ACCEPT;  :}
+;
+
+MethodDeclarator ::=
+        IDENTIFIER:n LPAREN FormalParameterListopt:p RPAREN
+        {:
+            RESULT = (MethodDecl)make.MethodDecl(n, 0, null, p, null, null).
+                                            at(nleft);
+        :}
+      | MethodDeclarator:d LBRACKET:a RBRACKET
+        {:
+            d.restype = make.ArrayTypeTerm(d.restype).at(aleft);
+            RESULT = d;
+        :}
+/**/  | IDENTIFIER:n LPAREN RecoverAtParen
+        {:
+            RESULT = (MethodDecl)make.MethodDecl(n, 0, null, null, null, null).
+                                            at(nleft);
+        :}
+;
+
+FormalParameterListopt ::=
+        /* empty */                 {: RESULT = new VarDecl[0];             :}
+      | FormalParameterList:f       {: RESULT = varDeclArray(f.toArray());  :}
+;
+
+FormalParameterList ::=
+        FormalParameter:f                       {: RESULT = trees.TreeList(f);  :}
+      | FormalParameterList:fs COMMA FormalParameter:f
+        {:
+            RESULT = fs.append(f);
+        :}
+/**/  | RecoverAtComma FormalParameter:f
+        {:
+            RESULT = trees.TreeList(f);
+        :}
+;
+
+FormalParameter ::=
+        Type:t VariableDeclaratorId:v
+        {:
+            if (v instanceof ArrayTypeTerm)
+            {
+                RESULT = (VarDecl)make.VarDecl(((Ident)
+                    replaceArrayType((ArrayTypeTerm)v, t)).name, 0, v, null).
+                        at(tleft);
+            }
+            else
+                RESULT = (VarDecl)make.VarDecl(((Ident)v).name, 0, t,
+                    null).at(tleft);
+        :}
+      | Modifiers:m Type:t VariableDeclaratorId:v
+        {:
+            if (v instanceof ArrayTypeTerm)
+            {
+                RESULT = (VarDecl)make.VarDecl(((Ident)
+                                replaceArrayType((ArrayTypeTerm)v, t)).name,
+                                        m.intValue(), v, null).at(mleft);
+            }
+            else
+                RESULT = (VarDecl)make.VarDecl(((Ident)v).name,
+                                m.intValue(), t, null).at(mleft);
+        :}
+;
+
+Throwsopt ::=
+        /* empty */                         {: RESULT = trees.noTrees;          :}
+      | Throws                              {: ACCEPT;                      :}
+;
+
+Throws ::=
+        THROWS ClassTypeList:ts             {: RESULT = ts.toArray();       :}
+;
+
+ClassTypeList ::=
+        ClassOrInterfaceType:t              {: RESULT = trees.TreeList(t);      :}
+      | ClassTypeList:ts COMMA ClassOrInterfaceType:t
+        {:
+            RESULT = ts.append(t);
+        :}
+;
+
+MethodBody ::=
+        Block:s                             {: RESULT = ((Block)s).stats;   :}
+      | SEMI                                {: RESULT = null;               :}
+;
+
+StaticInitializer ::=
+        STATIC Block:s
+        {:
+            ((Block)s).mods |= ModifierConst.STATIC;
+            RESULT = s;
+        :}
+;
+
+ConstructorDeclaration ::=
+        Modifiersopt:m ConstructorDeclarator:c Throwsopt:t ConstructorBody:s
+        {:
+            // fix constructor declaration
+            c.mods |= m.intValue();
+            c.thrown = t;
+            c.stats = s;
+            RESULT = c;
+        :}
+;
+
+ConstructorDeclarator ::=
+        SimpleName:s LPAREN FormalParameterListopt:f RPAREN
+        {:
+            RESULT = (MethodDecl)make.MethodDecl(s, 0, null, f, null, null).
+                                            at(sleft);
+        :}
+     | SimpleName:t LPAREN FormalParameterListopt:f RPAREN Operator:o THIS
+        {:
+            Name mangledName = oper.mangleName(Name.fromString(oper.toString(o.intValue())), false);
+            MethodDecl d = (MethodDecl)make.MethodDecl(mangledName, 0, null, f, null, null).at(oleft);
+
+            d.mods |= OPModifierConst.OPERATOR;
+            d.restype = make.Ident(t).at(tleft);
+            RESULT = d;
+        :}
+/**/  | SimpleName:s LPAREN RecoverAtParen
+        {:
+            RESULT = (MethodDecl)make.MethodDecl(s, 0, null, null, null, null).
+                                            at(sleft);
+        :}
+;
+
+/* CHANGED SLIGHTLY TO AVOID S-R CONFLICT */
+ConstructorBody ::=
+        LBRACE:a BlockStatementsopt:s RBRACE
+        {:
+            RESULT = s.toArray();
+        :}
+      | LBRACE ExplicitConstructorInvocation:c BlockStatementsopt:s RBRACE
+        {:
+                RESULT = s.prepend(c).toArray();
+        :}
+/**/  | LBRACE RecoverAtBrace:err
+        {:
+            RESULT = new Tree[]{err};
+        :}
+;
+
+ExplicitConstructorInvocation ::=
+        THIS:s LPAREN ArgumentListopt:a RPAREN SEMI
+        {:
+            RESULT = make.Exec(
+                        make.Apply(trees.This().at(sleft), a).at(aleft)).
+                     at(sleft);
+        :}
+      | SUPER:s LPAREN ArgumentListopt:a RPAREN SEMI
+        {:
+            RESULT = make.Exec(
+                        make.Apply(trees.Super().at(sleft), a).at(aleft)).
+                     at(sleft);
+        :}
+      | Primary:p DOT SUPER:s LPAREN ArgumentListopt:a RPAREN SEMI
+        {:
+            RESULT = make.Exec(
+                        make.Apply(trees.Super().at(sleft), a).at(aleft)).
+                     at(pleft);
+        :}
+;
+
+InterfaceDeclaration ::=
+        Modifiersopt:m INTERFACE IDENTIFIER:n ExtendsInterfacesopt:e
+        InterfaceBody:s
+        {:
+            RESULT = (ClassDecl)make.ClassDecl(n,
+                        m.intValue() | ModifierConst.INTERFACE,
+                        null, e, s).at(mleft);
+        :}
+;
+
+ExtendsInterfacesopt ::=
+        /* empty */                     {: RESULT = trees.noTrees;              :}
+      | ExtendsInterfaces:is            {: RESULT = is.toArray();           :}
+;
+
+ExtendsInterfaces ::=
+        EXTENDS ClassOrInterfaceType:t  {: RESULT = trees.TreeList(t);          :}
+      | ExtendsInterfaces:ts COMMA ClassOrInterfaceType:t
+        {:
+            RESULT = ts.append(t);
+        :}
+;
+
+InterfaceBody ::=
+        LBRACE InterfaceMemberDeclarationsopt:is RBRACE     {: RESULT = is; :}
+/**/  | LBRACE RecoverAtBrace:err       {: RESULT = new Tree[]{err};        :}
+;
+
+InterfaceMemberDeclarationsopt ::=
+        /* empty */                     {: RESULT = trees.noTrees;              :}
+      | InterfaceMemberDeclarations:is  {: RESULT = is.toArray();           :}
+;
+
+InterfaceMemberDeclarations ::=
+        InterfaceMemberDeclaration      {: ACCEPT;                          :}
+      | InterfaceMemberDeclarations:ds InterfaceMemberDeclaration:d
+        {:
+            RESULT = ds.append(d);
+        :}
+;
+
+InterfaceMemberDeclaration ::=
+        ConstantDeclaration             {: ACCEPT;                          :}
+      | AbstractMethodDeclaration:d     {: RESULT = trees.TreeList(d);      :}
+      | ClassDeclaration:d              {: RESULT = trees.TreeList(d);      :}
+      | InterfaceDeclaration:d          {: RESULT = trees.TreeList(d);      :}
+;
+
+ConstantDeclaration ::=
+        FieldDeclaration                {: ACCEPT;                          :}
+;
+
+AbstractMethodDeclaration ::=
+        MethodHeader:m SEMI             {: RESULT = m;                      :}
+;
+
+/* CHANGED SLIGHTLY TO AVOID S-R CONFLICT */
+ArrayInitializer ::=
+        LBRACE:l RBRACE
+        {:
+            RESULT = make.Aggregate(trees.noTrees, null).at(lleft);
+        :}
+      | LBRACE:l COMMA RBRACE
+        {:
+            RESULT = make.Aggregate(trees.noTrees, null).at(lleft);
+        :}
+      | LBRACE:l VariableInitializers:vs RBRACE
+        {:
+            RESULT = make.Aggregate(vs.toArray(), null).at(lleft);
+        :}
+      | LBRACE:l VariableInitializers:vs COMMA RBRACE
+        {:
+            RESULT = make.Aggregate(vs.toArray(), null).at(lleft);
+        :}
+/**/  | LBRACE RecoverAtBrace:err                       {: RESULT = err;    :}
+;
+
+VariableInitializers ::=
+        VariableInitializer:v               {: RESULT = trees.TreeList(v);  :}
+      | VariableInitializers:vs COMMA VariableInitializer:v
+        {:
+            RESULT = vs.append(v);
+        :}
+;
+
+Block ::=
+        LBRACE:l BlockStatementsopt:bs RBRACE
+        {:
+            RESULT = make.Block(0, bs.toArray()).at(lleft);
+        :}
+/**/  | LBRACE RecoverAtBrace:err
+        {:
+            RESULT = make.Block(0, new Tree[]{err}).at(errleft);
+        :}
+;
+
+BlockStatementsopt ::=
+        /* empty */                     {: RESULT = trees.TreeList();       :}
+      | BlockStatements                 {: ACCEPT;                          :}
+;
+
+BlockStatements ::=
+        BlockStatement                      {: ACCEPT;                      :}
+      | BlockStatements:bs BlockStatement:b {: RESULT = bs.append(b);       :}
+;
+
+BlockStatement ::=
+        LocalVariableDeclarationStatement   {: ACCEPT;                      :}
+      | Statement:s                         {: RESULT = trees.TreeList(s);  :}
+      | ClassDeclaration:s                  {: RESULT = trees.TreeList(s);  :}
+/**/  | RecoverAtSemi:err                   {: RESULT = trees.TreeList(err);:}
+;
+
+LocalVariableDeclarationStatement ::=
+        LocalVariableDeclaration:d SEMI     {: RESULT = d;                  :}
+;
+
+LocalVariableDeclaration ::=
+        Type:t VariableDeclarators:ds
+        {:
+            Tree[]  decls = ds.toArray();
+            for (int i = 0; i < decls.length; i++)
+            {
+                VarDecl vd = (VarDecl)decls[i]; // fix declarations
+                if (vd.vartype instanceof ArrayTypeTerm)
+                    vd.name = ((Ident)replaceArrayType(
+                                    (ArrayTypeTerm)vd.vartype, t)).name;
+                else
+                {
+                    vd.name = ((Ident)vd.vartype).name;
+                    vd.vartype = t;
+                }
+            }
+            RESULT = ds;
+        :}
+      | Modifiers:m Type:t VariableDeclarators:ds
+        {:
+            int     mods = m.intValue();
+            Tree[]  decls = ds.toArray();
+            for (int i = 0; i < decls.length; i++)
+            {
+                VarDecl vd = (VarDecl)decls[i]; // fix declarations
+                vd.mods = mods;
+                if (vd.vartype instanceof ArrayTypeTerm)
+                    vd.name = ((Ident)replaceArrayType(
+                                    (ArrayTypeTerm)vd.vartype, t)).name;
+                else
+                {
+                    vd.name = ((Ident)vd.vartype).name;
+                    vd.vartype = t;
+                }
+            }
+            RESULT = ds;
+        :}
+;
+
+Statement ::=
+        StatementWithoutTrailingSubstatement        {: ACCEPT;              :}
+      | LabeledStatement                            {: ACCEPT;              :}
+      | IfThenStatement                             {: ACCEPT;              :}
+      | IfThenElseStatement                         {: ACCEPT;              :}
+      | WhileStatement                              {: ACCEPT;              :}
+      | ForStatement                                {: ACCEPT;              :}
+;
+
+StatementNoShortIf ::=
+        StatementWithoutTrailingSubstatement        {: ACCEPT;              :}
+      | LabeledStatementNoShortIf                   {: ACCEPT;              :}
+      | IfThenElseStatementNoShortIf                {: ACCEPT;              :}
+      | WhileStatementNoShortIf                     {: ACCEPT;              :}
+      | ForStatementNoShortIf                       {: ACCEPT;              :}
+;
+
+StatementWithoutTrailingSubstatement ::=
+        Block                                       {: ACCEPT;              :}
+      | ExpressionStatement                         {: ACCEPT;              :}
+      | SwitchStatement                             {: ACCEPT;              :}
+      | DoStatement                                 {: ACCEPT;              :}
+      | BreakStatement                              {: ACCEPT;              :}
+      | ContinueStatement                           {: ACCEPT;              :}
+      | ReturnStatement                             {: ACCEPT;              :}
+      | SynchronizedStatement                       {: ACCEPT;              :}
+      | ThrowStatement                              {: ACCEPT;              :}
+      | TryStatement                                {: ACCEPT;              :}
+      | EmptyStatement                              {: ACCEPT;              :}
+;
+
+EmptyStatement ::=
+        SEMI                                        {: RESULT = null;       :}
+;
+
+LabeledStatement ::=
+        IDENTIFIER:n COLON:c Statement:s
+        {:
+            RESULT = make.Labelled(n, s).at(cleft);
+        :}
+;
+
+LabeledStatementNoShortIf ::=
+        IDENTIFIER:n COLON:c StatementNoShortIf:s
+        {:
+            RESULT = make.Labelled(n, s).at(cleft);
+        :}
+;
+
+ExpressionStatement ::=
+        StatementExpression:e SEMI  {: RESULT = e;                          :}
+;
+
+StatementExpression ::=
+        Assignment:e                {: RESULT = make.Exec(e).at(eleft); :}
+      | PreIncrementExpression:e    {: RESULT = make.Exec(e).at(eleft); :}
+      | PreDecrementExpression:e    {: RESULT = make.Exec(e).at(eleft); :}
+      | PostIncrementExpression:e   {: RESULT = make.Exec(e).at(eleft); :}
+      | PostDecrementExpression:e   {: RESULT = make.Exec(e).at(eleft); :}
+      | MethodInvocation:e          {: RESULT = make.Exec(e).at(eleft); :}
+      | ClassInstanceCreationExpression:e
+        {:
+            RESULT = make.Exec(e).at(eleft);
+        :}
+;
+
+IfThenStatement ::=
+        IF:i LPAREN Expression:e RPAREN Statement:s
+        {:
+            RESULT = make.If(e, s, null).at(ileft);
+        :}
+;
+
+IfThenElseStatement ::=
+        IF:i LPAREN Expression:e RPAREN StatementNoShortIf:s1
+        ELSE Statement:s2
+        {:
+            RESULT = make.If(e, s1, s2).at(ileft);
+        :}
+;
+
+IfThenElseStatementNoShortIf ::=
+        IF:i LPAREN Expression:e RPAREN StatementNoShortIf:s1
+        ELSE StatementNoShortIf:s2
+        {:
+            RESULT = make.If(e, s1, s2).at(ileft);
+        :}
+;
+
+SwitchStatement ::=
+        SWITCH:s LPAREN Expression:e RPAREN SwitchBlock:b
+        {:
+            RESULT = make.Switch(e, b).at(sleft);
+        :}
+;
+
+/* CHANGED SLIGHTLY TO AVOID S-R CONFLICT */
+SwitchBlock ::=
+        LBRACE SwitchLabelsopt:l RBRACE
+        {:
+            if (l == null)
+                RESULT = new Case[0];
+            else
+                RESULT = new Case[]{l};
+        :}
+      | LBRACE SwitchBlockStatementGroups:ls SwitchLabelsopt:ls2 RBRACE
+        {:
+            Tree[]  treess = ls.append(ls2).toArray();
+            Case[]  cases = new Case[treess.length];
+            System.arraycopy(treess, 0, cases, 0, treess.length);
+            RESULT = cases;
+        :}
+/**/  | LBRACE RecoverAtBrace:err               {: RESULT = new Case[0];    :}
+;
+
+SwitchBlockStatementGroups ::=
+        SwitchBlockStatementGroup:s             {: RESULT = trees.TreeList(s);  :}
+      | SwitchBlockStatementGroups:ss SwitchBlockStatementGroup:ss2
+        {:
+            RESULT = ss.append(ss2);
+        :}
+;
+
+SwitchBlockStatementGroup ::=
+        SwitchLabels:ls BlockStatements:ss
+        {:
+            Tree[]  pats = ls.toArray();
+            for (int i = 0; i < ls.length(); i++)
+                if (pats[i] != null)
+                    pats[i] = ((Exec)pats[i]).expr;
+            RESULT = (Case)make.Case(pats, ss.toArray()).at(lsleft);
+        :}
+;
+
+SwitchLabelsopt ::=
+        /* empty */                         {: RESULT = null;               :}
+      | SwitchLabels:ls
+        {:
+            Tree[]  pats = ls.toArray();
+            for (int i = 0; i < ls.length(); i++)
+                if (pats[i] != null)
+                    pats[i] = ((Exec)pats[i]).expr;
+            RESULT = (Case)make.Case(pats, trees.noTrees).at(lsleft);
+        :}
+;
+
+SwitchLabels ::=
+        SwitchLabel:l                       {: RESULT = new TreeList(l);        :}
+      | SwitchLabels:ls SwitchLabel:l
+        {:
+            RESULT = ls.append(l);
+        :}
+;
+
+SwitchLabel ::= // dirty work-around!
+        CASE:c BinaryExpression:e COLON     {: RESULT = make.Exec(e);   :}
+      | DEFAULT COLON                       {: RESULT = make.Exec(null);:}
+;
+
+WhileStatement ::=
+        WHILE:w LPAREN Expression:e RPAREN Statement:s
+        {:
+            RESULT = make.Loop(TreeConst.WHILE, e, s).at(wleft);
+        :}
+;
+
+WhileStatementNoShortIf ::=
+        WHILE:w LPAREN Expression:e RPAREN StatementNoShortIf:s
+        {:
+            RESULT = make.Loop(TreeConst.WHILE, e, s).at(wleft);
+        :}
+;
+
+DoStatement ::=
+        DO:k Statement:s WHILE LPAREN Expression:e RPAREN SEMI
+        {:
+            RESULT = make.Loop(TreeConst.DO, e, s).at(kleft);
+        :}
+;
+
+ForStatement ::=
+        FOR:k LPAREN ForInitopt:i SEMI Expressionopt:e SEMI
+        ForUpdateopt:u RPAREN Statement:s
+        {:
+            RESULT = make.ForLoop(i, e, u, s).at(kleft);
+        :}
+;
+
+ForStatementNoShortIf ::=
+        FOR:k LPAREN ForInitopt:i SEMI Expressionopt:e SEMI
+        ForUpdateopt:u RPAREN StatementNoShortIf:s
+        {:
+            RESULT = make.ForLoop(i, e, u, s).at(kleft);
+        :}
+;
+
+ForInitopt ::=
+        /* empty */                     {: RESULT = trees.noTrees;              :}
+      | ForInit                         {: ACCEPT;                          :}
+;
+
+ForInit ::=
+        StatementExpressionList:ss      {: RESULT = ss.toArray();           :}
+      | LocalVariableDeclaration:vd     {: RESULT = vd.toArray();           :}
+;
+
+ForUpdateopt ::=
+        /* empty */                     {: RESULT = trees.noTrees;              :}
+      | ForUpdate                       {: ACCEPT;                          :}
+;
+
+ForUpdate ::=
+        StatementExpressionList:es      {: RESULT = es.toArray();           :}
+;
+
+StatementExpressionList ::=
+        StatementExpression:e           {: RESULT = trees.TreeList(e);          :}
+      | StatementExpressionList:es COMMA StatementExpression:e
+        {:
+            RESULT = es.append(e);
+        :}
+;
+
+BreakStatement ::=
+        BREAK:k SEMI
+        {:
+            RESULT = make.Break(null).at(kleft);
+        :}
+      | BREAK:k IDENTIFIER:i SEMI
+        {:
+            RESULT = make.Break(i).at(kleft);
+        :}
+;
+
+ContinueStatement ::=
+        CONTINUE:k SEMI
+        {:
+            RESULT = make.Continue(null).at(kleft);
+        :}
+      | CONTINUE:k IDENTIFIER:i SEMI
+        {:
+            RESULT = make.Continue(i).at(kleft);
+        :}
+;
+
+ReturnStatement ::=
+        RETURN:k Expressionopt:e SEMI
+        {:
+            RESULT = make.Return(e).at(kleft);
+        :}
+;
+
+ThrowStatement ::=
+        THROW:k Expression:e SEMI
+        {:
+            RESULT = make.Throw(e).at(kleft);
+        :}
+;
+
+SynchronizedStatement ::=
+        SYNCHRONIZED:k LPAREN Expression:e RPAREN Block:b
+        {:
+            RESULT = make.Synchronized(e, b).at(kleft);
+        :}
+;
+
+TryStatement ::=
+        TRY:k Block:b Catches:c
+        {:
+            Tree[]      treess = c.toArray();
+            Catch[]     catches = new Catch[treess.length];
+            System.arraycopy(treess, 0, catches, 0, treess.length);
+            RESULT = make.Try(b, catches, null).at(kleft);
+        :}
+      | TRY:k Block:b Catchesopt:c Finally:f
+        {:
+            RESULT = make.Try(b, c, f).at(kleft);
+        :}
+;
+
+Catchesopt ::=
+        /* empty */                     {: RESULT = new Catch[0];           :}
+      | Catches:c
+        {:
+            Tree[]      treess = c.toArray();
+            Catch[]     catches = new Catch[treess.length];
+            System.arraycopy(treess, 0, catches, 0, treess.length);
+            RESULT = catches;
+        :}
+;
+
+Catches ::=
+        CatchClause:c                       {: RESULT = trees.TreeList(c);  :}
+      | Catches:cs CatchClause:c            {: RESULT = cs.append(c);       :}
+;
+
+CatchClause ::=
+        CATCH:k LPAREN FormalParameter:f RPAREN Block:b
+        {:
+            RESULT = make.Catch(f, b).at(kleft);
+        :}
+;
+
+Finally ::=
+        FINALLY Block:b                     {: RESULT = b;                  :}
+;
+
+PrimaryNoNewArray ::=
+        Literal                         {: ACCEPT;                          :}
+      | THIS:k                          {: RESULT = trees.This().at(kleft); :}
+      | LPAREN Expression:e RPAREN      {: RESULT = e;                      :}
+      | ClassInstanceCreationExpression {: ACCEPT;                          :}
+      | FieldAccess                     {: ACCEPT;                          :}
+      | MethodInvocation                {: ACCEPT;                          :}
+      | ArrayAccess                     {: ACCEPT;                          :}
+      | Name:e DOT THIS:k
+        {:
+            RESULT = make.Self(e, TreeConst.THIS).at(kleft);
+        :}
+;
+
+Primary ::=
+        PrimaryNoNewArray                   {: ACCEPT;                      :}
+      | ArrayCreationExpression             {: ACCEPT;                      :}
+;
+
+ClassInstanceCreationExpression ::=
+        NEW:k ClassOrInterfaceType:t LPAREN ArgumentListopt:a RPAREN
+        {:
+            RESULT = make.NewObj(null, t, a, null).at(kleft);
+        :}
+      | NEW:k ClassOrInterfaceType:t LPAREN ArgumentListopt:a
+        RPAREN ClassBody:b
+        {:
+            RESULT = make.NewObj(null, t, a,
+                        make.ClassDecl(null, 0, null, trees.noTrees,
+                            b).at(bleft)).at(kleft);
+        :}
+      | Primary:e DOT NEW:k IDENTIFIER:i LPAREN ArgumentListopt:a RPAREN
+        {:
+            RESULT = make.NewObj(e, make.Ident(i).at(ileft),
+                            a, null).at(kleft);
+        :}
+      | Primary:e DOT NEW:k IDENTIFIER:i LPAREN ArgumentListopt:a
+        RPAREN ClassBody:b
+        {:
+            RESULT = make.NewObj(e, make.Ident(i).at(ileft), a,
+                        make.ClassDecl(null, 0, null, trees.noTrees,
+                            b).at(bleft)).at(kleft);
+        :}
+;
+
+ArgumentListopt ::=
+        /* empty */                         {: RESULT = trees.noTrees;          :}
+      | ArgumentList:as                     {: RESULT = as.toArray();       :}
+;
+
+ArgumentList ::=
+        Expression:e                        {: RESULT = trees.TreeList(e);  :}
+      | ArgumentList:as COMMA Expression:e  {: RESULT = as.append(e);       :}
+;
+
+ArrayCreationExpression ::=
+        NEW:k PrimitiveType:t DimExprs:e Dimsopt:d
+        {:
+            if (d != null)
+            {
+                replaceArrayType(d, t);
+                RESULT = make.NewArray(d, e.toArray()).at(kleft);
+            }
+            else
+                RESULT = make.NewArray(t, e.toArray()).at(kleft);
+        :}
+      | NEW:k ClassOrInterfaceType:t DimExprs:e Dimsopt:d
+        {:
+            if (d != null)
+            {
+                replaceArrayType(d, t);
+                RESULT = make.NewArray(d, e.toArray()).at(kleft);
+            }
+            else
+                RESULT = make.NewArray(t, e.toArray()).at(kleft);
+        :}
+      | NEW:k PrimitiveType:t Dims:d ArrayInitializer:i
+        {:
+            if (d != null)
+            {
+                replaceArrayType(d, t);
+                ((Aggregate)i).arrtype = d;
+                RESULT = i;
+            }
+            else
+                ((Aggregate)i).arrtype = t;
+            RESULT = i;
+        :}
+      | NEW:k ClassOrInterfaceType:t Dims:d ArrayInitializer:i
+        {:
+            if (d != null)
+            {
+                replaceArrayType(d, t);
+                ((Aggregate)i).arrtype = d;
+                RESULT = i;
+            }
+            else
+                ((Aggregate)i).arrtype = t;
+            RESULT = i;
+        :}
+;
+
+DimExprs ::=
+        DimExpr:e                           {: RESULT = trees.TreeList(e);  :}
+      | DimExprs:es DimExpr:e               {: RESULT = es.append(e);       :}
+;
+
+DimExpr ::=
+        LBRACKET Expression:e RBRACKET          {: RESULT = e;              :}
+;
+
+Dimsopt ::=
+        /* empty */                             {: RESULT = null;           :}
+      | Dims                                    {: ACCEPT;                  :}
+;
+
+Dims ::=
+        LBRACKET:l RBRACKET
+        {:
+            RESULT = (ArrayTypeTerm)make.ArrayTypeTerm(null).at(lleft);
+        :}
+      | Dims:d LBRACKET:l RBRACKET
+        {:
+            RESULT = (ArrayTypeTerm)make.ArrayTypeTerm(d).at(lleft);
+        :}
+;
+
+FieldAccess ::=
+        Primary:e DOT:k IDENTIFIER:i
+        {:
+            RESULT = make.Select(e, i).at(kleft);
+        :}
+      | SUPER:s DOT:k IDENTIFIER:i
+        {:
+            RESULT = make.Select(trees.Super().at(sleft), i).at(kleft);
+        :}
+      | PrimitiveType:t Dimsopt:d DOT CLASS:k
+        {:
+            if (d != null)
+            {
+                replaceArrayType(d, t);
+                RESULT = trees.Class(d).at(kleft);
+            }
+            else
+                RESULT = trees.Class(t).at(kleft);
+        :}
+      | Name:n Dims:d DOT CLASS:k
+        {:
+            replaceArrayType(d, n);
+            RESULT = trees.Class(d).at(kleft);
+        :}
+      | VOID:v DOT CLASS:k
+        {:
+            RESULT = trees.Class(make.BasicType(TypeConst.VOID).at(vleft)).
+                            at(kleft);
+        :}
+;
+
+MethodInvocation ::=
+        Name:n LPAREN:l ArgumentListopt:a RPAREN
+        {:
+            RESULT = make.Apply(n, a).at(lleft);
+        :}
+      | Primary:e DOT:k IDENTIFIER:i LPAREN:l ArgumentListopt:a RPAREN
+        {:
+            RESULT = make.Apply(make.Select(e, i).at(kleft), a).
+                                at(lleft);
+        :}
+      | SUPER:s DOT:d IDENTIFIER:i LPAREN:l ArgumentListopt:a RPAREN
+        {:
+            RESULT = make.Apply(make.Select(trees.Super().at(sleft), i).
+                                                at(dleft), a).at(lleft);
+        :}
+;
+
+ArrayAccess ::=
+        Name:n LBRACKET:l Expression:e RBRACKET
+        {:
+            RESULT = make.Index(n, e).at(lleft);
+        :}
+      | PrimaryNoNewArray:e1 LBRACKET:l Expression:e2 RBRACKET
+        {:
+            RESULT = make.Index(e1, e2).at(lleft);
+        :}
+/**/  | error LBRACKET Expression RBRACKET      {: RESULT = trees.errorTree;    :}
+ ;
+
+PostfixExpression ::=
+        Primary                                 {: ACCEPT;                  :}
+      | Name                                    {: ACCEPT;                  :}
+      | PostIncrementExpression                 {: ACCEPT;                  :}
+      | PostDecrementExpression                 {: ACCEPT;                  :}
+;
+
+PostIncrementExpression ::=
+        PostfixExpression:e PLUSPLUS:o
+        {:
+            RESULT = make.Unop(OperatorConst.POSTINC, e).at(oleft);
+        :}
+;
+
+PostDecrementExpression ::=
+        PostfixExpression:e SUBSUB:o
+        {:
+            RESULT = make.Unop(OperatorConst.POSTDEC, e).at(oleft);
+        :}
+;
+
+UnaryExpression ::=
+        PreIncrementExpression                  {: ACCEPT;                  :}
+      | PreDecrementExpression                  {: ACCEPT;                  :}
+      | PLUS:o UnaryExpression:e
+        {:
+            RESULT = make.Unop(OperatorConst.POS, e).at(oleft);
+        :}
+      | SUB:o UnaryExpression:e
+        {:
+            RESULT = make.Unop(OperatorConst.NEG, e).at(oleft);
+        :}
+      | UnaryExpressionNotPlusMinus             {: ACCEPT;                  :}
+;
+
+PreIncrementExpression ::=
+        PLUSPLUS:o UnaryExpression:e
+        {:
+            RESULT = make.Unop(OperatorConst.PREINC, e).at(oleft);
+        :}
+;
+
+PreDecrementExpression ::=
+        SUBSUB:o UnaryExpression:e
+        {:
+            RESULT = make.Unop(OperatorConst.PREDEC, e).at(oleft);
+        :}
+;
+
+UnaryExpressionNotPlusMinus ::=
+        PostfixExpression                       {: ACCEPT;                  :}
+      | TILDE:o UnaryExpression:e
+        {:
+            RESULT = make.Unop(OperatorConst.COMPL, e).at(oleft);
+        :}
+      | BANG:o UnaryExpression:e
+        {:
+            RESULT = make.Unop(OperatorConst.NOT, e).at(oleft);
+        :}
+      | CastExpression                          {: ACCEPT;                  :}
+;
+
+CastExpression ::=
+        LPAREN:l PrimitiveType:t Dimsopt:d RPAREN UnaryExpression:e
+        {:
+            if (d != null)
+            {
+                replaceArrayType(d, t);
+                    RESULT = make.Typeop(OperatorConst.TYPECAST, e, d).at(lleft);
+            }
+            else
+                RESULT = make.Typeop(OperatorConst.TYPECAST, e, t).at(lleft);
+        :}
+      | LPAREN:l Expression:t RPAREN UnaryExpressionNotPlusMinus:e
+        {:
+            RESULT = make.Typeop(OperatorConst.TYPECAST, e, t).at(lleft);
+        :}
+      | LPAREN:l Name:n Dims:d RPAREN UnaryExpressionNotPlusMinus:e
+        {:
+            if (d != null)
+            {
+                replaceArrayType(d, n);
+                RESULT = make.Typeop(OperatorConst.TYPECAST, e, d).at(lleft);
+            }
+            else
+                RESULT = make.Typeop(OperatorConst.TYPECAST, e, n).at(lleft);
+        :}
+;
+
+BinaryExpression ::=
+        BinaryExpressionInclEq          {: ACCEPT;                          :}
+      | BinaryExpression:x OPERATOR:o BinaryExpression:y
+        {:
+            RESULT = make.Binop(oper.getopcode(o), x, y).at(oleft);
+        :}
+      | BinaryExpression:x BARBAR:o BinaryExpression:y
+        {:
+            RESULT = make.Binop(OperatorConst.OR, x, y).at(oleft);
+        :}
+      | BinaryExpression:x AMPAMP:o BinaryExpression:y
+        {:
+            RESULT = make.Binop(OperatorConst.AND, x, y).at(oleft);
+        :}
+      | BinaryExpression:x BAR:o    BinaryExpression:y
+        {:
+            RESULT = make.Binop(OperatorConst.BITOR, x, y).at(oleft);
+        :}
+      | BinaryExpression:x CARET:o  BinaryExpression:y
+        {:
+            RESULT = make.Binop(OperatorConst.BITXOR, x, y).at(oleft);
+        :}
+      | BinaryExpression:x AMP:o    BinaryExpression:y
+        {:
+            RESULT = make.Binop(OperatorConst.BITAND, x, y).at(oleft);
+        :}
+;
+
+BinaryExpressionInclEq ::=
+        UnaryExpression                 {: ACCEPT;                          :}
+      | BinaryExpressionInclEq:x BANGEQ:o     BinaryExpressionInclEq:y
+        {:
+            RESULT = make.Binop(OperatorConst.NE, x, y).at(oleft);
+        :}
+      | BinaryExpressionInclEq:x EQEQ:o       BinaryExpressionInclEq:y
+        {:
+            RESULT = make.Binop(OperatorConst.EQ, x, y).at(oleft);
+        :}
+      | BinaryExpressionInclEq:x INSTANCEOF:o ClassOrArray:y
+        {:
+            RESULT = make.Typeop(OperatorConst.TYPETEST, x, y).
+                                                            at(oleft);
+        :}
+      | BinaryExpressionInclEq:x GTEQ:o       BinaryExpressionInclEq:y
+        {:
+            RESULT = make.Binop(OperatorConst.GE, x, y).at(oleft);
+        :}
+      | BinaryExpressionInclEq:x LTEQ:o       BinaryExpressionInclEq:y
+        {:
+            RESULT = make.Binop(OperatorConst.LE, x, y).at(oleft);
+        :}
+      | BinaryExpressionInclEq:x GT:o         BinaryExpressionInclEq:y
+        {:
+            RESULT = make.Binop(OperatorConst.GT, x, y).at(oleft);
+        :}
+      | BinaryExpressionInclEq:x LT:o         BinaryExpressionInclEq:y
+        {:
+            RESULT = make.Binop(OperatorConst.LT, x, y).at(oleft);
+        :}
+      | BinaryExpressionInclEq:x GTGTGT:o     BinaryExpressionInclEq:y
+        {:
+            RESULT = make.Binop(OperatorConst.USR, x, y).at(oleft);
+        :}
+      | BinaryExpressionInclEq:x GTGT:o       BinaryExpressionInclEq:y
+        {:
+            RESULT = make.Binop(OperatorConst.SR, x, y).at(oleft);
+        :}
+      | BinaryExpressionInclEq:x LTLT:o       BinaryExpressionInclEq:y
+        {:
+            RESULT = make.Binop(OperatorConst.SL, x, y).at(oleft);
+        :}
+      | BinaryExpressionInclEq:x SUB:o        BinaryExpressionInclEq:y
+        {:
+            RESULT = make.Binop(OperatorConst.MINUS, x, y).at(oleft);
+        :}
+      | BinaryExpressionInclEq:x PLUS:o       BinaryExpressionInclEq:y
+        {:
+            RESULT = make.Binop(OperatorConst.PLUS, x, y).at(oleft);
+        :}
+      | BinaryExpressionInclEq:x PERCENT:o    BinaryExpressionInclEq:y
+        {:
+            RESULT = make.Binop(OperatorConst.MOD, x, y).at(oleft);
+        :}
+      | BinaryExpressionInclEq:x SLASH:o      BinaryExpressionInclEq:y
+        {:
+            RESULT = make.Binop(OperatorConst.DIV, x, y).at(oleft);
+        :}
+      | BinaryExpressionInclEq:x STAR:o       BinaryExpressionInclEq:y
+        {:
+            RESULT = make.Binop(OperatorConst.TIMES, x, y).at(oleft);
+        :}
+;
+
+ConditionalExpression ::=
+        BinaryExpression            {: ACCEPT;                              :}
+      | BinaryExpression:c QUES:q Expression:e1 COLON ConditionalExpression:e2
+        {:
+            RESULT = make.If(c, e1, e2).at(qleft);
+        :}
+;
+
+Expression ::=
+        ConditionalExpression       {: ACCEPT;                              :}
+      | Assignment                  {: ACCEPT;                              :}
+;
+
+Assignment ::=
+        LeftHandSide:lhs EQ:o Expression:rhs
+        {:
+            RESULT = make.Assign(lhs, rhs).at(oleft);
+        :}
+      | LeftHandSide:lhs AssignmentOperator:o Expression:rhs
+        {:
+            RESULT = make.Assignop(o.intValue(), lhs, rhs).at(oleft);
+        :}
+;
+
+LeftHandSide ::=
+        Name                        {: ACCEPT;                              :}
+      | FieldAccess                 {: ACCEPT;                              :}
+      | ArrayAccess                 {: ACCEPT;                              :}
+;
+
+AssignmentOperator ::=
+        STAREQ              {: RESULT = new Integer(OperatorConst.TIMES);   :}
+      | SLASHEQ             {: RESULT = new Integer(OperatorConst.DIV);     :}
+      | PERCENTEQ           {: RESULT = new Integer(OperatorConst.MOD);     :}
+      | PLUSEQ              {: RESULT = new Integer(OperatorConst.PLUS);    :}
+      | SUBEQ               {: RESULT = new Integer(OperatorConst.MINUS);   :}
+      | LTLTEQ              {: RESULT = new Integer(OperatorConst.SL);      :}
+      | GTGTEQ              {: RESULT = new Integer(OperatorConst.SR);      :}
+      | GTGTGTEQ            {: RESULT = new Integer(OperatorConst.USR);     :}
+      | AMPEQ               {: RESULT = new Integer(OperatorConst.BITAND);  :}
+      | CARETEQ             {: RESULT = new Integer(OperatorConst.BITXOR);  :}
+      | BAREQ               {: RESULT = new Integer(OperatorConst.BITOR);   :}
+;
+
+Expressionopt ::=
+        /* empty */                 {: RESULT = null;                       :}
+      | Expression                  {: ACCEPT;                              :}
+;
+
+ClassOrArray ::=
+        Name                        {: ACCEPT;                              :}
+      | ArrayType                   {: ACCEPT;                              :}
+;
+
+
+// ERROR RECOVERY
+
+RecoverAtSemi ::=
+        error SEMI                  {: RESULT = trees.errorTree;            :}
+;
+
+RecoverAtBrace ::=
+        error RBRACE                {: RESULT = trees.errorTree;            :}
+;
+
+RecoverAtComma ::=
+        error COMMA                 {: RESULT = trees.errorTree;            :}
+;
+
+RecoverAtParen ::=
+        error RPAREN                {: RESULT = trees.errorTree;            :}
+;

@@ -1,0 +1,52 @@
+module interface MI {
+    interface I {
+        void foo();
+        void bar(A a);
+    }
+    A produce();
+    void test(A a);
+    class A implements I;
+}
+
+module interface MJ {
+    interface J {
+        void bar(A a);
+    }
+    void test(A a);
+    class A implements J;
+}
+
+module M implements MI, MJ {
+
+    interface K {
+        K();
+        void done(A a);
+    }
+
+    class C implements I, J, K {
+        public void foo() {
+            System.out.println("M.foo");
+        }
+        public void bar(A a) {
+            a.bar(a);
+        }
+        public void done(A a) {
+            System.out.println("M.done");
+        }
+    }
+
+    class A implements I, J, K with C;
+
+    public A produce() {
+        return new A();
+    }
+
+    public void test(A a) {
+        a.foo();
+        MI.produce().done(produce());
+    }
+    
+    public void main(String[] args) {
+        test(new A());
+    }    
+}

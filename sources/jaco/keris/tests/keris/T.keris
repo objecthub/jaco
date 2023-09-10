@@ -1,0 +1,19 @@
+interface F {
+    void foo();
+}
+
+module A {
+    class C implements F with {
+        void foo() {
+        }
+    }
+}
+
+module S extends A {
+    //class C with super.C;
+    class D with A.C;
+}
+
+module M extends S {
+    class C with super.D { }
+}

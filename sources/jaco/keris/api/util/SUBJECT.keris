@@ -1,0 +1,39 @@
+package keris.util;
+
+public module SUBJECT requires OBSERVER {
+
+    public interface SubjectIntf {
+        SubjectIntf();
+        void add(OBSERVER.Observer obs);
+        void notify(Object event);
+    }
+    
+    public class Subject implements SubjectIntf with {
+        OBSERVER.Observer[] obs = new OBSERVER.Observer[0];
+        
+        public Subject() {
+            Subject[] newsubs = new Subject[subs.length];
+            System.arraycopy(subs, 0, newsubs, 1, subs.length);
+            newsubs[0] = this;
+            subs = newsubs;
+        }
+        
+        public void add(OBSERVER.Observer o) {
+            OBSERVER.Observer[] newobs = new OBSERVER.Observer[obs.length];
+            System.arraycopy(obs, 0, newobs, 1, obs.length);
+            newobs[0] = o;
+            obs = newobs;
+        }
+        
+        public void notify(Object event) {
+            for (int i = 0; i < obs.length; i++)
+                obs[i].notify(this, event);
+        }
+    }
+    
+    private Subject[] subs = new Subject[0];
+    
+    public Subject[] allSubjects() {
+        return subs;
+    }
+}

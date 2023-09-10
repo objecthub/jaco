@@ -1,0 +1,7 @@
+class A {
+
+  public static void main(String[] args) {
+      int t = -1;
+  }
+
+}

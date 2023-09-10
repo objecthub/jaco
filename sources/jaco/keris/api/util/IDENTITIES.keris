@@ -1,0 +1,32 @@
+//                 _
+//   _  _____ _ __(_)___     Keris API
+//  | |/ / _ \ '__| / __|    (c) 2001 Matthias Zenger
+//  |   <  __/ |  | \__ \
+//  |_|\_\___|_|  |_|___/    Enumeration module
+//                           
+//  [ENUMERATION.keris (763) 13-Jul-01 16:39 -> 13-Jul-01 16:46]
+
+package keris.util;
+
+import java.util.*;
+
+
+public module IDENTITIES {
+    
+    /** a hashtable of all enumerated objects
+     */
+    protected Map repository = new WeakHashMap();
+    
+    protected int identities = 0;
+    
+    /** get the ID of an object
+     */
+    public synchronized int get(Object obj) {
+        Integer id = (Integer)repository.get(obj);
+        if (id == null) {
+            repository.put(obj, new Integer(identities++));
+            return identities - 1;
+        } else
+            return id.intValue();
+    }
+}

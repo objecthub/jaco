@@ -1,0 +1,8 @@
+public class BasicTest
+{
+	public static void foo()
+	{
+		int		i = 0;
+		byte	b = (byte)i;
+	}
+}

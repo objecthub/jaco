@@ -1,0 +1,65 @@
+import keris.application.*;
+
+module MAIN {
+    interface Prnt {
+        Prnt();
+        void print(String prefix);
+    }
+    
+    class C implements Prnt {
+        public void print(String prefix) {
+            System.out.println(prefix + ": MAIN");
+        }
+    }
+    
+    class A implements Prnt with C;
+
+    A a = new A();
+    
+    void main(String[] args) {
+        a.print("first");
+    }
+}
+
+module NEWMAIN extends MAIN requires OPTIONS {
+
+    class D extends C {
+        public void print(String prefix) {
+            System.out.println("NEWMAIN: " + prefix);
+        }
+    }
+    
+    class A implements Prnt with D;
+    
+    void main(String[] args) {
+        System.out.println("new");
+        super.main(args);
+        try {
+            OPTIONS.parse(args);
+            System.out.println("files = " + OPTIONS.files);
+            System.out.println("skipped = " + OPTIONS.skipped);
+        } catch (OPTIONS.OptionParsingException e) {
+            System.out.println("parse error");
+        }
+    }
+}
+
+module RUN {
+    module MAIN;
+    module OPTIONS;
+    
+    void main(String[] args) {
+        MAIN.main(args);
+    }
+}
+
+module MYOPTIONS extends OPTIONS {
+    {
+        suffixes = new String[]{".test"};
+    }
+}
+
+module MYRUN extends RUN {
+    module NEWMAIN;
+    module MYOPTIONS;
+}

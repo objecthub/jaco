@@ -1,0 +1,82 @@
+public interface PIntf {}
+
+public interface PSIntf extends PIntf {}
+
+	
+class EACSubSub extends EACSub
+{
+	final case C6(EACSub s);
+}
+
+public class EAC
+{
+	int	pos;
+	
+	public case C1(int tag);
+	case C2(EAC tree, String str, int tag) { tag = 3; str = "hi"; }
+	case C3 { pos = 100; }
+	
+	public Object extract(EAC d)
+	{
+		return null;
+	}
+	
+	public int foo(Object x)
+	{
+		return pos;
+	}
+}
+
+class EACSub extends EAC implements PIntf
+{
+	// String	name = "hi";
+	static int	t = 0;
+	
+	case C5;
+	case C4(int i, int j, Object any);
+	
+	
+	public Object extract(EAC x)
+	{
+		return "text";
+	}
+	
+	public int foo(Object x)
+	{
+		((EACSub)x).goo((EAC)x);
+		return 0;
+	}
+	
+	public static void goo(EAC eac)
+	{
+		EACSub	that = (EACSub)eac;
+		if (that.extract(that) instanceof EACSubSub)
+			that = null;
+		if ((C4)that.extract(that) instanceof EACSubSub)
+			that = null;
+		if ((EACSubSub.C6)that.extract(that) instanceof EACSubSub)
+			that = null;
+		if (that.extract(that) instanceof EAC)
+			that = null;
+		/* switch ((EACSubSub)that)
+		{
+			case C1(5):
+				return;
+			
+			case C2(C2(C1(int x), _, int tag), "hi", int y):
+				return;
+			
+			case C3:
+				return;
+			
+			case C4(1, _, Object x):
+				return;
+			
+			case C5:
+				return;
+			
+			case C6(_):
+				return;
+		} */
+	}
+}

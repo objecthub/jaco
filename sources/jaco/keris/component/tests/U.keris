@@ -1,0 +1,17 @@
+module M {
+	module N;
+	import N.*;
+	public final int z = 4;
+	public void main(String[] args) {
+		foo(z);
+	}
+	void test(XIY x) {}
+}
+
+module N {
+	public final int x = 5;
+	interface XIY {}
+    void foo(int y) {
+    	System.out.println("test " + y);
+    }
+}

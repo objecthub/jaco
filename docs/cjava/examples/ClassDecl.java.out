@@ -1,0 +1,9 @@
+abstract public class C implements I3, I2, I1, I4 {
+   public C() {
+      super();
+   }
+   public abstract void i3();
+   public abstract void i2();
+   public abstract void i1();
+   public abstract void i4();
+}

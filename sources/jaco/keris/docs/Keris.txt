@@ -1,0 +1,386 @@
+============================================================
+
+         KERIS -- modular, extensible Java programming
+        
+                         20/04/01
+         Matthias Zenger, matthias.zenger@epfl.ch
+
+============================================================
+
+
+0) MOTIVATION
+
+
+0.1) ARE CLASSES AND PACKAGES ENOUGH?
+
+- Java does not allow modular programming; most classes cannot
+  be compiled in isolation; all depending classes have to be
+  compiled simultaneously
+
+- Java supports the development of extensible software only
+  on a very low/primitive level. Extensibility has to be planned
+  ahead through the use of design patterns. For writing
+  extensible applications, complicated patterns/programming
+  protocols have to be observed (e.g. Context/Component).
+
+- Even though a class is the basic building block of Java
+  programs, most classes do not mean anything in isolation.
+  They have a role in a specific program structure, but there
+  is only limited support to formulate this role or to make
+  this role explicit. A priori, class interactions are
+  implicit, if not using a special design pattern that
+  emphasizes cooperating classes. Since a single class often
+  does not mean anything in isolation, formulating:
+  
+    * design patterns
+    * applications/systems
+    * software components
+    * composition of software components
+    * libraries
+  
+  turns out to be extremely difficult in general. Applications
+  are usually represented by a main class. To find out on what
+  other classes this class depends, code has to be inspected.
+  Implementation of software components is usually guided by a
+  relatively weekly specified programming protocol (e.g.
+  JavaBeans). Composition of software components is often even
+  done by circumventing the programming language, using
+  reflective mechanisms. For modelling libraries, it is often
+  recommended to use the package system of Java. For small and
+  simple libraries, this approach works fine. But huge libraries
+  often call for further internal structuring. It is possible
+  to nest packages, but this also limits access to non-public
+  members. Therefore classes that have to access internal
+  data (which is not exposed to the outer world), all have to
+  reside in the same package.
+
+
+0.2) WHAT KERIS PROVIDES
+
+Keris tries to facilitate the development of extensible
+software by providing an additional layer for structuring
+software components. This layer introduces modules as the
+basic building blocks for software. With Keris' modules, it
+is possible to give concrete implementations for concepts
+like design patterns, libraries, applications, sub-systems
+or even more abstract notions like software components.
+All this is done in a completely extensible fashion, allowing
+to refine existing software or to derive new extended
+software from existing one.
+
+
+1) OVERVIEW OF KERIS
+
+1.1) MODULES
+
+1.1.1) BASIC MODULES
+
+In Keris, modules are the basic top-level building blocks supporting
+separate compilation and type abstraction in an extensible fashion.
+Modules are composed by nesting. They support the concept
+of incremental revelation: a module can be refined/extended
+step by step.
+
+A module definition has the form:
+
+  module M implements MI
+           requires N1, N2, ... {
+      ...
+  }
+
+This defines a module M which implements the module interface MI.
+By implementing the module interface MI, module M is said to be more
+specific than MI. It has to implement at least all members of MI.
+The implementation of module M depends on the modules N1, N2, etc.
+specified by the requires clause.
+
+Module interfaces are specified in the same way:
+
+  module interface MI requires NI, ... {
+      ...
+  }
+
+A module contains fields, methods, initializers, nested classes
+or interfaces as well as module fields and class fields.
+Modules export all definitions of their body according to the
+Java access modifiers associated with each definition.
+
+
+1.1.2) EXTENDED MODULES
+
+It is possible to extend modules in the same way, classes
+are extended. The same rules apply for overloading and overriding.
+An extended module M with
+
+  module M extends L ... {
+  
+  }
+  
+inherits all definitions from L (including L's required modules)
+and defines additional members. By extending L, module M gets a
+more specific implementation of module L.
+
+Module interfaces support multiple (interface) inheritance as
+defined for regular Java interfaces.
+
+
+1.1.3) DERIVED MODULES
+
+By extending a module, a new refined version of the same module
+is created. This extended module may override nested modules
+(see later) or any other inherited module member. Furthermore,
+new members can be defined. Sometimes it is useful to derive new
+modules from an existing one simply by inheriting from it. This
+new module does not have any relations to the one from which it
+is derived. It simply inherits all it's members. Here is an
+implementation of a Subject/Observer pattern:
+
+  module Subject requires Observer, Event {
+      ...
+  }
+  module Observer requires Subject, Event {
+      ...
+  }
+  
+We can derive modules for Windows/WindowManagers (which have the
+same structure as Subject/Observers) from these modules using the
+'for' keyword instead of 'extends'. Whenever a new module is
+derived, all required and nested modules that refer to this new
+module (through their requires clause) have to be updated as well,
+to refer to the new module. Therefore, we can specialize the
+modules of the Subject/Observer pattern above only simultaneously:
+
+  module WindowManager for Subject requires Window for Observer, Event {
+      ...
+  }
+  module Window for Observer requires WindowManager for Subject, Event {
+      ...
+  }
+  
+The 'for' keyword is also used here to adapt required or nested
+modules to the newly derived modules.
+
+To generalize this example, we look at the following module
+definition:
+
+  module M for L requires N1' for N1, N2' for N2, ... {
+      ...
+  }
+
+This definition declares a module M to inherit from L. Furthermore,
+the required modules of L are refined. If the module L requires
+a module N1, which itself requires L, then the derived module M
+has to refine the required module N1 to require M instead of L.
+Thus, omitting the clause N1' for N1 would be illegal for the
+module definition above.
+
+To summarize: with 'extends' an existing module is refined. This
+does not create a new module. This creates just an extended
+interface and an extended implementation for an already existing
+module. Opposed to this refinement of other modules, it is also
+possible to derive a new module from an existing one by inheritance.
+This can be seen as an instantiation of a module pattern, since
+depending modules have to be specialized simultaneously.
+
+
+1.1.4) EXECUTABLE MODULES
+
+Modules that do not require other modules and which offer a main
+method with the following signature:
+
+  void main(String[] args);
+  
+are considered to be executable modules. These modules can be
+executed like any ordinary Java class which has a static main
+method. On startup, executable modules first create an instance
+of themself and then invoke their main method.
+
+
+
+1.2) NESTING MODULES
+
+1.2.1) LINKING MODULES BY NESTING
+
+An important feature of Keris is that modules are nesting. This is
+supported in a way which does not restrict separate compilation.
+The following module contains a local module N (an instanciation
+of N):
+
+  module M {
+      module N;
+  }
+
+where N is defined by a regular top-level module declaration:
+
+  module N {
+      ....
+  }
+
+A module N may be nested inside another module M only, if this
+module provides all modules required by N. A module M provides
+a module O, if it either requires O or defines a nested module O.
+It is forbidden to require and to nest the same module.
+Thus, for nesting the following module N in module M, we have to
+make sure that M also provides O.
+
+  module N requires O {
+      ...
+  }
+
+So there are two possible ways to nest N in M:
+
+  module M requires O {
+      module N;
+  }
+  
+or
+
+  module M {
+      module O;
+      module N;
+  }
+
+The first possibility is not always possible. For the following
+module definition of O, it won't work:
+
+  module O requires N {
+      ...
+  }
+  
+Here, modules O and N depend recursively on each other. This is
+an indication that they have to be nested in the same module.
+Otherwise they wouldn't be able to refer to each other. This
+restriction is enforced by a simple rule: a module M can only
+require a module O, if module O does not require another module
+which is also nested in M. With this rule, the following program
+is illegal:
+
+  module N requires O { ... }
+  module O requires N { ... }
+  module M requires O {
+      module N;
+  }
+  
+But it would be perfectly legal to require O without defining
+a nested module N:
+
+  module M requires O { ... }
+  
+To summarize: nesting of modules is used to link depending modules.
+A nested module refers to modules that are either nested in the
+same module, or that are required by the module in which it is
+nested.
+
+
+1.2.2) HIDING MODULE IMPLEMENTATIONS
+
+In the program
+
+  module N implements NI {
+      ...
+  }
+  module M {
+      module N;
+  }
+
+module M defines a nested module N. Since N implements NI, we
+implicitly nest module NI in M. Thus, a nested module declaration
+for module N nests all modules that are at least as specific as
+module N. Sometimes a concrete implementation for a module
+interface NI is not relevant. In those cases it is good practice
+to hide the implementation of a module interface:
+
+  module M {
+      module N implements NI;
+  }
+
+This only nests module NI in M. Furthermore this declaration
+states that NI is implemented by an instance of module N.
+
+
+1.2.3) OVERRIDING LINKS
+
+Keris offers means to extend linked module structures. This is done
+by overriding nested modules with more specific ones. The following
+program links a Stack module with a List module:
+
+  module Stack requires List {
+      ...
+  }
+  module ArrayList implements List {
+      ...
+  }
+  module Program {
+      module Stack;
+      module ArrayList implements List;
+  }
+
+For some applications it might be useful to use a different
+implementation for Lists (that does not depend on Arrays for example).
+We can extend the program by overriding the implementation
+of the List module:
+
+  module NewProgram extends Program {
+      module ChainedList implements List;
+  }
+  
+The NewProgram module inherits all nested modules from Program,
+but overrides the definition of nested module List. Without
+any further changes, our new program uses chained lists instead
+or array lists.
+
+
+1.2.4 IMPORTING MODULES
+
+
+
+1.3) MODULE MEMBERS
+
+1.3.1) BASIC MEMBERS
+
+The modules introduced in 1.1 may have as members:
+
+  - initializers,
+  - functions,
+  - variables, and
+  - class/interface definitions.
+  
+Furthermore, they can contain nested modules (or module
+fields). All these members are considered to be non-static.
+Java's access modifiers may be used to restrict access
+to members.
+
+1.3.2) FUNCTIONS
+
+Modules that do not require any other module and which
+define a main method with the following signature:
+
+  void main(String[] args);
+  
+are considered to be executable. These modules can be
+run as any other regular Java class that defines a static
+main method with the same signature.
+
+1.3.3) VARIABLES
+
+1.3.4) NESTED CLASSES/INTERFACES
+
+1.3.5) CLASS FIELDS
+
+
+
+2) CLASS FIELDS
+
+
+
+
+2) FURTHER INVESTIGATIONS
+
+- hot-swapping modules
+
+- generating software components in the form of .jar files
+  from a "root" module. All nested modules and all classes
+  defined in those modules (or referenced via class fields)
+  are included. Required modules are supposed to be supplied
+  at "link time" => component-oriented programming
+

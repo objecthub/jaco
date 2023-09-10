@@ -1,0 +1,17 @@
+module interface MI {
+	class C implements I;
+	C id(C c);
+}
+module M implements MI {
+	class D implements I, J {
+		public D(int i) {}
+	}
+    public class C implements I, J with D;
+    public C id(C c) {
+    	return null;
+    }
+}
+interface I {
+	I(int i);
+}
+interface J {}

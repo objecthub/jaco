@@ -1,0 +1,16 @@
+// solution with records for t3.join
+
+{
+	ref(z) = {
+				get1() & state(x) = x & state(x),
+				put1(x) & state(y) = state(x)
+			 };
+			 {
+			 	this = {
+						   get = get1,
+						   put = put1
+					   }
+			 };
+			 this & state(z)
+};
+ref

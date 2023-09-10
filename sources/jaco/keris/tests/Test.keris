@@ -1,0 +1,6 @@
+import xjava.util.*;
+//import xjava.util.NameTable.*;
+
+class Test {
+    NameTable a;
+}

@@ -1,0 +1,19 @@
+module M requires N {
+    import N::O::P;
+    void foo() {
+        N::O::P.bar();
+        P.bar();
+    }
+}
+
+module N {
+    module O;
+}
+
+module O {
+    module P;
+}
+
+module P {
+    void bar() {}
+}

@@ -1,0 +1,36 @@
+package jac;
+
+public class Const {
+   public final int $tag;
+   protected Const(int $tag) {
+      this.$tag = $tag;
+   }
+   public static class IntConst extends Const {
+      public int value;
+      public IntConst(int value) {
+         super(2);
+         this.value = value;
+      }
+   }
+   public static class LongConst extends Const {
+      public long value;
+      public LongConst(long value) {
+         super(3);
+         this.value = value;
+      }
+   }
+   public static final Const NullConst = new Const(4);
+   public int tag;
+   static {
+      NullConst.tag = 0;
+   }
+   public int intValue() {
+      return 0;
+   }
+   public static jac.Const IntConst(int value) {
+      return new IntConst(value);
+   }
+   public static jac.Const LongConst(long value) {
+      return new LongConst(value);
+   }
+}

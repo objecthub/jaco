@@ -1,0 +1,184 @@
+module SUBJECT requires OBSERVER, EVENT {
+    interface SubjectIntf = {
+        void add(OBSERVER.Observer obs);
+        void notify(EVENT.Event evt);
+    }
+    class SubjectImpl implements SubjectIntf {
+        OBSERVER.Observer[] observers = new OBSERVER.Observer[0];
+        void add(OBSERVER.Observer obs) {
+            OBSERVER.Observer[] newobs = ...
+            ...
+        }
+        void notify(EVENT.Event evt) {
+            for (int i = 0; i < observers.length; i++)
+                observers.notify(this, evt);
+        }
+    }
+    class Subject implements SubjectIntf = SubjectImpl;
+}
+
+module OBSERVER requires SUBJECT, EVENT {
+    interface ObserverIntf {
+        void notify(SUBJECT.Subject subj, EVENT.Event evt);
+    }
+    class ObserverImpl implements ObserverIntf {
+        void notify(SUBJECT.Subject subj, EVENT.Event evt) {
+            
+        }
+    }
+    class Observer implements ObserverIntf = ObserverImpl;
+}
+
+module interface EVENT {
+    interface EventIntf {
+        EventIntf();
+    }
+    class Event implements EventIntf;
+}
+
+/***************************************************************************/
+
+module WindowManager extends Subject
+                     requires Window for Observer, WindowEvent for Event {
+    virtual class Subj overrides Subject.Subj {
+        void add(Window.Obs obs) { ... }
+        void notify(WindowEvent.Evt evt) { ... }
+    }
+}
+
+module Window extends Observer
+              requires WindowManager for Subject, WindowEvent for Event {
+    virtual class Obs overrides Observer.Obs {
+        void notify(WindowManager.Subj subj, WindowEvent.Evt evt) { ... }
+    }
+}
+
+module WindowEvent implements Event {
+    class Evt {
+        ...
+    }
+    virtual class FirstEvt extends Evt {
+        ...
+    }
+    virtual class SecondEvt extends Evt {
+        ...
+    }
+}
+
+/**************************************************************************/
+
+module SubjectObserver requires Subject, Observer, Event {
+    module Combine = new Combine();
+    module Service = new Service();
+}
+
+module Combine requires Subject, Observer {
+    void foo(Subject.Subj s, Observer.Obs o) {
+        s.add(o);
+    }
+}
+
+module WindowSystem extends SubjectObserver
+                    requires WindowManager as Subject,
+                             Window as Observer,
+                             WEvent as Event {
+}
+
+module App {
+    module WindowManager;
+    module Window;
+    module WEvent;
+    module WindowSystem;
+}
+
+module NewApp extends App {
+    module NewWindowManager as WindowManager;
+    module NewWindow as Window;
+}
+
+
+module App {
+    module XSubject as Subject;
+    module XObserver;
+    module YSubject;
+    module YObserver as Observer;
+}
+
+
+
+
+module ConcreteWindowSystem {
+    module WindowManager
+    module Window
+    module WEvent
+    module WindowSystem
+}
+
+module SubjectObserver {
+    module Subject = new Subject()
+    module Observer = new Observer()
+    module Event = new Event()
+    module Combine = new Combine()
+}
+
+module WindowSystem extends SubjectObserver {
+    module WindowManager for Subject = new WindowManager
+    module Window for Observer = new Window
+    module WEvent for Event = new Event
+}
+
+
+module ConcreteWindowSystem {
+    module WindowManager
+    module Window
+    module WEvent
+    module WindowSystem
+}
+
+//////////////////
+
+
+module SubjectObserver(Subj, Obs) where Subj = Subject(Obs, Evt),
+                                        Obs = Observer(Subj, Evt) {
+    module Subject = Subj
+    module Observer = Obs
+    module Combine = new Combine(this)
+}
+
+module Combine(SubOb) where SubOb = SubjectObserver(_, _) {
+    void foo(SubOb.Subject.Subj s, SubObj.Observer.Obs o) {
+        s.add(o);
+    }
+}
+
+module WindowSystem(WinMan, Win) extends SubjectObserver(WinMan, Win)
+                                 where WinMan = WindowManager(Win, Evt),
+                                       Win = Window(WinMan, Evt) {
+    
+}
+
+module SO {
+    module Combine = new Combine;
+    module Subject = new Subject;
+    module Observer = new Observer;
+    
+    module WindowModules = new WindowModules(f, g);
+    
+    module WindowManager = new WindowManager;
+    module Window = new Window()
+            
+    module XSubject = new XSubject()
+    module XObserver = new XObserver()
+    module XEvent = new XEvent()
+}
+
+
+module SubjectObserver requires WindowEvent {
+    module WindowManager = new WindowManager();
+    module Window = new Window()
+}
+
+module MySubjectObserver {
+    import SubjectObserver;
+    module WindowEvent = new MyWindowEvent();
+}

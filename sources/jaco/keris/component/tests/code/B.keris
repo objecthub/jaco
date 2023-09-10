@@ -1,0 +1,46 @@
+module M {
+	module O;
+	public void main(String[] args) {
+		System.out.println("Running main...");
+		O::R.foo();
+	}
+}
+
+module Mn specializes M {
+	module On as O;
+	module Or;
+}
+
+module Mr refines M {
+	module Or;
+}
+
+module O {
+	module R;
+}
+
+module On specializes O {
+	module Rn as R;
+}
+
+module Or refines O {
+    module Rr;
+}
+
+module R {
+	void foo() {
+		System.out.println("R.foo");	
+	}
+}
+
+module Rn specializes R {
+	void foo() {
+		System.out.println("Rn.foo");	
+	}
+}
+
+module Rr refines R {
+    void foo() {
+		System.out.println("Rr.foo");	
+	}
+}

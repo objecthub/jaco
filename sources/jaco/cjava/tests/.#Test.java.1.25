@@ -1,0 +1,16 @@
+import java.io.*;
+interface A{ }
+interface B{  }
+interface C{ void c(); }
+
+public class Test implements A, B, C
+{
+    public void c() {}
+    static public void main(String[] args)
+    {
+	[A, B][]ab = new ABC[3];
+	[A, B, C][] abc = ([A, B, C][])ab;
+	ab[0] = new Test();
+	abc[0].c();
+    }
+}

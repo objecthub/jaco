@@ -1,0 +1,25 @@
+context S {
+    M = new C().new M();
+}
+
+context C {
+    M1 = new M1();
+    M2 = new M2();
+}
+
+module M requires M1 {
+    void foo() {
+        M1.bar();
+    }
+}
+
+module M1 requires M2 {
+    void bar() {
+        M2.goo();
+    }
+}
+
+module M2 {
+    void goo() {
+    }
+}

@@ -1,0 +1,47 @@
+module M {
+	module N;
+	interface I {
+		I();
+		void foo();
+	}
+	interface J {
+		void test();
+	}
+	class CC implements I, J {
+		public void foo() {
+			System.out.println("CC.foo");
+		}
+		public void test() {
+			System.out.println("CC.test");
+		}
+	}
+	class C implements I, J = CC;
+	class D implements I = {
+		public D() {
+		}
+	    public void foo() {
+			System.out.println("D.foo");
+			bang();
+		}
+		void bang() {
+		}
+	}
+	void foo(C c) {
+		c.test();
+	}
+	void bar(I i) {
+	}
+	public void main(String[] args) {
+		Object o = new C();
+		//((N::M.C)o).foo();
+		C c = (C)o;
+		foo(c);
+		bar(c);
+		D d = new D();
+		d.foo();
+	}
+}
+
+module N {
+	module M;
+}

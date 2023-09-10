@@ -1,0 +1,13 @@
+module M {
+	void foo() {
+		main(null);
+	}
+	public void main(String[] args) {
+		
+	}
+}
+module N extends M {
+	void bar() {
+		main(null);
+	}
+}

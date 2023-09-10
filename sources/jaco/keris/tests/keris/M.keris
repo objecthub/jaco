@@ -1,0 +1,27 @@
+interface X {
+    X(int i);
+	void foo();
+}
+
+class A implements X {
+	public A(int i) {}
+	public void foo() {}
+}
+
+module M {
+	class B implements X {
+		public B(int i) {}
+		public void foo() {}
+	}
+	class C implements X with B;
+
+	void main(String[] args) {
+		System.out.println("hello: " + new C(4));
+	}
+}
+
+module N requires M {
+	Object test() {
+		return new M.C(12);
+	}
+}

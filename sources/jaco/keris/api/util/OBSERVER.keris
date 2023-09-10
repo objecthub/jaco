@@ -1,0 +1,11 @@
+package keris.util;
+
+public module interface OBSERVER requires SUBJECT {
+
+    public interface ObserverIntf {
+        ObserverIntf();
+        void notify(SUBJECT.Subject subj, Object event);
+    }
+
+    public class Observer implements ObserverIntf;
+}

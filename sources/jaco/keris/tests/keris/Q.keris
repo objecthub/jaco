@@ -1,0 +1,41 @@
+module M {
+	module P;
+    class A {
+    	void test(P.C c) {}
+    }
+}
+
+module O {
+    module M;
+}
+
+module P requires M {
+	class C extends M.A {
+	
+	}
+}
+
+module N extends M {
+    module O;
+    
+    class B extends O::M.A {
+    	public B() {
+    		O::M.super();
+    	}
+    }
+    
+    class D extends O::M::P.C {
+    	public D() {
+    		O::M::P.super();
+    	}
+    }
+    
+    void foo(O::M.A a) {}
+    void bar(B b, O::M.A a, O::M::P.C c, P.C d, A a2, P.C c2) {
+    	b.test(c);
+    	foo(b);
+    	b.test(new D());
+    	foo(a);
+    	foo(c);
+    }
+}

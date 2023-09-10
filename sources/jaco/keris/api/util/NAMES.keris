@@ -1,0 +1,318 @@
+//                 _
+//   _  _____ _ __(_)___     Keris API
+//  | |/ / _ \ '__| / __|    (c) 2001 Matthias Zenger
+//  |   <  __/ |  | \__ \
+//  |_|\_\___|_|  |_|___/    Name tables
+//                           
+//  [OPTIONS.keris (6262) 6-Jul-01 12:03 -> 6-Jul-01 16:09]
+
+package keris.util;
+
+
+public module NAMES requires CONVERSIONS {
+
+    public interface Id {
+        
+        /** return a unique integer value for this Id
+         */
+        int intValue();
+    
+        /** copy bytes of this name to buffer cs, starting at offset
+         */
+        void copyAscii(byte cs[], int offset);
+
+        /** return the ascii representation of this name
+         */
+        byte[] toAscii();
+
+        /** return the source representation of this name
+         */
+        byte[] toSource();
+
+        /** returns the length of this name
+         */
+        int length();
+
+        /** returns i'th byte of this name
+         */
+        byte byteAt(int i);
+
+        /** returns first occurrence of byte b in this name, len if not found
+         */
+        int pos(byte b);
+
+        /** returns last occurrence of byte b in this name, -1 if not found
+         */
+        int lastPos(byte b);
+
+        /** does this name start with prefix?
+         */
+        boolean startsWith(Name prefix);
+
+        /** does this name end with suffix?
+         */
+        boolean endsWith(Name suffix);
+
+        /** returns the subName starting at position start, excluding
+         *  position end
+         */
+        Name subName(int start, int end);
+
+        /** replace all `from' bytes with `to'
+         */
+        Name replace(byte from, byte to);
+
+        /** returns the concatenation of this name and n
+         */
+        Name append(Name n);
+        
+        /** returns the concatenation of this name and string s
+         */
+        Name append(String s);
+        
+        /** returns the concatenation of string s with this name
+         */
+        Name prepend(String s);
+    }
+    
+    interface InternalId {
+    
+        /** id constructor
+         */
+        InternalId(int index, int len, Name next);
+        
+        /** the next InternalId in the same hash bucket
+         */
+        Name next();
+    }
+    
+    public class NameImpl implements Id, InternalId {
+    
+        /** address in the name memory
+         */
+        protected int index;
+
+        /** length of the name
+         */
+        protected int len;
+
+        /** next name in the same hash bucket
+         */
+        protected Name next;
+        
+        public NameImpl(int index, int len, Name next) {
+            this.index = index;
+            this.len = len;
+            this.next = next;
+        }
+        
+        public int intValue() {
+            return index;
+        }
+        
+        public Name next() {
+            return next;
+        }
+        
+        public void copyAscii(byte cs[], int offset) {
+            System.arraycopy(names, index, cs, offset, len);
+        }
+
+        public byte[] toAscii() {
+            byte[] ascii = new byte[len];
+            System.arraycopy(names, index, ascii, 0, len);
+            return ascii;
+        }
+
+        public byte[] toSource() {
+            return CONVERSIONS.string2source(toString());
+        }
+
+        public String toString() {
+            return CONVERSIONS.ascii2string(names, index, len);
+        }
+
+        public int hashCode() {
+            return index;
+        }
+
+        public int length() {
+            return len;
+        }
+
+        public byte byteAt(int i) {
+            return names[index + i];
+        }
+
+        public int pos(byte b) {
+            int i = 0;
+            while (i < len && names[index + i] != b)
+                i++;
+            return i;
+        }
+
+        public int lastPos(byte b) {
+            int i = len - 1;
+            while (i >= 0 && names[index + i] != b)
+                i--;
+            return i;
+        }
+
+        public boolean startsWith(Name prefix) {
+            int i = 0;
+            int prefixIndex = prefix.intValue();
+            int prefixLength = prefix.length();
+            while ((i < prefixLength) &&
+                    (i < len) &&
+                    (names[index + i] == names[prefixIndex + i]))
+                i++;
+            return i == prefixLength;
+        }
+
+        public boolean endsWith(Name suffix) {
+            int i = len - 1;
+            int j = suffix.length() - 1;
+            int suffixIndex = suffix.intValue();
+            while ((j >= 0) && (i >= 0) &&
+                    (names[index + i] == names[suffixIndex + j])) {
+                    i--;
+                    j--;
+            }
+            return j < 0;
+        }
+
+        public Name subName(int start, int end) {
+            if (end < start)
+                end = start;
+            byte[] ascii = new byte[end - start];
+            System.arraycopy(names, index + start, ascii, 0, end - start);
+            return fromAscii(ascii, 0, ascii.length);
+        }
+
+        public Name replace(byte from, byte to) {
+            byte[] ascii = new byte[len];
+            copyAscii(ascii, 0);
+            for (int i = 0; i < len; i++)
+                if (ascii[i] == from) ascii[i] = to;
+            return fromAscii(ascii, 0, len);
+        }
+
+        public Name append(Name n) {
+            byte[] ascii = new byte[len + n.length()];
+            copyAscii(ascii, 0);
+            n.copyAscii(ascii, len);
+            return fromAscii(ascii, 0, ascii.length);
+        }
+        
+        public Name append(String s) {
+            return null;
+        }
+        
+        public Name prepend(String s) {
+            return null;
+        }
+    }
+    
+    /** the name implementation
+     */
+    public class Name implements Id, InternalId with NameImpl;
+    
+    
+    /** global constants
+     */
+    protected int HASH_SIZE = 0x8000;
+    protected int HASH_MASK = 0x7FFF;
+    protected int NAME_SIZE = 0x20000;
+    
+    /** memory to store all names sequentially
+     */
+    public byte[] names = new byte[NAME_SIZE];
+    protected int nc = 0;
+
+    /** hashtable for finding names quickly
+     */
+    protected Name[] hashtable = new Name[HASH_SIZE];
+
+
+    /** the hashcode of a name
+     */
+    protected int hashValue(byte cs[], int offset, int len) {
+        if (len > 0)
+            return
+                len * (41 * 41 * 41) +
+                cs[offset] * (41 * 41) +
+                cs[offset + len - 1] * 41 +
+                cs[offset + (len >> 1)];
+        else
+            return 0;
+    }
+
+    /** is (the ascii representation of) name equal to
+     *  cs[offset..offset+len-1]?
+     */
+    protected boolean equals(int index, byte cs[], int offset, int len) {
+        int i = 0;
+        while ((i < len) && (names[index + i] == cs[offset + i]))
+            i++;
+        return i == len;
+    }
+
+    /** create a name from the bytes in cs[offset..offset+len-1].
+     *  assume that bytes are in ascii format.
+     */
+    public Name fromAscii(byte cs[], int offset, int len) {
+        int h = hashValue(cs, offset, len) & HASH_MASK;
+        Name n = hashtable[h];
+        while ((n != null) &&
+               ((n.length() != len) || !equals(n.intValue(), cs, offset, len)))
+            n = n.next();
+        if (n == null) {
+            n = new Name(nc, len, hashtable[h]);
+            hashtable[h] = n;
+            for (int i = 0; i < len; i++)
+            {
+                if (nc == names.length)
+                {
+                    byte[] newnames = new byte[names.length * 2];
+                    System.arraycopy(names, 0, newnames, 0, names.length);
+                    names = newnames;
+                }
+                names[nc++] = cs[offset + i];
+            }
+            if (len == 0)
+                nc++;
+        }
+        return n;
+    }
+
+    /** create a name from the bytes in cs[offset..offset+len-1];
+     *  assume that characters are in source format
+     */
+    public Name fromSource(byte cs[], int offset, int len) {
+        byte[]  ascii = new byte[len * 2];
+        int alen = CONVERSIONS.source2ascii(cs, offset, len, ascii);
+        return fromAscii(ascii, 0, alen);
+    }
+
+    /** create a name from the characters in string s
+     */
+    public Name fromString(String s) {
+        byte[]  source = CONVERSIONS.string2source(s);
+        return fromSource(source, 0, source.length);
+    }
+    
+    /** returns the concatenation of all names in ns
+     */
+    public Name concat(Name ns[]) {
+        int len = 0;
+        for (int i = 0; i < ns.length; i++)
+            len = len + ns[i].length();
+        byte[] ascii = new byte[len];
+        len = 0;
+        for (int i = 0; i < ns.length; i++) {
+            ns[i].copyAscii(ascii, len);
+            len = len + ns[i].length();
+        }
+        return fromAscii(ascii, 0, len);
+    }
+}

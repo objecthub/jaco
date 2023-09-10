@@ -1,0 +1,20 @@
+final class PatCheck {
+    case T(PatCheck a);
+    case S(PatCheck a);
+    case V;
+    
+    int foo() {
+        switch (this) {
+            case T(S(_)):
+                return 1;
+            case T(_):
+                return 2;
+            case S(T(_)):
+                return 3;
+            case S(_):
+                return 4;
+            case V:
+                return 5;
+        }
+    }
+}

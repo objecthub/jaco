@@ -1,0 +1,17 @@
+____    /   _ _     JaCo
+    \  //\ / / \    -- an extensible compiler
+     \//  \\_\_/    (c) 2000, Matthias Zenger
+           \____________________________________________________________
+
+
+JaCo is an extensible Java compiler. It's written in an extension
+of itself :-). This distribution contains only the binaries. You
+can use jaco as a replacement for Sun's javac.
+
+For installing jaco just include the bin directory into your path.
+That's all. Have fun!
+
+-- Matthias
+
+________________________________________________________________________
+                Copyright 2000, Matthias Zenger (matthias@objecthub.com)

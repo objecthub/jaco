@@ -1,0 +1,44 @@
+module M requires N, O {
+   module A;
+   module B;
+}
+
+interface $M {
+    M $M();
+}
+
+class M implements $M, $N, $O, ...{
+    
+    class $EnclMap implements $M, ...{
+        A $A() {
+            return $nes;
+        }
+    }
+    private $enclMap = new $EnclMap();
+    
+    private N $req0;
+    private O $req1;
+    private A $nes0 = new A();
+    private B $nes1 = new B();
+    
+    void $setup(Object encl) {
+        $import(encl);
+        $init();
+    }
+    
+/** import modules and link super module
+ */
+    void $import(Object encl) {
+        this.$req1 = (($N)encl).bla;
+        this.$req2 = (($O)encl).bla;
+        super.$import(enclMap);
+    }
+    
+/** initialize module and super modules
+ */
+    void $init() {
+        super.$init();
+        ...
+    }
+}
+

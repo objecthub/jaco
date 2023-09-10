@@ -1,0 +1,56 @@
+module interface MI {
+	interface I {
+		I();
+		void foo(C c);
+	}
+	class C implements I;
+}
+
+module N requires MI {
+	MI.C bar() {
+		return new MI.C();
+	}
+	void toto(MI.C c) {
+	}
+}
+
+module N1 extends N requires M {
+	void toto(M.C c) {
+		c.toto();
+	}
+}
+
+//=====
+
+module M implements MI {
+	interface J {
+		void toto();
+	}
+    class A implements I, J {
+        public void foo(C c) {
+        	if (c != null)
+        		c.foo(null);
+        }
+        public void toto() {
+        }
+    }
+    class C implements I, J with A;
+}
+
+//=====
+
+module O {
+	module N;
+	module M;
+	
+	public void main(String[] args) {
+		M.C c = N.bar();
+		c.foo(c);
+		c.toto();
+		System.out.println("done");
+	}
+}
+
+module O1 extends O {
+	module N1;
+}

@@ -1,0 +1,49 @@
+//                 _
+//   _  _____ _ __(_)___     Keris API
+//  | |/ / _ \ '__| / __|    (c) 2001 Matthias Zenger
+//  |   <  __/ |  | \__ \
+//  |_|\_\___|_|  |_|___/    Input module interface
+//                           
+//  [OPTIONS.keris (6262) 6-Jul-01 12:03 -> 6-Jul-01 16:09]
+
+package keris.io;
+
+import java.io.*;
+
+
+public module interface IN {
+
+    int read() throws IOException;
+
+    int read(byte b[]) throws IOException;
+    
+    int read(byte b[], int off, int len) throws IOException;
+
+    long skip(long n) throws IOException;
+    
+    int available() throws IOException;
+    
+    boolean readBoolean() throws IOException;
+
+    byte readByte() throws IOException;
+
+    int readUnsignedByte() throws IOException;
+
+    short readShort() throws IOException;
+
+    int readUnsignedShort() throws IOException;
+
+    char readChar() throws IOException;
+
+    int readInt() throws IOException;
+
+    long readLong() throws IOException;
+
+    float readFloat() throws IOException;
+
+    double readDouble() throws IOException;
+
+    String readLine() throws IOException;
+    
+    String readUTF() throws IOException;
+}

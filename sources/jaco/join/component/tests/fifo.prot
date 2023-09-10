@@ -1,0 +1,319 @@
+FUNCTIONS
+
+  TOPLEVEL()
+    0: ENTER 0
+    3: GOTO 39
+    6: FUN 3
+    9: STORE 0
+    11: FUN 4
+    14: STORE 1
+    16: FUN 5
+    19: STORE 2
+    21: FUN 6
+    24: STORE 3
+    26: FUN 7
+    29: STORE 4
+    31: FUN 8
+    34: STORE 5
+    36: GOTO 42
+    39: GOTO 6
+    42: ENTER 2
+    45: GOTO 66
+    48: FUN 12
+    51: STORE 0
+    53: FUN 13
+    56: STORE 1
+    58: FUN 14
+    61: STORE 2
+    63: GOTO 69
+    66: GOTO 48
+    69: ENTER 8
+    72: GOTO 85
+    75: LOAD 1, 0
+    78: UNIT
+    79: APPLY
+    80: STORE 0
+    82: GOTO 88
+    85: GOTO 75
+    88: LOAD 1, 1
+    91: LOAD 0, 0
+    94: BYTE 2
+    96: TUPEL 2
+    98: APPLY
+    99: LEAVE
+    100: LEAVE
+    101: LEAVE
+    102: STOP
+
+  FUNCTION 0(1 variables, guard is 3,  left token map is 0)
+    0: STORE 0
+    2: POP
+    3: FORK 14
+    6: LOAD 1, 3
+    9: LOAD 0, 0
+    12: YIELD
+    13: STOP
+    14: UNIT
+    15: RET
+
+  FUNCTION 1(1 variables, guard is 12,  left token map is 0)
+    0: POP
+    1: STORE 0
+    3: LOAD 2, 0
+    6: LOAD 0, 0
+    9: FALSE
+    10: TUPEL 3
+    12: RET
+
+  FUNCTION 2(0 variables, guard is 9,  left token map is 0)
+    0: POP
+    1: POP
+    2: LOAD 2, 0
+    5: LOAD 1, 0
+    8: LOAD 1, 2
+    11: TUPEL 2
+    13: TRUE
+    14: TUPEL 3
+    16: RET
+
+  FUNCTION 3(1 variables, guard is 0,  left token map is 0)
+    0: STORE 0
+    2: ENTER 1
+    5: GOTO 11
+    8: GOTO 30
+    11: TOKEN 2
+    13: STORE 0
+    15: TOKEN 1
+    17: STORE 1
+    19: TOKEN 4
+    21: STORE 2
+    23: TOKEN 3
+    25: STORE 3
+    27: GOTO 8
+    30: FORK 39
+    33: LOAD 0, 1
+    36: UNIT
+    37: YIELD
+    38: STOP
+    39: LOAD 0, 0
+    42: LOAD 0, 2
+    45: TUPEL 2
+    47: LEAVE
+    48: RET
+
+  FUNCTION 4(3 variables, guard is 0,  left token map is 0)
+    0: DECOMP
+    1: STORE 2
+    3: DECOMP
+    4: STORE 1
+    6: STORE 0
+    8: LOAD 0, 0
+    11: LOAD 0, 2
+    14: APPLY
+    15: RET
+
+  FUNCTION 5(2 variables, guard is 0,  left token map is 0)
+    0: DECOMP
+    1: STORE 1
+    3: STORE 0
+    5: LOAD 0, 1
+    8: UNIT
+    9: APPLY
+    10: RET
+
+  FUNCTION 6(3 variables, guard is 0,  left token map is 0)
+    0: DECOMP
+    1: STORE 2
+    3: STORE 1
+    5: STORE 0
+    7: LOAD 0, 0
+    10: RET
+
+  FUNCTION 7(3 variables, guard is 0,  left token map is 0)
+    0: DECOMP
+    1: STORE 2
+    3: STORE 1
+    5: STORE 0
+    7: LOAD 0, 1
+    10: RET
+
+  FUNCTION 8(3 variables, guard is 0,  left token map is 0)
+    0: DECOMP
+    1: STORE 2
+    3: STORE 1
+    5: STORE 0
+    7: LOAD 0, 2
+    10: RET
+
+  FUNCTION 9(1 variables, guard is 3,  left token map is 0)
+    0: STORE 0
+    2: POP
+    3: ENTER 4
+    6: GOTO 21
+    9: LOAD 5, 0
+    12: LOAD 1, 0
+    15: APPLY
+    16: STORE 0
+    18: GOTO 24
+    21: GOTO 9
+    24: FORK 40
+    27: LOAD 2, 2
+    30: LOAD 0, 0
+    33: LOAD 0, 0
+    36: TUPEL 2
+    38: YIELD
+    39: STOP
+    40: UNIT
+    41: LEAVE
+    42: RET
+
+  FUNCTION 10(3 variables, guard is 6,  left token map is 0)
+    0: DECOMP
+    1: STORE 2
+    3: STORE 1
+    5: STORE 0
+    7: ENTER 5
+    10: GOTO 25
+    13: LOAD 5, 0
+    16: LOAD 1, 0
+    19: APPLY
+    20: STORE 0
+    22: GOTO 28
+    25: GOTO 13
+    28: ENTER 6
+    31: GOTO 51
+    34: LOAD 6, 1
+    37: LOAD 2, 1
+    40: LOAD 1, 0
+    43: TUPEL 2
+    45: APPLY
+    46: STORE 0
+    48: GOTO 54
+    51: GOTO 34
+    54: FORK 70
+    57: LOAD 3, 2
+    60: LOAD 1, 0
+    63: LOAD 2, 2
+    66: TUPEL 2
+    68: YIELD
+    69: STOP
+    70: UNIT
+    71: LEAVE
+    72: LEAVE
+    73: RET
+
+  FUNCTION 11(2 variables, guard is 12,  left token map is 0)
+    0: POP
+    1: DECOMP
+    2: STORE 1
+    4: STORE 0
+    6: ENTER 7
+    9: GOTO 24
+    12: LOAD 5, 2
+    15: LOAD 1, 1
+    18: APPLY
+    19: STORE 0
+    21: GOTO 27
+    24: GOTO 12
+    27: FORK 65
+    30: LOAD 5, 5
+    33: LOAD 0, 0
+    36: APPLY
+    37: JMPF 48
+    40: LOAD 2, 1
+    43: UNIT
+    44: YIELD
+    45: GOTO 64
+    48: LOAD 2, 2
+    51: LOAD 1, 0
+    54: LOAD 5, 4
+    57: LOAD 0, 0
+    60: APPLY
+    61: TUPEL 2
+    63: YIELD
+    64: STOP
+    65: LOAD 5, 3
+    68: LOAD 0, 0
+    71: APPLY
+    72: LEAVE
+    73: RET
+
+  FUNCTION 12(0 variables, guard is 0,  left token map is 0)
+    0: POP
+    1: ENTER 3
+    4: GOTO 10
+    7: GOTO 29
+    10: TOKEN 2
+    12: STORE 0
+    14: TOKEN 1
+    16: STORE 1
+    18: TOKEN 3
+    20: STORE 2
+    22: TOKEN 4
+    24: STORE 3
+    26: GOTO 7
+    29: FORK 38
+    32: LOAD 0, 1
+    35: UNIT
+    36: YIELD
+    37: STOP
+    38: LOAD 0, 0
+    41: LOAD 0, 3
+    44: TUPEL 2
+    46: LEAVE
+    47: RET
+
+  FUNCTION 13(3 variables, guard is 0,  left token map is 0)
+    0: DECOMP
+    1: STORE 2
+    3: DECOMP
+    4: STORE 1
+    6: STORE 0
+    8: LOAD 0, 0
+    11: LOAD 0, 2
+    14: APPLY
+    15: RET
+
+  FUNCTION 14(2 variables, guard is 0,  left token map is 0)
+    0: DECOMP
+    1: STORE 1
+    3: STORE 0
+    5: LOAD 0, 1
+    8: UNIT
+    9: APPLY
+    10: RET
+
+STATE SPACES
+
+  SPACE 0:
+    members: 6, tokens: 0, actions: 0
+
+  SPACE 1:
+    members: 4, tokens: 4, actions: 3
+    invoke function 0 for 3
+    invoke function 1 for 12
+    invoke function 2 for 9
+
+  SPACE 2:
+    members: 3, tokens: 0, actions: 0
+
+  SPACE 3:
+    members: 4, tokens: 4, actions: 3
+    invoke function 9 for 3
+    invoke function 10 for 6
+    invoke function 11 for 12
+
+  SPACE 4:
+    members: 1, tokens: 0, actions: 0
+
+  SPACE 5:
+    members: 1, tokens: 0, actions: 0
+
+  SPACE 6:
+    members: 1, tokens: 0, actions: 0
+
+  SPACE 7:
+    members: 1, tokens: 0, actions: 0
+
+  SPACE 8:
+    members: 1, tokens: 0, actions: 0

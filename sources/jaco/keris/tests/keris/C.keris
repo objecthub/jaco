@@ -1,0 +1,12 @@
+class B {
+	void foo() {}
+}
+
+class M {
+	class C extends B {
+		public C() {
+			foo(7);	
+		}
+	}
+	void foo(int i) {}
+}

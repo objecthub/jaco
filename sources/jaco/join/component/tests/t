@@ -1,0 +1,731 @@
+{ 
+  new_cell x = { 
+        set_prev prev & first () = () & inside prev,
+        kill () & inside prev = (x, prev, false),
+        kill () & first () = (x, (set_prev, kill), true) } ;
+        (set_prev, kill) & first (),
+  set ((s, x$0), y) = s y,
+  remove (x$1, r) = r (),
+  content (z, x$2, x$3) = z,
+  prev (x$4, z, x$5) = z,
+  last_cell (x$6, x$7, z) = z } ;
+  { fifo () = { 
+           put x & empty () = { fst = new_cell x } ;
+                 () & state (fst, fst),
+           put x & state (fst, lst) = { new_fst = new_cell x } ;
+                 { x$8 = set (fst, new_fst) } ;
+                    () & state (new_fst, lst),
+           get () & state (fst, lst) = { cell = remove lst } ;
+                 content cell & 
+                 if (last_cell cell)
+                    empty ()
+                 else
+                    state (fst, prev cell) } ;
+           (put, get) & empty () } ;
+     fifo ()
+
+  0: group members = 4; 1
+  0: group members = 4; 1
+(1)  new_cell:: b
+(2)  x:: a
+(3)  new_cell x:: au
+(4)  first:: e
+(5)  ():: ()
+(6)  first ():: av
+(7)  set_prev:: d
+(8)  prev:: c
+(9)  set_prev prev:: aw
+(10)  set_prev prev & first ():: aw
+(11)  inside:: h
+(12)  prev:: c
+(13)  inside prev:: ax
+(14)  ():: ()
+(15)  () & inside prev:: ()
+(16)  set_prev prev & first () = () & inside prev:: ()
+(17)  inside:: c -> nil
+(18)  prev:: g
+(19)  inside prev:: nil
+(20)  kill:: f
+(21)  ():: ()
+(22)  kill ():: b`
+(23)  kill () & inside prev:: b`
+(24)  x:: a
+(25)  prev:: g
+(26)  false:: bool
+(27)  (x, prev, false):: (a, g, bool)
+(28)  kill () & inside prev = (x, prev, false):: (a, g, bool)
+(29)  first:: () -> nil
+(30)  ():: ()
+(31)  first ():: nil
+(32)  kill:: () -> (a, g, bool)
+(33)  ():: ()
+(34)  kill ():: (a, g, bool)
+(35)  kill () & first ():: (a, g, bool)
+(36)  x:: a
+(37)  set_prev:: g -> ()
+(38)  kill:: () -> (a, g, bool)
+(39)  (set_prev, kill):: (g -> (), () -> (a, g, bool))
+(40)  true:: bool
+(41)  (x, (set_prev, kill), true):: (a, (g -> (), () -> (a, g, bool)), bool)
+(42)  kill () & first () = (x, (set_prev, kill), true):: (a, mu bc.(bc -> (), () -> (a, bc, bool)), bool)
+(43)  rec { 
+  set_prev prev & first () = () & inside prev,
+  kill () & inside prev = (x, prev, false),
+  kill () & first () = (x, (set_prev, kill), true) }:: {set_prev::d[d = g[g = mu bc.(bc -> (), () -> (a, bc, bool))] -> ()], first::e[e = () -> nil], kill::f[f = () -> (a, g[g = mu bc.(bc -> (), () -> (a, bc, bool))], bool)], inside::h[h = c[c = g[g = mu bc.(bc -> (), () -> (a, bc, bool))]] -> nil]}
+TOTYPESCHEME1
+EXPAND TYPE d[d = g[g = mu bc.(bc -> (), () -> (a, bc, bool))] -> ()]
+EXPAND TYPE f[f = () -> (a, g[g = mu bc.(bc -> (), () -> (a, bc, bool))], bool)]
+EXPAND TYPE () -> (a, mu bc.(bc -> (), () -> (a, bc, bool)), bool)
+TOTYPESCHEME2
+TOTYPESCHEME3
+(44)  { rec { 
+     set_prev prev & first () = () & inside prev,
+     kill () & inside prev = (x, prev, false),
+     kill () & first () = (x, (set_prev, kill), true) } }:: {set_prev::mu bc.(bc -> (), () -> (a, bc, bool)) -> (), first::e[e = () -> nil], kill::() -> (a, mu bc.(bc -> (), () -> (a, bc, bool)), bool), inside::h[h = c[c = g[g = mu bc.(bc -> (), () -> (a, bc, bool))]] -> nil]}
+(45)  first:: () -> nil
+(46)  ():: ()
+(47)  first ():: nil
+(48)  set_prev:: mu bc.(bc -> (), () -> (a, bc, bool)) -> ()
+(49)  kill:: () -> (a, mu bc.(bc -> (), () -> (a, bc, bool)), bool)
+(50)  (set_prev, kill):: (mu bc.(bc -> (), () -> (a, bc, bool)) -> (), () -> (a, mu bc.(bc -> (), () -> (a, bc, bool)), bool))
+(51)  (set_prev, kill) & first ():: (mu bc.(bc -> (), () -> (a, bc, bool)) -> (), () -> (a, mu bc.(bc -> (), () -> (a, bc, bool)), bool))
+(52)  { rec { 
+     set_prev prev & first () = () & inside prev,
+     kill () & inside prev = (x, prev, false),
+     kill () & first () = (x, (set_prev, kill), true) } } ;
+  (set_prev, kill) & first ():: (mu bc.(bc -> (), () -> (a, bc, bool)) -> (), () -> (a, mu bc.(bc -> (), () -> (a, bc, bool)), bool))
+(53)  new_cell x = { rec { 
+        set_prev prev & first () = () & inside prev,
+        kill () & inside prev = (x, prev, false),
+        kill () & first () = (x, (set_prev, kill), true) } } ;
+     (set_prev, kill) & first ():: (mu bc.(bc -> (), () -> (a, bc, bool)) -> (), () -> (a, mu bc.(bc -> (), () -> (a, bc, bool)), bool))
+(54)  set:: n
+(55)  s:: k
+(56)  x$0:: l
+(57)  (s, x$0):: (k, l)
+(58)  y:: m
+(59)  ((s, x$0), y):: ((k, l), m)
+(60)  set ((s, x$0), y):: be
+(61)  s:: k
+(62)  y:: m
+(63)  s y:: bf
+(64)  set ((s, x$0), y) = s y:: bf
+(65)  remove:: q
+(66)  x$1:: o
+(67)  r:: p
+(68)  (x$1, r):: (o, p)
+(69)  remove (x$1, r):: bg
+(70)  r:: p
+(71)  ():: ()
+(72)  r ():: bh
+(73)  remove (x$1, r) = r ():: bh
+(74)  content:: u
+(75)  z:: r
+(76)  x$2:: s
+(77)  x$3:: t
+(78)  (z, x$2, x$3):: (r, s, t)
+(79)  content (z, x$2, x$3):: bi
+(80)  z:: r
+(81)  content (z, x$2, x$3) = z:: r
+(82)  prev:: y
+(83)  x$4:: v
+(84)  z:: w
+(85)  x$5:: x
+(86)  (x$4, z, x$5):: (v, w, x)
+(87)  prev (x$4, z, x$5):: bj
+(88)  z:: w
+(89)  prev (x$4, z, x$5) = z:: w
+(90)  last_cell:: ac
+(91)  x$6:: a`
+(92)  x$7:: aa
+(93)  z:: ab
+(94)  (x$6, x$7, z):: (a`, aa, ab)
+(95)  last_cell (x$6, x$7, z):: bk
+(96)  z:: ab
+(97)  last_cell (x$6, x$7, z) = z:: ab
+(98)  { 
+  new_cell x = { rec { 
+           set_prev prev & first () = () & inside prev,
+           kill () & inside prev = (x, prev, false),
+           kill () & first () = (x, (set_prev, kill), true) } } ;
+        (set_prev, kill) & first (),
+  set ((s, x$0), y) = s y,
+  remove (x$1, r) = r (),
+  content (z, x$2, x$3) = z,
+  prev (x$4, z, x$5) = z,
+  last_cell (x$6, x$7, z) = z }:: {new_cell::Va.a -> (mu bc.(bc -> (), () -> (a, bc, bool)) -> (), () -> (a, mu bc.(bc -> (), () -> (a, bc, bool)), bool)), set::Vm,bf,l.((m -> bf, l), m) -> bf, remove::Vo,bh.(o, () -> bh) -> bh, content::Vr,s,t.(r, s, t) -> r, prev::Vv,w,x.(v, w, x) -> w, last_cell::Va`,aa,ab.(a`, aa, ab) -> ab}
+(99)  fifo:: ad
+(100)  ():: ()
+(101)  fifo ():: bl
+(102)  empty:: ag
+(103)  ():: ()
+(104)  empty ():: bm
+(105)  put:: af
+(106)  x:: ae
+(107)  put x:: bn
+(108)  put x & empty ():: bn
+(109)  fst:: ah
+(110)  new_cell:: bo -> (mu bp.(bp -> (), () -> (bo, bp, bool)) -> (), () -> (bo, mu bq.(bq -> (), () -> (bo, bq, bool)), bool))
+(111)  x:: ae
+(112)  new_cell x:: (mu bp.(bp -> (), () -> (ae, bp, bool)) -> (), () -> (ae, mu bq.(bq -> (), () -> (ae, bq, bool)), bool))
+(113)  fst = new_cell x:: (mu bp.(bp -> (), () -> (ae, bp, bool)) -> (), () -> (ae, mu bq.(bq -> (), () -> (ae, bq, bool)), bool))
+(114)  { fst = new_cell x }:: {fst::(mu bp.(bp -> (), () -> (ae, bp, bool)) -> (), () -> (ae, mu bq.(bq -> (), () -> (ae, bq, bool)), bool))}
+(115)  state:: am
+(116)  fst:: (mu bp.(bp -> (), () -> (ae, bp, bool)) -> (), () -> (ae, mu bq.(bq -> (), () -> (ae, bq, bool)), bool))
+(117)  fst:: (mu bp.(bp -> (), () -> (ae, bp, bool)) -> (), () -> (ae, mu bq.(bq -> (), () -> (ae, bq, bool)), bool))
+(118)  (fst, fst):: ((mu bp.(bp -> (), () -> (ae, bp, bool)) -> (), () -> (ae, mu bq.(bq -> (), () -> (ae, bq, bool)), bool)), (mu bp.(bp -> (), () -> (ae, bp, bool)) -> (), () -> (ae, mu bq.(bq -> (), () -> (ae, bq, bool)), bool)))
+(119)  state (fst, fst):: bs
+(120)  ():: ()
+(121)  () & state (fst, fst):: ()
+(122)  { fst = new_cell x } ;
+  () & state (fst, fst):: ()
+(123)  put x & empty () = { fst = new_cell x } ;
+     () & state (fst, fst):: ()
+(124)  state:: ((mu bp.(bp -> (), () -> (ae, bp, bool)) -> (), () -> (ae, mu bq.(bq -> (), () -> (ae, bq, bool)), bool)), (mu bp.(bp -> (), () -> (ae, bp, bool)) -> (), () -> (ae, mu bq.(bq -> (), () -> (ae, bq, bool)), bool))) -> nil
+(125)  fst:: ak
+(126)  lst:: al
+(127)  (fst, lst):: (ak, al)
+(128)  state (fst, lst):: nil
+(129)  put:: ae -> ()
+(130)  x:: ai
+(131)  put x:: ()
+(132)  put x & state (fst, lst):: ()
+(133)  new_fst:: an
+(134)  new_cell:: bv -> (mu bw.(bw -> (), () -> (bv, bw, bool)) -> (), () -> (bv, mu bx.(bx -> (), () -> (bv, bx, bool)), bool))
+(135)  x:: ai
+(136)  new_cell x:: (mu bw.(bw -> (), () -> (ai, bw, bool)) -> (), () -> (ai, mu bx.(bx -> (), () -> (ai, bx, bool)), bool))
+(137)  new_fst = new_cell x:: (mu bw.(bw -> (), () -> (ai, bw, bool)) -> (), () -> (ai, mu bx.(bx -> (), () -> (ai, bx, bool)), bool))
+(138)  { new_fst = new_cell x }:: {new_fst::(mu bw.(bw -> (), () -> (ai, bw, bool)) -> (), () -> (ai, mu bx.(bx -> (), () -> (ai, bx, bool)), bool))}
+(139)  x$8:: ao
+(140)  set:: ((c` -> ca, cb), c`) -> ca
+(141)  fst:: (mu bp.(bp -> (), () -> (ai, bp, bool)) -> (), () -> (ai, mu bq.(bq -> (), () -> (ai, bq, bool)), bool))
+(142)  new_fst:: (mu bw.(bw -> (), () -> (ai, bw, bool)) -> (), () -> (ai, mu bx.(bx -> (), () -> (ai, bx, bool)), bool))
+(143)  (fst, new_fst):: ((mu bp.(bp -> (), () -> (ai, bp, bool)) -> (), () -> (ai, mu bq.(bq -> (), () -> (ai, bq, bool)), bool)), (mu bw.(bw -> (), () -> (ai, bw, bool)) -> (), () -> (ai, mu bx.(bx -> (), () -> (ai, bx, bool)), bool)))
+cannot unify: mu bp.(bp -> (), () -> (ai, bp, bool)) == (mu bw.(bw -> (), () -> (ai, bw, bool)) -> (), () -> (ai, mu bx.(bx -> (), () -> (ai, bx, bool)), bool))
+(144)  set (fst, new_fst):: ()
+(145)  x$8 = set (fst, new_fst):: ()
+(146)  { x$8 = set (fst, new_fst) }:: {x$8::()}
+(147)  state:: ((mu bp.(bp -> (), () -> (ai, bp, bool)) -> (), () -> (ai, mu bq.(bq -> (), () -> (ai, bq, bool)), bool)), (mu bp.(bp -> (), () -> (ai, bp, bool)) -> (), () -> (ai, mu bq.(bq -> (), () -> (ai, bq, bool)), bool))) -> nil
+(148)  new_fst:: (mu bw.(bw -> (), () -> (ai, bw, bool)) -> (), () -> (ai, mu bx.(bx -> (), () -> (ai, bx, bool)), bool))
+(149)  lst:: (mu bp.(bp -> (), () -> (ai, bp, bool)) -> (), () -> (ai, mu bq.(bq -> (), () -> (ai, bq, bool)), bool))
+(150)  (new_fst, lst):: ((mu bw.(bw -> (), () -> (ai, bw, bool)) -> (), () -> (ai, mu bx.(bx -> (), () -> (ai, bx, bool)), bool)), (mu bp.(bp -> (), () -> (ai, bp, bool)) -> (), () -> (ai, mu bq.(bq -> (), () -> (ai, bq, bool)), bool)))
+(151)  state (new_fst, lst):: nil
+(152)  ():: ()
+(153)  () & state (new_fst, lst):: ()
+(154)  { x$8 = set (fst, new_fst) } ;
+  () & state (new_fst, lst):: ()
+(155)  { new_fst = new_cell x } ;
+  { x$8 = set (fst, new_fst) } ;
+     () & state (new_fst, lst):: ()
+(156)  put x & state (fst, lst) = { new_fst = new_cell x } ;
+     { x$8 = set (fst, new_fst) } ;
+        () & state (new_fst, lst):: ()
+(157)  state:: (((mu bp.(bp -> (), () -> (ai, bp, bool)) -> (), () -> (ai, mu bp.(bp -> (), () -> (ai, bp, bool)), bool)) -> (), () -> (ai, (mu bq.(bq -> (), () -> (ai, bq, bool)) -> (), () -> (ai, mu bq.(bq -> (), () -> (ai, bq, bool)), bool)), bool)), ((mu bp.(bp -> (), () -> (ai, bp, bool)) -> (), () -> (ai, mu bp.(bp -> (), () -> (ai, bp, bool)), bool)) -> (), () -> (ai, (mu bq.(bq -> (), () -> (ai, bq, bool)) -> (), () -> (ai, mu bq.(bq -> (), () -> (ai, bq, bool)), bool)), bool))) -> nil
+(158)  fst:: aq
+(159)  lst:: ar
+(160)  (fst, lst):: (aq, ar)
+(161)  state (fst, lst):: nil
+(162)  get:: ap
+(163)  ():: ()
+(164)  get ():: cf
+(165)  get () & state (fst, lst):: cf
+(166)  cell:: at
+(167)  remove:: (cg, () -> ch) -> ch
+(168)  lst:: ((mu bp.(bp -> (), () -> (ai, bp, bool)) -> (), () -> (ai, mu bp.(bp -> (), () -> (ai, bp, bool)), bool)) -> (), () -> (ai, (mu bq.(bq -> (), () -> (ai, bq, bool)) -> (), () -> (ai, mu bq.(bq -> (), () -> (ai, bq, bool)), bool)), bool))
+(169)  remove lst:: (ai, (mu bq.(bq -> (), () -> (ai, bq, bool)) -> (), () -> (ai, mu bq.(bq -> (), () -> (ai, bq, bool)), bool)), bool)
+(170)  cell = remove lst:: (ai, (mu bq.(bq -> (), () -> (ai, bq, bool)) -> (), () -> (ai, mu bq.(bq -> (), () -> (ai, bq, bool)), bool)), bool)
+(171)  { cell = remove lst }:: {cell::(ai, (mu bq.(bq -> (), () -> (ai, bq, bool)) -> (), () -> (ai, mu bq.(bq -> (), () -> (ai, bq, bool)), bool)), bool)}
+(172)  last_cell:: (cj, ck, cl) -> cl
+(173)  cell:: (ai, (mu bq.(bq -> (), () -> (ai, bq, bool)) -> (), () -> (ai, mu bq.(bq -> (), () -> (ai, bq, bool)), bool)), bool)
+(174)  last_cell cell:: bool
+(175)  empty:: () -> nil
+(176)  ():: ()
+(177)  empty ():: nil
+(178)  state:: (((mu bp.(bp -> (), () -> (ai, bp, bool)) -> (), () -> (ai, mu bp.(bp -> (), () -> (ai, bp, bool)), bool)) -> (), () -> (ai, (mu bq.(bq -> (), () -> (ai, bq, bool)) -> (), () -> (ai, mu bq.(bq -> (), () -> (ai, bq, bool)), bool)), bool)), ((mu bp.(bp -> (), () -> (ai, bp, bool)) -> (), () -> (ai, mu bp.(bp -> (), () -> (ai, bp, bool)), bool)) -> (), () -> (ai, (mu bq.(bq -> (), () -> (ai, bq, bool)) -> (), () -> (ai, mu bq.(bq -> (), () -> (ai, bq, bool)), bool)), bool))) -> nil
+(179)  fst:: ((mu bp.(bp -> (), () -> (ai, bp, bool)) -> (), () -> (ai, mu bp.(bp -> (), () -> (ai, bp, bool)), bool)) -> (), () -> (ai, (mu bq.(bq -> (), () -> (ai, bq, bool)) -> (), () -> (ai, mu bq.(bq -> (), () -> (ai, bq, bool)), bool)), bool))
+(180)  prev:: (co, cp, cq) -> cp
+(181)  cell:: (ai, (mu bq.(bq -> (), () -> (ai, bq, bool)) -> (), () -> (ai, mu bq.(bq -> (), () -> (ai, bq, bool)), bool)), bool)
+(182)  prev cell:: (mu bq.(bq -> (), () -> (ai, bq, bool)) -> (), () -> (ai, mu bq.(bq -> (), () -> (ai, bq, bool)), bool))
+(183)  (fst, prev cell):: (((mu bp.(bp -> (), () -> (ai, bp, bool)) -> (), () -> (ai, mu bp.(bp -> (), () -> (ai, bp, bool)), bool)) -> (), () -> (ai, (mu bq.(bq -> (), () -> (ai, bq, bool)) -> (), () -> (ai, mu bq.(bq -> (), () -> (ai, bq, bool)), bool)), bool)), (mu bq.(bq -> (), () -> (ai, bq, bool)) -> (), () -> (ai, mu bq.(bq -> (), () -> (ai, bq, bool)), bool)))
+(184)  state (fst, prev cell):: nil
+(185)  
+if (last_cell cell)
+  empty ()
+else
+  state (fst, prev cell):: nil
+(186)  content:: (ct, cu, cv) -> ct
+(187)  cell:: (ai, (mu bq.(bq -> (), () -> (ai, bq, bool)) -> (), () -> (ai, mu bq.(bq -> (), () -> (ai, bq, bool)), bool)), bool)
+(188)  content cell:: cw
+(189)  content cell & 
+if (last_cell cell)
+  empty ()
+else
+  state (fst, prev cell):: cw
+(190)  { cell = remove lst } ;
+  content cell & 
+  if (last_cell cell)
+     empty ()
+  else
+     state (fst, prev cell):: cw
+(191)  get () & state (fst, lst) = { cell = remove lst } ;
+     content cell & 
+     if (last_cell cell)
+        empty ()
+     else
+        state (fst, prev cell):: cw
+(192)  rec { 
+  put x & empty () = { fst = new_cell x } ;
+        () & state (fst, fst),
+  put x & state (fst, lst) = { new_fst = new_cell x } ;
+        { x$8 = set (fst, new_fst) } ;
+           () & state (new_fst, lst),
+  get () & state (fst, lst) = { cell = remove lst } ;
+        content cell & 
+        if (last_cell cell)
+           empty ()
+        else
+           state (fst, prev cell) }:: {put::af[af = ae[ae = ai[ai = cw]] -> ()], empty::ag[ag = () -> nil], state::am[am = ((((mu bp.(bp -> (), () -> (ai[ai = cw], bp, bool)) -> (), () -> (ai[ai = cw], mu bp.(bp -> (), () -> (ai[ai = cw], bp, bool)), bool)) -> (), () -> (ai[ai = cw], (mu bp.(bp -> (), () -> (ai[ai = cw], bp, bool)) -> (), () -> (ai[ai = cw], mu bp.(bp -> (), () -> (ai[ai = cw], bp, bool)), bool)), bool)) -> (), () -> (ai[ai = cw], ((mu bq.(bq -> (), () -> (ai[ai = cw], bq, bool)) -> (), () -> (ai[ai = cw], mu bq.(bq -> (), () -> (ai[ai = cw], bq, bool)), bool)) -> (), () -> (ai[ai = cw], (mu bq.(bq -> (), () -> (ai[ai = cw], bq, bool)) -> (), () -> (ai[ai = cw], mu bq.(bq -> (), () -> (ai[ai = cw], bq, bool)), bool)), bool)), bool)), (((mu bp.(bp -> (), () -> (ai[ai = cw], bp, bool)) -> (), () -> (ai[ai = cw], mu bp.(bp -> (), () -> (ai[ai = cw], bp, bool)), bool)) -> (), () -> (ai[ai = cw], (mu bp.(bp -> (), () -> (ai[ai = cw], bp, bool)) -> (), () -> (ai[ai = cw], mu bp.(bp -> (), () -> (ai[ai = cw], bp, bool)), bool)), bool)) -> (), () -> (ai[ai = cw], ((mu bq.(bq -> (), () -> (ai[ai = cw], bq, bool)) -> (), () -> (ai[ai = cw], mu bq.(bq -> (), () -> (ai[ai = cw], bq, bool)), bool)) -> (), () -> (ai[ai = cw], (mu bq.(bq -> (), () -> (ai[ai = cw], bq, bool)) -> (), () -> (ai[ai = cw], mu bq.(bq -> (), () -> (ai[ai = cw], bq, bool)), bool)), bool)), bool))) -> nil], get::ap[ap = () -> cf[cf = cw]]}
+TOTYPESCHEME1
+EXPAND TYPE af[af = ae[ae = ai[ai = cw]] -> ()]
+EXPAND TYPE cw -> ()
+EXPAND TYPE ap[ap = () -> cf[cf = cw]]
+TOTYPESCHEME2
+TOTYPESCHEME3
+(193)  { rec { 
+     put x & empty () = { fst = new_cell x } ;
+           () & state (fst, fst),
+     put x & state (fst, lst) = { new_fst = new_cell x } ;
+           { x$8 = set (fst, new_fst) } ;
+              () & state (new_fst, lst),
+     get () & state (fst, lst) = { cell = remove lst } ;
+           content cell & 
+           if (last_cell cell)
+              empty ()
+           else
+              state (fst, prev cell) } }:: {put::cw -> (), empty::ag[ag = () -> nil], state::am[am = ((((mu bp.(bp -> (), () -> (ai[ai = cw], bp, bool)) -> (), () -> (ai[ai = cw], mu bp.(bp -> (), () -> (ai[ai = cw], bp, bool)), bool)) -> (), () -> (ai[ai = cw], (mu bp.(bp -> (), () -> (ai[ai = cw], bp, bool)) -> (), () -> (ai[ai = cw], mu bp.(bp -> (), () -> (ai[ai = cw], bp, bool)), bool)), bool)) -> (), () -> (ai[ai = cw], ((mu bq.(bq -> (), () -> (ai[ai = cw], bq, bool)) -> (), () -> (ai[ai = cw], mu bq.(bq -> (), () -> (ai[ai = cw], bq, bool)), bool)) -> (), () -> (ai[ai = cw], (mu bq.(bq -> (), () -> (ai[ai = cw], bq, bool)) -> (), () -> (ai[ai = cw], mu bq.(bq -> (), () -> (ai[ai = cw], bq, bool)), bool)), bool)), bool)), (((mu bp.(bp -> (), () -> (ai[ai = cw], bp, bool)) -> (), () -> (ai[ai = cw], mu bp.(bp -> (), () -> (ai[ai = cw], bp, bool)), bool)) -> (), () -> (ai[ai = cw], (mu bp.(bp -> (), () -> (ai[ai = cw], bp, bool)) -> (), () -> (ai[ai = cw], mu bp.(bp -> (), () -> (ai[ai = cw], bp, bool)), bool)), bool)) -> (), () -> (ai[ai = cw], ((mu bq.(bq -> (), () -> (ai[ai = cw], bq, bool)) -> (), () -> (ai[ai = cw], mu bq.(bq -> (), () -> (ai[ai = cw], bq, bool)), bool)) -> (), () -> (ai[ai = cw], (mu bq.(bq -> (), () -> (ai[ai = cw], bq, bool)) -> (), () -> (ai[ai = cw], mu bq.(bq -> (), () -> (ai[ai = cw], bq, bool)), bool)), bool)), bool))) -> nil], get::() -> cw}
+(194)  empty:: () -> nil
+(195)  ():: ()
+(196)  empty ():: nil
+(197)  put:: cw -> ()
+(198)  get:: () -> cw
+(199)  (put, get):: (cw -> (), () -> cw)
+(200)  (put, get) & empty ():: (cw -> (), () -> cw)
+(201)  { rec { 
+     put x & empty () = { fst = new_cell x } ;
+           () & state (fst, fst),
+     put x & state (fst, lst) = { new_fst = new_cell x } ;
+           { x$8 = set (fst, new_fst) } ;
+              () & state (new_fst, lst),
+     get () & state (fst, lst) = { cell = remove lst } ;
+           content cell & 
+           if (last_cell cell)
+              empty ()
+           else
+              state (fst, prev cell) } } ;
+  (put, get) & empty ():: (cw -> (), () -> cw)
+(202)  fifo () = { rec { 
+        put x & empty () = { fst = new_cell x } ;
+              () & state (fst, fst),
+        put x & state (fst, lst) = { new_fst = new_cell x } ;
+              { x$8 = set (fst, new_fst) } ;
+                 () & state (new_fst, lst),
+        get () & state (fst, lst) = { cell = remove lst } ;
+              content cell & 
+              if (last_cell cell)
+                 empty ()
+              else
+                 state (fst, prev cell) } } ;
+     (put, get) & empty ():: (cw -> (), () -> cw)
+(203)  { fifo () = { rec { 
+           put x & empty () = { fst = new_cell x } ;
+                 () & state (fst, fst),
+           put x & state (fst, lst) = { new_fst = new_cell x } ;
+                 { x$8 = set (fst, new_fst) } ;
+                    () & state (new_fst, lst),
+           get () & state (fst, lst) = { cell = remove lst } ;
+                 content cell & 
+                 if (last_cell cell)
+                    empty ()
+                 else
+                    state (fst, prev cell) } } ;
+        (put, get) & empty () }:: {fifo::Vcw.() -> (cw -> (), () -> cw)}
+(204)  fifo:: () -> (cy -> (), () -> cy)
+(205)  ():: ()
+(206)  fifo ():: (cy -> (), () -> cy)
+(207)  { fifo () = { rec { 
+           put x & empty () = { fst = new_cell x } ;
+                 () & state (fst, fst),
+           put x & state (fst, lst) = { new_fst = new_cell x } ;
+                 { x$8 = set (fst, new_fst) } ;
+                    () & state (new_fst, lst),
+           get () & state (fst, lst) = { cell = remove lst } ;
+                 content cell & 
+                 if (last_cell cell)
+                    empty ()
+                 else
+                    state (fst, prev cell) } } ;
+        (put, get) & empty () } ;
+  fifo ():: (cy -> (), () -> cy)
+(208)  { 
+  new_cell x = { rec { 
+           set_prev prev & first () = () & inside prev,
+           kill () & inside prev = (x, prev, false),
+           kill () & first () = (x, (set_prev, kill), true) } } ;
+        (set_prev, kill) & first (),
+  set ((s, x$0), y) = s y,
+  remove (x$1, r) = r (),
+  content (z, x$2, x$3) = z,
+  prev (x$4, z, x$5) = z,
+  last_cell (x$6, x$7, z) = z } ;
+  { fifo () = { rec { 
+              put x & empty () = { fst = new_cell x } ;
+                    () & state (fst, fst),
+              put x & state (fst, lst) = { new_fst = new_cell x } ;
+                    { x$8 = set (fst, new_fst) } ;
+                       () & state (new_fst, lst),
+              get () & state (fst, lst) = { cell = remove lst } ;
+                    content cell & 
+                    if (last_cell cell)
+                       empty ()
+                    else
+                       state (fst, prev cell) } } ;
+           (put, get) & empty () } ;
+     fifo ():: (cy -> (), () -> cy)
+(209)  { 
+  new_cell x = { rec { 
+           set_prev prev & first () = () & inside prev,
+           kill () & inside prev = (x, prev, false),
+           kill () & first () = (x, (set_prev, kill), true) } } ;
+        (set_prev, kill) & first (),
+  set ((s, x$0), y) = s y,
+  remove (x$1, r) = r (),
+  content (z, x$2, x$3) = z,
+  prev (x$4, z, x$5) = z,
+  last_cell (x$6, x$7, z) = z } ;
+  { fifo () = { rec { 
+              put x & empty () = { fst = new_cell x } ;
+                    () & state (fst, fst),
+              put x & state (fst, lst) = { new_fst = new_cell x } ;
+                    { x$8 = set (fst, new_fst) } ;
+                       () & state (new_fst, lst),
+              get () & state (fst, lst) = { cell = remove lst } ;
+                    content cell & 
+                    if (last_cell cell)
+                       empty ()
+                    else
+                       state (fst, prev cell) } } ;
+           (put, get) & empty () } ;
+     fifo ()
+
+:: (cy -> (), () -> cy)
+FUNCTIONS
+
+  TOPLEVEL()
+    0: ENTER 0
+    3: GOTO 39
+    6: FUN 3
+    9: STORE 0
+    11: FUN 4
+    14: STORE 1
+    16: FUN 5
+    19: STORE 2
+    21: FUN 6
+    24: STORE 3
+    26: FUN 7
+    29: STORE 4
+    31: FUN 8
+    34: STORE 5
+    36: GOTO 42
+    39: GOTO 6
+    42: ENTER 2
+    45: GOTO 56
+    48: FUN 12
+    51: STORE 0
+    53: GOTO 59
+    56: GOTO 48
+    59: LOAD 0, 0
+    62: UNIT
+    63: APPLY
+    64: LEAVE
+    65: LEAVE
+    66: STOP
+
+  FUNCTION 0(1 variables, guard is 3,  left token map is 0)
+    0: STORE 0
+    2: POP
+    3: FORK 14
+    6: LOAD 1, 3
+    9: LOAD 0, 0
+    12: YIELD
+    13: STOP
+    14: UNIT
+    15: RET
+
+  FUNCTION 1(1 variables, guard is 12,  left token map is 0)
+    0: POP
+    1: STORE 0
+    3: LOAD 2, 0
+    6: LOAD 0, 0
+    9: FALSE
+    10: TUPEL 3
+    12: RET
+
+  FUNCTION 2(0 variables, guard is 9,  left token map is 0)
+    0: POP
+    1: POP
+    2: LOAD 2, 0
+    5: LOAD 1, 0
+    8: LOAD 1, 2
+    11: TUPEL 2
+    13: TRUE
+    14: TUPEL 3
+    16: RET
+
+  FUNCTION 3(1 variables, guard is 0,  left token map is 0)
+    0: STORE 0
+    2: ENTER 1
+    5: GOTO 11
+    8: GOTO 30
+    11: TOKEN 2
+    13: STORE 0
+    15: TOKEN 1
+    17: STORE 1
+    19: TOKEN 4
+    21: STORE 2
+    23: TOKEN 3
+    25: STORE 3
+    27: GOTO 8
+    30: FORK 39
+    33: LOAD 0, 1
+    36: UNIT
+    37: YIELD
+    38: STOP
+    39: LOAD 0, 0
+    42: LOAD 0, 2
+    45: TUPEL 2
+    47: LEAVE
+    48: RET
+
+  FUNCTION 4(3 variables, guard is 0,  left token map is 0)
+    0: DECOMP
+    1: STORE 2
+    3: DECOMP
+    4: STORE 1
+    6: STORE 0
+    8: LOAD 0, 0
+    11: LOAD 0, 2
+    14: APPLY
+    15: RET
+
+  FUNCTION 5(2 variables, guard is 0,  left token map is 0)
+    0: DECOMP
+    1: STORE 1
+    3: STORE 0
+    5: LOAD 0, 1
+    8: UNIT
+    9: APPLY
+    10: RET
+
+  FUNCTION 6(3 variables, guard is 0,  left token map is 0)
+    0: DECOMP
+    1: STORE 2
+    3: STORE 1
+    5: STORE 0
+    7: LOAD 0, 0
+    10: RET
+
+  FUNCTION 7(3 variables, guard is 0,  left token map is 0)
+    0: DECOMP
+    1: STORE 2
+    3: STORE 1
+    5: STORE 0
+    7: LOAD 0, 1
+    10: RET
+
+  FUNCTION 8(3 variables, guard is 0,  left token map is 0)
+    0: DECOMP
+    1: STORE 2
+    3: STORE 1
+    5: STORE 0
+    7: LOAD 0, 2
+    10: RET
+
+  FUNCTION 9(1 variables, guard is 3,  left token map is 0)
+    0: STORE 0
+    2: POP
+    3: ENTER 4
+    6: GOTO 21
+    9: LOAD 5, 0
+    12: LOAD 1, 0
+    15: APPLY
+    16: STORE 0
+    18: GOTO 24
+    21: GOTO 9
+    24: FORK 40
+    27: LOAD 2, 2
+    30: LOAD 0, 0
+    33: LOAD 0, 0
+    36: TUPEL 2
+    38: YIELD
+    39: STOP
+    40: UNIT
+    41: LEAVE
+    42: RET
+
+  FUNCTION 10(3 variables, guard is 6,  left token map is 0)
+    0: DECOMP
+    1: STORE 2
+    3: STORE 1
+    5: STORE 0
+    7: ENTER 5
+    10: GOTO 25
+    13: LOAD 5, 0
+    16: LOAD 1, 0
+    19: APPLY
+    20: STORE 0
+    22: GOTO 28
+    25: GOTO 13
+    28: ENTER 6
+    31: GOTO 51
+    34: LOAD 6, 1
+    37: LOAD 2, 1
+    40: LOAD 1, 0
+    43: TUPEL 2
+    45: APPLY
+    46: STORE 0
+    48: GOTO 54
+    51: GOTO 34
+    54: FORK 70
+    57: LOAD 3, 2
+    60: LOAD 1, 0
+    63: LOAD 2, 2
+    66: TUPEL 2
+    68: YIELD
+    69: STOP
+    70: UNIT
+    71: LEAVE
+    72: LEAVE
+    73: RET
+
+  FUNCTION 11(2 variables, guard is 12,  left token map is 0)
+    0: POP
+    1: DECOMP
+    2: STORE 1
+    4: STORE 0
+    6: ENTER 7
+    9: GOTO 24
+    12: LOAD 5, 2
+    15: LOAD 1, 1
+    18: APPLY
+    19: STORE 0
+    21: GOTO 27
+    24: GOTO 12
+    27: FORK 65
+    30: LOAD 5, 5
+    33: LOAD 0, 0
+    36: APPLY
+    37: JMPF 48
+    40: LOAD 2, 1
+    43: UNIT
+    44: YIELD
+    45: GOTO 64
+    48: LOAD 2, 2
+    51: LOAD 1, 0
+    54: LOAD 5, 4
+    57: LOAD 0, 0
+    60: APPLY
+    61: TUPEL 2
+    63: YIELD
+    64: STOP
+    65: LOAD 5, 3
+    68: LOAD 0, 0
+    71: APPLY
+    72: LEAVE
+    73: RET
+
+  FUNCTION 12(0 variables, guard is 0,  left token map is 0)
+    0: POP
+    1: ENTER 3
+    4: GOTO 10
+    7: GOTO 29
+    10: TOKEN 2
+    12: STORE 0
+    14: TOKEN 1
+    16: STORE 1
+    18: TOKEN 3
+    20: STORE 2
+    22: TOKEN 4
+    24: STORE 3
+    26: GOTO 7
+    29: FORK 38
+    32: LOAD 0, 1
+    35: UNIT
+    36: YIELD
+    37: STOP
+    38: LOAD 0, 0
+    41: LOAD 0, 3
+    44: TUPEL 2
+    46: LEAVE
+    47: RET
+
+STATE SPACES
+
+  SPACE 0:
+    members: 6, tokens: 0, actions: 0
+
+  SPACE 1:
+    members: 4, tokens: 4, actions: 3
+    invoke function 0 for 3
+    invoke function 1 for 12
+    invoke function 2 for 9
+
+  SPACE 2:
+    members: 1, tokens: 0, actions: 0
+
+  SPACE 3:
+    members: 4, tokens: 4, actions: 3
+    invoke function 9 for 3
+    invoke function 10 for 6
+    invoke function 11 for 12
+
+  SPACE 4:
+    members: 1, tokens: 0, actions: 0
+
+  SPACE 5:
+    members: 1, tokens: 0, actions: 0
+
+  SPACE 6:
+    members: 1, tokens: 0, actions: 0
+
+  SPACE 7:
+    members: 1, tokens: 0, actions: 0
+////// fifo.join //////
+import join.runtime.*;
+
+public class fifo {
+   public static void main(String[] args) {
+      JoinProgram prog = new JoinProgram(8, 13);
+      prog.defineStateSpace(0, 6, null, null);
+      prog.defineStateSpace(1, 4, new int[]{0, 1, 2}, new byte[]{-1, -1, -1, 0, -1, -1, -1, 0, -1, 2, -1, 0, 1, 1, 1, 0});
+      prog.defineStateSpace(2, 1, null, null);
+      prog.defineStateSpace(3, 4, new int[]{9, 10, 11}, new byte[]{-1, -1, -1, 0, -1, -1, 1, 0, -1, -1, -1, 0, 2, 2, 1, 0});
+      prog.defineStateSpace(4, 1, null, null);
+      prog.defineStateSpace(5, 1, null, null);
+      prog.defineStateSpace(6, 1, null, null);
+      prog.defineStateSpace(7, 1, null, null);
+      prog.defineFunction(0, 3, 0, 1, new byte[]{14, 0, 16, 1, 0, 14, 13, 1, 3, 13, 0, 0, 23, 3, 4, 2});
+      prog.defineFunction(1, 12, 0, 1, new byte[]{16, 14, 0, 13, 2, 0, 13, 0, 0, 8, 9, 3, 2});
+      prog.defineFunction(2, 9, 0, 0, new byte[]{16, 16, 13, 2, 0, 13, 1, 0, 13, 1, 2, 9, 2, 7, 9, 3, 2});
+      prog.defineFunction(3, 0, 0, 1, new byte[]{14, 0, 17, 0, 1, 19, 0, 11, 19, 0, 30, 12, 2, 14, 0, 12, 1, 14, 1, 12, 4, 14, 2, 12, 3, 14, 3, 19, 0, 8, 1, 0, 39, 13, 0, 1, 4, 23, 3, 13, 0, 0, 13, 0, 2, 9, 2, 18, 2});
+      prog.defineFunction(4, 0, 0, 3, new byte[]{10, 14, 2, 10, 14, 1, 14, 0, 13, 0, 0, 13, 0, 2, 22, 2});
+      prog.defineFunction(5, 0, 0, 2, new byte[]{10, 14, 1, 14, 0, 13, 0, 1, 4, 22, 2});
+      prog.defineFunction(6, 0, 0, 3, new byte[]{10, 14, 2, 14, 1, 14, 0, 13, 0, 0, 2});
+      prog.defineFunction(7, 0, 0, 3, new byte[]{10, 14, 2, 14, 1, 14, 0, 13, 0, 1, 2});
+      prog.defineFunction(8, 0, 0, 3, new byte[]{10, 14, 2, 14, 1, 14, 0, 13, 0, 2, 2});
+      prog.defineFunction(9, 3, 0, 1, new byte[]{14, 0, 16, 17, 0, 4, 19, 0, 21, 13, 5, 0, 13, 1, 0, 22, 14, 0, 19, 0, 24, 19, 0, 9, 1, 0, 40, 13, 2, 2, 13, 0, 0, 13, 0, 0, 9, 2, 23, 3, 4, 18, 2});
+      prog.defineFunction(10, 6, 0, 3, new byte[]{10, 14, 2, 14, 1, 14, 0, 17, 0, 5, 19, 0, 25, 13, 5, 0, 13, 1, 0, 22, 14, 0, 19, 0, 28, 19, 0, 13, 17, 0, 6, 19, 0, 51, 13, 6, 1, 13, 2, 1, 13, 1, 0, 9, 2, 22, 14, 0, 19, 0, 54, 19, 0, 34, 1, 0, 70, 13, 3, 2, 13, 1, 0, 13, 2, 2, 9, 2, 23, 3, 4, 18, 18, 2});
+      prog.defineFunction(11, 12, 0, 2, new byte[]{16, 10, 14, 1, 14, 0, 17, 0, 7, 19, 0, 24, 13, 5, 2, 13, 1, 1, 22, 14, 0, 19, 0, 27, 19, 0, 12, 1, 0, 65, 13, 5, 5, 13, 0, 0, 22, 21, 0, 48, 13, 2, 1, 4, 23, 19, 0, 64, 13, 2, 2, 13, 1, 0, 13, 5, 4, 13, 0, 0, 22, 9, 2, 23, 3, 13, 5, 3, 13, 0, 0, 22, 18, 2});
+      prog.defineFunction(12, 0, 0, 0, new byte[]{16, 17, 0, 3, 19, 0, 10, 19, 0, 29, 12, 2, 14, 0, 12, 1, 14, 1, 12, 3, 14, 2, 12, 4, 14, 3, 19, 0, 7, 1, 0, 38, 13, 0, 1, 4, 23, 3, 13, 0, 0, 13, 0, 3, 9, 2, 18, 2});
+      prog.print(prog.execute(new byte[]{17, 0, 0, 19, 0, 39, 11, 0, 3, 14, 0, 11, 0, 4, 14, 1, 11, 0, 5, 14, 2, 11, 0, 6, 14, 3, 11, 0, 7, 14, 4, 11, 0, 8, 14, 5, 19, 0, 42, 19, 0, 6, 17, 0, 2, 19, 0, 56, 11, 0, 12, 14, 0, 19, 0, 59, 19, 0, 48, 13, 0, 0, 4, 22, 18, 18, 3}));
+   }
+}

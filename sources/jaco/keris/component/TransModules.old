@@ -1,0 +1,1713 @@
+//                 _
+//   _  _____ _ __(_)___     Keris -- modular, object-oriented programming
+//  | |/ / _ \ '__| / __|    (c) 2001 Matthias Zenger
+//  |   <  __/ |  | \__ \
+//  |_|\_\___|_|  |_|___/    Keris to Java translator
+//                           
+//  [XTrans.java (51763) 18-May-01 12:15 -> 22-Jun-01 23:13]
+
+package jaco.keris.component;
+
+import jaco.framework.*;
+import jaco.java.component.*;
+import jaco.java.struct.*;
+import jaco.keris.context.*;
+import jaco.keris.struct.*;
+import java.util.*;
+import Tree.*;
+import XTree.*;
+import Definition.*;
+
+
+public interface TransModulesConst {
+    Name SETUP_N = Name.fromString("$setup");
+    Name INIT_N = Name.fromString("$init");
+    Name IMPORT_N = Name.fromString("$import");
+    Name ENCL_N = Name.fromString("$encl");
+    Name SELF_N = Name.fromString("$self");
+    Name CONNECTOR_N = Name.fromString("Connector$");
+    Name CE_N = Name.fromString("$c");
+    Name CONNECT_N = Name.fromString("$connect");
+    Name ARGS_N = Name.fromString("args");
+    Name MAIN_N = Name.fromString("main");
+    Name DMAIN_N = Name.fromString("$main");
+    Name SUB_N = Name.fromString("$sub");
+    Name SUPER_N = Name.fromString("$super");
+    Name FACTORY_N = Name.fromString("$Factory");
+    Name NEW_N = Name.fromString("$new$");
+    Name CREATE_N = Name.fromString("$create$");
+    Name VIEW_N = Name.fromString("$view$");
+    Name IMPLSUF_N = Name.fromString("$Impl");
+    Name VIEWSUF_N = Name.fromString("$View");
+    Name SUPERSUF_N = Name.fromString("$Super");
+    Name MAIN_MESSAGE_N = Name.fromString("module not executable");
+    Name ERROR_EXC_N = Name.fromString("Error");
+}
+
+
+public class TransModules extends Translator
+                          implements XModifierConst, OperatorConst,
+                                     TransModulesConst, TreeConst,
+                                     DefinitionConst, TypeConst,
+                                     AlgebraicSupportConst {
+	/** the context
+	 */
+    protected XMainContext mainContext;
+    
+	/** other components
+	 */
+    protected NameResolver namer;
+    protected Mangler mangler;
+    protected Constants constants;
+    protected XTypes types;
+    protected XDefinitions definitions;
+    protected AlgebraicSupport algebraic;
+    protected Constants consts;
+    
+    protected Type stringArrayParam;
+    protected Tree[] constructorMethods = new Tree[0];
+    
+    protected TreeList setupCode;
+    
+    protected TreeList moduleAddOns;
+    
+    protected Set modsAndViews = new HashSet();
+    
+    protected int superCounter = 0;
+    
+    protected boolean lhsflag;
+    
+	/** component name
+	 */
+    public String getName() {
+        return "TransModules";
+    }
+    
+	/** return descrition of tree processor
+	 */
+    public String getDescription() {
+        return "keris translation";
+    }
+    
+	/** default getDebugName method; returns an invalid debug name
+	 */
+    public String getDebugName() {
+        return "xtrans";
+    }
+    
+	/** component initialization
+	 */
+    public void init(XTransContext context) {
+        super.init(context.compilerContext);
+        mainContext = (XMainContext)context.compilerContext.mainContext;
+        namer = mainContext.NameResolver();
+        mangler = mainContext.Mangler();
+        constants = mainContext.Constants();
+        definitions = (XDefinitions)mainContext.Definitions();
+        types = (XTypes)mainContext.Types();
+        algebraic = context.AlgebraicSupport();
+        consts = mainContext.Constants();
+        stringArrayParam = types.make.ArrayType(types.stringType);
+    }
+    
+	/** enter code
+	 */
+    public TreeList enter(TreeList treelist) throws AbortCompilation {
+        return super.enter(treelist);
+    }
+    
+	/** correct modifiers
+	 */
+    public TreeList exit(TreeList treelist)  throws AbortCompilation {
+        TreeList res = super.exit(treelist);
+        mainContext.algebraicClasses = false;
+        definitions.swapScopes();
+        XClassDef[] cs = new XClassDef[modsAndViews.size()];
+        modsAndViews.toArray(cs);
+        for (int i = 0; i < cs.length; i++) {
+            if ((cs[i].modifiers & CLASSFIELD) != 0)
+                cs[i].modifiers = (cs[i].modifiers & ~CLASSFIELD) | INTERFACE;
+            else if ((cs[i].modifiers & MODULE) != 0)
+                cs[i].modifiers &= ~MODULE;
+            cs[i].modifiers &= 0xFFFF;
+        }
+        return res;
+    }
+    
+	/** transform class definition into class name tree
+	 */
+    public Tree classTree(Definition c) {
+        if (c.owner.kind == TYP)
+            return newdef.Select(
+                    classTree(c.owner),
+                    mangler.unmangleShort(c.name, c.fullname)).setDef(c);
+        else
+            return trees.Qualid(Name.fromString(mangler.unmangle(c.fullname))).setDef(c);
+    }
+    
+	/** return the tree representation of class field c
+	 */
+    public Tree viewTree(XClassDef c) {
+        // while (c.overrides != null)
+        //  c = c.overrides;
+        //return classTree(c);
+        return trees.toTree(types.objectType);
+    }
+    
+	/** transform class definition into class name tree
+	 */
+    public Tree superTree(Definition c) {
+        if (c.owner.kind == TYP)
+            return newdef.Select(
+                    classTree(c.owner),
+                    Name.fromString("" + mangler.unmangleShort(c.name, c.fullname) + SUPERSUF_N)).setDef(c);
+        else
+            return trees.Qualid(Name.fromString(mangler.unmangle(c.fullname))).setDef(c);
+    }
+    
+/** transform class definition into class name tree
+ */
+    public Tree redirectTree(XClassDef c) {
+        if (c.owner.kind == TYP) {
+            if ((c.vcIntf != null) && (c.vcIntf.overrides != null))
+                for (int i = 0; i < c.vcIntf.overrides.length; i++)
+                    if ((c.vcIntf.overrides[i].owner.modifiers & INTERFACE) == 0)
+                        return redirectTree(c.vcIntf.overrides[i]);
+            return newdef.Select(
+                    classTree(c.owner),
+                    Name.fromString("$" + mangler.unmangleShort(c.name, c.fullname))).setDef(c);
+        } else
+            return trees.Qualid(Name.fromString(mangler.unmangle(c.fullname))).setDef(c);
+    }
+    
+/** translate declarations
+ */
+    protected Tree translateDecl(Tree tree, Env env) {
+        switch ((XTree)tree) {
+            case ClassDecl(Name name, int mods, Tree extending,
+                           Tree[] implementing, Tree[] members,
+                           ClassDef c):
+                XClassDef xc = (XClassDef)c;
+                // translate module interfaces
+                if (((mods & MODULE) != 0) && ((mods & INTERFACE) != 0)) {
+                    modsAndViews.add(c);
+                    TreeList fields = new TreeList();
+                    setupCode = null;
+                    moduleAddOns = new TreeList();
+                    return trees.at(tree).make(
+                        trees.Container(new Tree[]{
+                            redef.ClassDecl(
+                                name, mods & ~MODULE,
+                                specialTransType(extending, env),
+                                trees.append(
+                                    createModuleFields(xc, fields),
+                                    specialTransTypes(implementing, env)),
+                                trees.append(
+                                    trees.append(
+                                        trees.append(
+                                            fields.toArray(),
+                                            newdef.MethodDecl(
+                                                SETUP_N, PUBLIC, // | SYNTHETIC,
+                                                classTree(c),
+                                                new VarDecl[0],
+                                                trees.noTrees, null)),
+                                        transDecls(members,
+                                            classEnv((ClassDecl)tree, env))),
+                                    moduleAddOns.toArray())),
+                            moduleAccessorInterface(xc)}));
+                // translate modules
+                } else if ((mods & MODULE) != 0) {
+                    modsAndViews.add(c);
+                    moduleAddOns = new TreeList();
+                    // new setup code
+                    setupCode = new TreeList();
+                    // initialize $self first
+                    setupCode.append(
+                        trees.at(tree.pos).make(
+                            newdef.Exec(
+                                newdef.Assign(
+                                    newdef.Select(trees.This(), SELF_N),
+                                    trees.This()))));
+                    // create module prelude
+                    TreeList fields = new TreeList(trees.at(tree.pos).make(modulePrelude(xc)));
+                    TreeList initCode = new TreeList();
+                    return trees.at(tree).make(
+                        trees.Container(new Tree[]{
+                            redef.ClassDecl(
+                                name, mods & ~MODULE,
+                                specialTransType(extending, env),
+                                trees.append(
+                                    createModuleFields(xc, fields),
+                                    specialTransTypes(implementing, env)),
+                                trees.append(
+                                    trees.append(
+                                        fields.append(connectorClass(xc)).toArray(),
+                                        trees.append(
+                                            transDecls(
+                                                normalizeDecls((XClassDef)c, members, env, initCode),
+                                                classEnv((ClassDecl)tree, env)),
+                                            moduleInitMethods((XClassDef)c, initCode.toArray()))),
+                                    moduleAddOns.toArray())),
+                            moduleAccessorInterface((XClassDef)c)
+                        }));
+                // translate class fields
+                } else if ((mods & CLASSFIELD) != 0) {
+                    modsAndViews.add(c);
+                    TreeList classfieldCode = new TreeList();
+                    // add factories to module
+                    classfieldCode.append(trees.at(tree.pos).make(classfieldFactories(xc)));
+                    //if ((c.modifiers & SEALED) != 0)
+                    //    classfieldCode.append(trees.at(tree.pos).make(viewFactories(xc)));
+                    // add new compound interface to module
+                    Tree[] ext = trees.at(tree.pos).make(specialTransTypes(implementing, env));
+                    if ((xc.vcIntf != null) && (xc.vcIntf.overrides != null)) {
+                        Tree[] newext = new Tree[ext.length + xc.vcIntf.overrides.length];
+                        System.arraycopy(ext, 0, newext, xc.vcIntf.overrides.length, ext.length);
+                        for (int i = 0; i < xc.vcIntf.overrides.length; i++)
+                            newext[i] = trees.at(tree.pos).make(classTree(xc.vcIntf.overrides[i]));
+                        ext = newext;
+                    }
+                    classfieldCode.append(
+                        trees.at(tree).make(
+                            redef.ClassDecl(
+                                name, mods & ~CLASSFIELD | INTERFACE,
+                                null, ext,
+                                trees.noTrees)));
+                    // add new implementation class to module
+                    if (xc.vcIntf.withClass != null)
+                        classfieldCode.append(trees.at(tree.pos).make(
+                                classfieldRepresentation(xc, transDecls(members,
+                                                classEnv((ClassDecl)tree, env)))));
+                    // add new view and adaptor to module
+                    /*if ((c.modifiers & SEALED) != 0) {
+                        boolean addAdaptor = true;
+                        if ((xc.vcIntf != null) && (xc.vcIntf.overrides != null))
+                            for (int i = 0; i < xc.vcIntf.overrides.length; i++)
+                                if ((xc.vcIntf.overrides[i].owner.modifiers & INTERFACE) == 0) {
+                                    addAdaptor = false;
+                                    break;
+                                }
+                        if ((c.owner.modifiers & INTERFACE) == 0) {
+                            if (addAdaptor) {
+                                classfieldCode.append(trees.at(tree.pos).make(
+                                    classfieldRedirects(xc)));
+                                classfieldCode.append(trees.at(tree.pos).make(
+                                    classfieldSuper(xc)));
+                            }
+                            //if (xc.withClass != null) {
+                            //    classfieldCode.append(trees.at(tree.pos).make(
+                            //        classfieldView(xc)));
+                            //}
+                        } else if (addAdaptor) {
+                            classfieldCode.append(trees.at(tree.pos).make(
+                                    classfieldRedirects(xc)));
+                        }
+                    } */
+                    return trees.Container(trees.at(tree.pos).make(classfieldCode.toArray()));
+                // translate mixins
+                } else if ((extending != null) &&
+                           ((extending.type.tdef().modifiers & CLASSFIELD) != 0)) {
+                    Tree[] ts;
+                    if (implementing == null)
+                        ts = new Tree[]{extending};
+                    else {
+                        ts = new Tree[implementing.length + 1];
+                        System.arraycopy(implementing, 0, ts, 1, implementing.length);
+                        ts[0] = extending;
+                    }
+                    if ((extending.type.tdef().owner.modifiers & INTERFACE) == 0)
+                        return trees.at(tree).make(
+                            redef.ClassDecl(
+                                name, mods, superTree(extending.type.tdef()),
+                                specialTransTypes(ts, env),
+                                transDecls(members,
+                                    classEnv((ClassDecl)tree, env))));
+                    else {
+                        Name superName = Name.fromString((superCounter++) + "" + SUPERSUF_N);
+                        return trees.at(tree.pos).make(
+                            trees.Container(new Tree[]{
+                                newdef.ClassDecl(
+                                    name, mods, newdef.Ident(superName),
+                                    specialTransTypes(ts, env),
+                                    transDecls(members,
+                                        classEnv((ClassDecl)tree, env))),
+                                classfieldSuper(extending.type, superName)
+                            }));
+                    }
+                // translate algebraic classes
+                } else if (definitions.isAlgebraicClass(c)) {
+                    return trees.at(tree).make(
+                        redef.ClassDecl(name, mods & ~(ALGEBRAIC | CASEDEF),
+                                    specialTransType(extending, env),
+                                    specialTransTypes(implementing, env),
+                                    trees.append(
+                                        algebraic.genRuntimeMembers(moduleAddOns, (XClassDef)c),
+                                        transDecls(members,
+                                            classEnv((ClassDecl)tree, env)))));
+                // translate regular classes
+                } else {
+                    return trees.at(tree).make(
+                        redef.ClassDecl(name, mods,
+                                        specialTransType(extending, env),
+                                        specialTransTypes(implementing, env),
+                                        transDecls(members,
+                                            classEnv((ClassDecl)tree, env))));
+                }
+            case ModuleFieldDecl(int mods, XTree.Overrides(Tree m, Tree[] n), Tree[] intf):
+                XClassDef c = (XClassDef)m.def();
+                /* Name modFName = moduleFieldName(c);
+                if (setupCode != null)
+                    setupCode.append(trees.at(tree.pos).make(
+                        newdef.Exec(
+                            newdef.Assign(
+                                newdef.Ident(modFName),
+                                newdef.NewObj(null, classTree(c),
+                                              new Tree[]{trees.This()}, null))))); */
+                return trees.Container(creatorMethods(c, intf));
+            case ModuleFieldDecl(int mods, Tree m, Tree[] intf):
+                XClassDef c = (XClassDef)m.def();
+                /* Name modFName = moduleFieldName(c);
+                if (setupCode != null)
+                    setupCode.append(trees.at(tree.pos).make(
+                        newdef.Exec(
+                            newdef.Assign(
+                                newdef.Ident(modFName),
+                                newdef.NewObj(null, classTree(c),
+                                              new Tree[]{trees.This()}, null))))); */
+                return trees.Container(creatorMethods(c, intf));
+            case MethodDecl(Name name, int mods, Tree restype, VarDecl[] params,
+                            Tree[] thrown, Tree[] stats, MethodDef def):
+                // translate main methods in modules
+                if (((def.owner.modifiers & MODULE) != 0) &&
+                    name.equals(MAIN_N)) {
+                    if (stats != null) {
+                        stats = transStats(stats, methodEnv((MethodDecl)tree, env));
+                        stats = trees.append(algebraic.temporaryDecls(), stats);
+                    }
+                    Tree res = trees.at(tree).make(
+                        redef.MethodDecl(DMAIN_N, mods,
+                                        transType(restype, env),
+                                        transVarDecls(params, env),
+                                        transTypes(thrown, env),
+                                        stats));
+                        return res;
+                // translate constructors in interfaces
+                } else if (((def.owner.modifiers & INTERFACE) != 0) &&
+                           name.equals(PredefConst.INIT_N)) {
+                    return trees.Container(trees.noTrees);
+                // translate the rest
+                } else {
+                    return super.translateDecl(tree, env);
+                }
+            case PackageDecl(Tree qualid):
+                return trees.at(tree).make(redef.PackageDecl(trees.copy(qualid)));
+            case Import(int tag, Tree qualid):
+                if ((tag == IMPORTSTAR) &&
+                    definitions.isAlgebraicSubclass(qualid.type.tdef())) {
+                    TreeList    imports = new TreeList();
+                    Type        type = qualid.type;
+                    while (types.isAlgebraicType(type)) {
+                        imports.append(
+                            trees.at(tree.pos).make(
+                                newdef.Import(tag, trees.toTree(type))));
+                        type = type.supertype();
+                    }
+                    return trees.Container(imports.toArray());
+                }
+                else
+                    return trees.at(tree).make(
+                            redef.Import(tag, trees.copy(qualid)));
+        }
+        return super.translateDecl(tree, env);
+    }
+    
+/** create a module creation method for module c
+ */
+    protected Tree creatorMethod(XClassDef c, XClassDef init) {
+        return newdef.MethodDecl(
+            moduleCreatorMethodName(c),
+            PUBLIC, // | SYNTHETIC,
+            classTree(c),
+            new VarDecl[0],
+            trees.noTrees,
+            new Tree[]{
+                newdef.Return(
+                    newdef.NewObj(
+                        null, classTree(init),
+                        new Tree[]{trees.This()}, null))
+            });
+    }
+
+/** create a module creation method for module c
+ */
+    protected Tree[] creatorMethods(XClassDef c, Tree[] intfs) {
+        if ((intfs == null) || (intfs.length == 0))
+            return new Tree[]{creatorMethod(c, c)};
+        Tree[] res = new Tree[intfs.length];
+        for (int i = 0; i < intfs.length; i++)
+            res[i] = creatorMethod((XClassDef)intfs[i].type.tdef(), c);
+        return res;
+    }
+    
+/** create a module accessor interface for module c
+ */
+    protected Tree moduleAccessorInterface(XClassDef c) {
+        return newdef.ClassDecl(
+            moduleAccessorInterfaceName(c),
+            (c.modifiers & ~MODULE) | INTERFACE, // | SYNTHETIC,
+            null,
+            moduleAccessorExtensions(c, true),
+            new Tree[]{
+                newdef.MethodDecl(
+                    moduleAccessorMethodName(c),
+                    PUBLIC | ABSTRACT, // | SYNTHETIC,
+                    classTree(c),
+                    new VarDecl[0],
+                    trees.noTrees,
+                    null)
+            });
+    }
+    
+/** create the field $encl and a module constructor
+ */
+    protected Tree[] modulePrelude(XClassDef c) {
+        Tree[] body = new Tree[2];
+        if ((c.supertype().tdef().modifiers & MODULE) != 0)
+            body[0] = newdef.Exec(
+                newdef.Apply(newdef.Self(null, SUPER),
+                             new Tree[]{newdef.Ident(ENCL_N)}));
+        else
+            body[0] = newdef.Exec(
+                newdef.Apply(newdef.Self(null, SUPER), trees.noTrees));
+        body[1] = trees.FieldInit(ENCL_N);
+        return new Tree[]{
+            newdef.VarDecl(ENCL_N, 0/*PRIVATE*/, trees.toTree(types.objectType), null),
+            newdef.MethodDecl(PredefConst.INIT_N,
+                PUBLIC, // | SYNTHETIC,
+                null,
+                new VarDecl[]{(VarDecl)
+                    newdef.VarDecl(ENCL_N, 0, trees.toTree(types.objectType), null)},
+                trees.noTrees, body)};
+    }
+    
+/** create a method of the connector class
+ */
+    protected Tree connectorMethod(XClassDef c, boolean init, Name res) {
+        Tree[] body = new Tree[init ? 2 : 1];
+        int i = 0;
+        if (init)
+            body[i++] = newdef.If(
+                newdef.Binop(EQ, newdef.Ident(res), trees.Null()),
+                newdef.Exec(newdef.Assign(
+                    newdef.Ident(res),
+                    newdef.NewObj(null, classTree(c),
+                        new Tree[]{newdef.Ident(SELF_N)}, null))),
+                null);
+        body[i] = newdef.Return(newdef.Ident(res));
+        return newdef.MethodDecl(
+            moduleAccessorMethodName(c),
+            PUBLIC, // | SYNTHETIC,
+            classTree(c),
+            new VarDecl[0],
+            trees.noTrees,
+            body);
+    }
+    
+/** create the connector class
+ */
+    protected Tree connectorClass(XClassDef c) {
+        XClassDef s = (XClassDef)c.supertype().tdef();
+        // create superclass
+        Tree t = ((s.modifiers & MODULE) != 0)
+            ? newdef.Select(classTree(s), CONNECTOR_N)
+            : trees.toTree(types.objectType);
+        // create body of class
+        TreeList body = new TreeList();
+        Set set = new HashSet();
+        // map self
+        XClassDef[] subs = ((c.modifiers & SPECIALIZES) != 0) ?
+            new XClassDef[]{s} : new XClassDef[0];
+        subs = c.subsumesAdditional(subs);
+        for (int j = 0; j < subs.length; j++) {
+            body.append(connectorMethod(subs[j], false, SELF_N));
+            set.add(subs[j]);
+        }
+        XClassDef[] cs;
+        if ((s.modifiers & MODULE) != 0) {
+            // map required from super
+            cs = c.modIntf.required.keys();
+            for (int i = 0; i < cs.length; i++) {
+                subs = ((ModuleSet)c.modIntf.required.get(cs[i])).keys();
+                subs = cs[i].subsumesAdditional(subs);
+                Name name = moduleFieldName(cs[i]);
+                for (int j = 0; j < subs.length; j++)
+                    if (s.modIntf.provides(subs[j]) &&
+                        !set.contains(subs[j])) {
+                        body.append(connectorMethod(subs[j], false, name));
+                        set.add(subs[j]);
+                    }
+            }
+            // map contained from super
+            cs = c.modIntf.contained.keys();
+            for (int i = 0; i < cs.length; i++) {
+                subs = ((ModuleSet)c.modIntf.contained.get(cs[i])).keys();
+                subs = cs[i].subsumesAdditional(subs);
+                Name name = moduleFieldName(cs[i]);
+                for (int j = 0; j < subs.length; j++)
+                    if (s.modIntf.provides(subs[j]) &&
+                        !set.contains(subs[j])) {
+                        body.append(connectorMethod(subs[j], false, name));
+                        set.add(subs[j]);
+                    }
+            }
+        }
+        // map required from this
+        cs = c.modIntf.required.keys();
+        for (int i = 0; i < cs.length; i++) {
+            subs = ((ModuleSet)c.modIntf.required.get(cs[i])).keys();
+            subs = cs[i].subsumesAdditional(subs);
+            Name name = moduleFieldName(cs[i]);
+            for (int j = 0; j < subs.length; j++)
+                if (!set.contains(subs[j]))
+                    body.append(connectorMethod(subs[j], false, name));
+        }
+        // map contained from this
+        cs = c.modIntf.contained.keys();
+        for (int i = 0; i < cs.length; i++) {
+            subs = ((ModuleSet)c.modIntf.contained.get(cs[i])).keys();
+            subs = cs[i].subsumesAdditional(subs);
+            Name name = moduleFieldName(cs[i]);
+            for (int j = 0; j < subs.length; j++)
+                if (!set.contains(subs[j]))
+                    body.append(connectorMethod(subs[j], false, name));
+        }
+        // create connector class
+        return newdef.ClassDecl(
+            CONNECTOR_N, PUBLIC, t,
+            moduleAccessorExtensions((XClassDef)c, false),
+            body.toArray());
+    }
+    
+/** deal with module accessor methods
+ */
+    protected Tree[] moduleAccessorExtensions(XClassDef c, boolean excludeSelf) {
+        XClassDef[] subs = c.subsumes();
+        Tree[] ts = new Tree[subs.length - (excludeSelf ? 1 : 0)];
+        int j = 0;
+        for (int i = 0; i < subs.length; i++)
+            if (!excludeSelf || (subs[i] != c))
+                ts[j++] = moduleAccessorInterfaceTree(subs[i]);
+        return ts;
+    }
+    
+    protected Name moduleAccessorInterfaceName(XClassDef c) {
+        return Name.fromString("$" + c.name);
+    }
+    
+    protected Name moduleAccessorMethodName(XClassDef c) {
+        return Name.fromString("$" + c.fullname.replace((byte)'.', (byte)'_'));
+    }
+    
+    protected Name moduleCreatorMethodName(XClassDef c) {
+        return Name.fromString(CREATE_N + "" + c.fullname.replace((byte)'.', (byte)'_'));
+    }
+    
+    protected Tree moduleAccessorInterfaceTree(XClassDef c) {
+        if ((c.owner == null) ||
+            (c.owner.fullname == null) ||
+            (c.owner.fullname.length() == 0))
+            return newdef.Ident(moduleAccessorInterfaceName(c));
+        else
+            return newdef.Select(
+                trees.Qualid(c.owner.fullname),
+                moduleAccessorInterfaceName(c));
+    }
+
+/** assign a field name to every contained module
+ */
+    Map moduleFields;
+    Map subsumedBy;
+    
+    protected Tree[] createModuleFields(XClassDef c, TreeList fields) {
+        TreeList intfs = new TreeList();
+        boolean isInterface = (c.modifiers & INTERFACE) != 0;
+        // create a new module field name map
+        moduleFields = new HashMap();
+        subsumedBy = new HashMap();
+        int reqs = 0;
+        int nest = 0;
+        // enter required modules
+        XClassDef[] cs = c.modIntf.required.keys();
+        for (int i = 0; i < cs.length; i++) {
+            XClassDef[] subs = cs[i].subsumes();
+            Name name = Name.fromString("$req" + (reqs++));
+            if (!isInterface) {
+                fields.append(
+                    newdef.VarDecl(name, 0/*PRIVATE*/, // | SYNTHETIC,
+                        classTree(cs[i]), null));
+                setupCode.append(
+                    newdef.Exec(
+                        newdef.Assign(
+                            newdef.Select(trees.This(), name),
+                            newdef.Apply(
+                                newdef.Select(
+                                    castTo(moduleAccessorInterfaceTree(cs[i]), ENCL_N),
+                                    moduleAccessorMethodName(cs[i])),
+                                trees.noTrees))));
+            }
+            for (int j = 0; j < subs.length; j++) {
+                moduleFields.put(subs[j], name);
+                subsumedBy.put(subs[j], cs[i]);
+                fields.append(
+                    newdef.MethodDecl(
+                        moduleAccessorMethodName(subs[j]),
+                        PUBLIC, // | SYNTHETIC,
+                        classTree(subs[j]),
+                        new VarDecl[0], trees.noTrees,
+                        isInterface ? null :
+                            new Tree[]{newdef.Return(
+                                //newdef.Typeop(TYPECAST,
+                                    newdef.Apply(
+                                        newdef.Select(newdef.Ident(name), SETUP_N),
+                                        trees.noTrees)
+                                //  , classTree(subs[j]))
+                                )}));
+                intfs.append(moduleAccessorInterfaceTree(subs[j]));
+            }
+        }
+        // enter contained modules
+        cs = c.modIntf.contained.keys();
+        for (int i = 0; i < cs.length; i++) {
+            XClassDef[] subs = cs[i].subsumes();
+            Name name = Name.fromString("$nes" + (nest++));
+            if (!isInterface) {
+                fields.append(
+                    newdef.VarDecl(name, 0/*PRIVATE*/, // | SYNTHETIC,
+                        classTree(cs[i]), null));
+                setupCode.append(
+                        newdef.Exec(
+                            newdef.Assign(
+                                newdef.Ident(name),
+                                newdef.Apply(newdef.Ident(moduleCreatorMethodName(cs[i])),
+                                             trees.noTrees))));
+            }
+            for (int j = 0; j < subs.length; j++) {
+                moduleFields.put(subs[j], name);
+                subsumedBy.put(subs[j], cs[i]);
+                fields.append(
+                    newdef.MethodDecl(
+                        moduleAccessorMethodName(subs[j]),
+                        PUBLIC, // | SYNTHETIC,
+                        classTree(subs[j]),
+                        new VarDecl[0], trees.noTrees,
+                        isInterface ? null :
+                            new Tree[]{newdef.Return(
+                                // newdef.Typeop(TYPECAST,
+                                    newdef.Apply(
+                                        newdef.Select(newdef.Ident(name), SETUP_N),
+                                        trees.noTrees)
+                                //  , classTree(subs[j]))
+                            )}));
+                intfs.append(moduleAccessorInterfaceTree(subs[j]));
+            }
+        }
+        // enter self
+        if (!isInterface)
+            fields.append(
+                newdef.VarDecl(SELF_N, 0/*PRIVATE*/, // | SYNTHETIC,
+                    classTree(c), null));
+        XClassDef[] subs = c.subsumes();
+        for (int j = 0; j < subs.length; j++) {
+            moduleFields.put(subs[j], SELF_N);
+            subsumedBy.put(subs[j], c);
+            fields.append(
+                newdef.MethodDecl(
+                    moduleAccessorMethodName(subs[j]),
+                    PUBLIC, // | SYNTHETIC,
+                    classTree(subs[j]),
+                    new VarDecl[0], trees.noTrees,
+                    isInterface ? null : new Tree[]{
+                        /* newdef.If(
+                            newdef.Binop(EQ, newdef.Ident(SELF_N), trees.Null()),
+                            newdef.Block(0, new Tree[]{
+                                newdef.Exec(newdef.Assign(
+                                    newdef.Ident(SELF_N), trees.This())),
+                                newdef.Exec(newdef.Apply(
+                                    newdef.Ident(INIT_N), trees.noTrees))}),
+                            null), */
+                        newdef.Return(newdef.Ident(SELF_N))}));
+            intfs.append(moduleAccessorInterfaceTree(subs[j]));
+        }
+        return intfs.toArray();
+    }
+    
+    protected Name moduleFieldName(XClassDef c) {
+        return (Name)moduleFields.get(c);
+    }
+    
+/** extract all module initializations and include them in a
+ *  method $init(); return a modified list of declarations
+ */
+    protected Tree[] normalizeDecls(XClassDef c, Tree[] defs, Env env, TreeList initCode) {
+        if ((c.supertype().tdef().modifiers & MODULE) != 0)
+            initCode.append(
+                newdef.Exec(
+                    newdef.Apply(
+                        newdef.Select(trees.Super(), INIT_N), trees.noTrees)));
+        TreeList rest = new TreeList();
+        for (int i = 0; i < defs.length; i++) {
+            Tree def = defs[i];
+            switch (defs[i]) {
+                case Block(_, _):
+                    initCode.append(transDecl(defs[i], env));
+                    break;
+                case VarDecl(Name name, int mods, Tree vartype, Tree init, _):
+                    rest.append(defs[i]);
+                    if ((init != null) &&
+                        (((mods & FINAL) == 0) || !init.type.isTypeOfConstant())) {
+                        ((VarDecl)defs[i]).init = null;
+                        if (init != null)
+                            initCode.append(
+                                trees.at(defs[i].pos).make(
+                                    newdef.Exec(
+                                        newdef.Assign(
+                                            newdef.Ident(name), transExpr(init, env)))));
+                    } else if ((init != null) && ((mods & FINAL) != 0))
+                        ((VarDecl)defs[i]).mods |= STATIC;
+                    break;
+                default:
+                    rest.append(defs[i]);
+            }
+        }
+        return rest.toArray();
+    }
+    
+/** cast name to type tree
+ */
+    protected Tree castTo(Tree tree, Name name) {
+        return newdef.Typeop(TYPECAST, newdef.Ident(name), tree);
+    }
+    
+/** create module initialization code for the connect method
+ */
+    protected void moduleInitOthers(TreeList code, XClassDef[] cs) {
+        for (int i = 0; i < cs.length; i++) {
+            Name name = moduleFieldName(cs[i]);
+            code.append(
+                newdef.Exec(
+                    newdef.Assign(
+                        newdef.Select(trees.This(), name),
+                        newdef.Apply(
+                            newdef.Select(
+                                newdef.Ident(CE_N),
+                                moduleAccessorMethodName(cs[i])),
+                            trees.noTrees))));
+        }
+    }
+    
+/** return implementations for the module initializer methods
+ *  setup, connect and init
+ */
+    protected Tree[] moduleInitMethods(XClassDef c, Tree[] initCode) {
+        // generate initialization of module fields
+        TreeList code = new TreeList();
+        // generate initialization of $self
+        code.append(
+            newdef.Exec(
+                newdef.Assign(
+                    newdef.Select(trees.This(), SELF_N),
+                    trees.This())));
+        moduleInitOthers(code, c.modIntf.required.keys());
+        moduleInitOthers(code, c.modIntf.contained.keys());
+        // call import in super module
+        if ((c.supertype().tdef().modifiers & MODULE) != 0) {
+            // call connect to super module
+            code.append(
+                newdef.Exec(
+                    newdef.Apply(
+                        newdef.Select(
+                            trees.Super(), CONNECT_N),
+                        new Tree[]{
+                            newdef.NewObj(null, newdef.Ident(CONNECTOR_N),
+                                          trees.noTrees, null)})));
+            // connect to super module
+            setupCode.append(
+                newdef.Exec(
+                    newdef.Apply(
+                        newdef.Select(trees.Super(), CONNECT_N),
+                        new Tree[]{
+                            newdef.NewObj(null, newdef.Ident(CONNECTOR_N),
+                                          trees.noTrees, null)})));
+        }
+        setupCode.append(newdef.Exec(newdef.Apply(newdef.Ident(INIT_N), trees.noTrees)));
+        setupCode.append(newdef.Return(trees.This()));
+        TreeList moduleInits = new TreeList();
+        moduleInits.append(
+            newdef.MethodDecl(
+                SETUP_N,
+                PUBLIC, // | SYNTHETIC,
+                classTree(c),
+                new VarDecl[0], trees.noTrees,
+                new Tree[]{
+                    newdef.If(
+                        newdef.Binop(EQ, newdef.Ident(SELF_N), trees.Null()),
+                        newdef.Block(0, setupCode.toArray()),
+                        newdef.Return(trees.This()))
+                }));
+        moduleInits.append(
+            newdef.MethodDecl(
+                CONNECT_N,
+                PROTECTED, // | SYNTHETIC,
+                newdef.BasicType(VOID),
+                new VarDecl[]{
+                    (VarDecl)newdef.VarDecl(CE_N, 0,
+                        newdef.Ident(CONNECTOR_N), null)
+                }, trees.noTrees,
+                code.toArray()));
+        moduleInits.append(
+            newdef.MethodDecl(
+                INIT_N,
+                PROTECTED, // | SYNTHETIC,
+                newdef.BasicType(VOID),
+                new VarDecl[0], trees.noTrees, initCode));
+        boolean mainGenerated = false;
+        // check if we need a static main method
+        if (c.modIntf.required.size() == 0) {
+            Definition e = null;
+            Definition current = c;
+            outer: do {
+                e = current.locals().lookup(MAIN_N);
+                while (e.scope != null) {
+                    if (namer.instantiatable(e.def, new Type[]{stringArrayParam}, c.type))
+                        break outer;
+                    e = e.next();
+                }
+                current = current.supertype().tdef();
+            } while ((current.modifiers & MODULE) != 0);
+            if ((e.scope != null) &&
+                types.sametype(e.def.type.restype(), types.voidType)) {
+                mainGenerated = true;
+                moduleInits.append(
+                    newdef.MethodDecl(
+                        MAIN_N,
+                        PUBLIC | STATIC,
+                        trees.toTree(types.voidType),
+                        new VarDecl[]{
+                            (VarDecl)newdef.VarDecl(ARGS_N, 0, trees.toTree(stringArrayParam), null)},
+                        trees.toTree(e.def.type.thrown()),
+                        new Tree[]{newdef.Exec(
+                            newdef.Apply(
+                                newdef.Select(
+                                    newdef.Apply(
+                                        newdef.Select(
+                                            newdef.NewObj(null, classTree(c),
+                                                new Tree[]{trees.Null()}, null),
+                                            SETUP_N),
+                                        trees.noTrees),
+                                    DMAIN_N),
+                                new Tree[]{newdef.Ident(ARGS_N)}))
+                        }));
+            }
+        }
+        if (!mainGenerated)
+            moduleInits.append(
+                newdef.MethodDecl(
+                    MAIN_N,
+                    PUBLIC | STATIC,
+                    trees.toTree(types.voidType),
+                    new VarDecl[]{
+                        (VarDecl)newdef.VarDecl(ARGS_N, 0, trees.toTree(stringArrayParam), null)},
+                    trees.noTrees,
+                    new Tree[]{
+                        newdef.Throw(newdef.NewObj(null,
+                            newdef.Ident(ERROR_EXC_N),
+                            new Tree[]{
+                                newdef.Literal(consts.make.StringConst(MAIN_MESSAGE_N))
+                            },
+                            null))}));
+        return moduleInits.toArray();
+    }
+    
+    protected Tree factoryMethodTree(XClassDef c, Type mod) {
+        return newdef.Select(accessModule(mod), factoryMethodName(c));
+    }
+    
+    protected Tree viewMethodTree(Type t) {
+        switch (t) {
+            case ClassType(Type outer):
+                return newdef.Select(accessModule(outer), viewMethodName((XClassDef)t.tdef()));
+            default:
+                throw new Error();
+        }
+    }
+    
+/** the factory method name for class field c
+ */
+    protected Name factoryMethodName(XClassDef c) {
+        return Name.fromString("" + NEW_N + mangler.unmangleShort(c.name, c.fullname));
+    }
+
+/** the factory method name for view c
+ */
+    protected Name viewMethodName(XClassDef c) {
+        return Name.fromString("" + VIEW_N + mangler.unmangleShort(c.name, c.fullname));
+    }
+    
+/** class field representation name
+ */
+    protected Name classfieldRepresentationName(XClassDef c) {
+        return Name.fromString("" + mangler.unmangleShort(c.name, c.fullname) + IMPLSUF_N);
+        //return Name.fromString(mangler.unmangleShort(c.owner.name, c.owner.fullname) + "$" + mangler.unmangleShort(c.name, c.fullname) + IMPLSUF_N);
+    }
+    
+/** class field view name
+ 
+    protected Name classfieldViewName(XClassDef c) {
+        return Name.fromString("" + mangler.unmangleShort(c.name, c.fullname) + VIEWSUF_N);
+    }
+  */
+  
+/** class field super adapter
+ */
+    protected Name classfieldSuperName(XClassDef c) {
+        return Name.fromString("" + mangler.unmangleShort(c.name, c.fullname) + SUPERSUF_N);
+    }
+    
+/** class field redirect name
+ */
+    protected Name classfieldRedirectName(XClassDef c) {
+        return Name.fromString("$" + mangler.unmangleShort(c.name, c.fullname));
+    }
+    
+/** find all constructors in class field c
+ */
+    protected Type[] findConstructors(XClassDef c) {
+        Definition e = c.locals().lookup(PredefConst.INIT_N);
+        TypeSet ts = new TypeSet(types);
+        while (e.scope != null) {
+            if ((e.def.owner == c) ||
+                ((e.def.owner.modifiers & INTERFACE) != 0))
+                ts.add(e.def.type);
+            e = e.next();
+        }
+        return ts.types();
+    }
+    
+/** find all (abstract) interface methods
+ */
+    protected FunTypeSet findInterfaceMethods(FunTypeSet ts, XClassDef c) {
+        Type[] is = c.interfaces();
+        for (int i = 0; i < is.length; i++) {
+            XClassDef iface = (XClassDef)is[i].tdef();
+            for (Definition e = iface.locals().elems; e != null; e = e.sibling)
+                if ((e.def.kind == FUN) &&
+                    ((e.def.modifiers & STATIC) == 0) &&
+                    (e.def.name != PredefConst.INIT_N))
+                    ts.add(e.def.name, e.def.type);
+            findInterfaceMethods(ts, iface);
+        }
+        return ts;
+    }
+    
+/** create factory methods for class field constructors
+ */
+    protected Tree[] classfieldFactories(XClassDef c) {
+        Type[] constr = findConstructors(c);
+        Tree[] ts = new Tree[constr.length];
+        for (int i = 0; i < constr.length; i++) {
+            Type[] pt = constr[i].argtypes();
+            Type[] npt = new Type[pt.length - 1];
+            System.arraycopy(pt, 1, npt, 0, npt.length);
+            VarDecl[] params = trees.Params(npt);
+            ts[i] = newdef.MethodDecl(
+                factoryMethodName(c),
+                                ((c.owner.modifiers & ABSTRACT) != 0) ?
+                                    PUBLIC | ABSTRACT /* | SYNTHETIC */ :
+                                    PUBLIC /* | SYNTHETIC */,
+                classTree(c),
+                params, trees.toTree(constr[i].thrown()),
+                (((c.owner.modifiers & INTERFACE) != 0) ||
+                 ((c.modifiers & ABSTRACT) != 0)) ?
+                    null : new Tree[]{
+                    newdef.Return(
+                        newdef.NewObj(null, newdef.Ident(classfieldRepresentationName(c)),
+                        trees.Idents(params), null))
+                });
+        }
+        return ts;
+    }
+    
+/** create a representation for a class field implementation
+ */
+    protected Tree classfieldRepresentation(XClassDef c, Tree[] defs) {
+        TreeList members = new TreeList();
+        Tree t;
+        // add constructors (if not inherited)
+        if (!c.vcIntf.thisImpl) {
+            Type[] constr = findConstructors(c);
+            for (int i = 0; i < constr.length; i++) {
+                Type[] pt = constr[i].argtypes();
+                Type[] npt = new Type[pt.length - 1];
+                System.arraycopy(pt, 1, npt, 0, npt.length);
+                VarDecl[] params = trees.Params(npt);
+                Tree superQual = null;
+                if ((c.vcIntf.withClass.owner.modifiers & MODULE) != 0)
+                    superQual = accessModule(c.vcIntf.withClass.owner);
+                members.append(newdef.MethodDecl(
+                    PredefConst.INIT_N, PUBLIC, // | SYNTHETIC,
+                    null, params, trees.toTree(constr[i].thrown()),
+                    new Tree[]{
+                        newdef.Exec(
+                            newdef.Apply(newdef.Self(superQual, SUPER), trees.Idents(params)))
+                    }));
+            }
+            //System.out.println(c + " is this_impl " + c.withClass);
+            t = classTree(c.vcIntf.withClass);
+        } else {
+            members.append(defs);
+            //System.out.println(c + " is remote_impl " + c.withClass.supertype());
+            t = classTree(c.vcIntf.withClass.supertype().tdef());
+        }
+        return newdef.ClassDecl(
+            classfieldRepresentationName(c), 0,
+            t,
+            new Tree[]{classTree(c)},
+            members.toArray());
+    }
+    
+/** create factory methods for views
+ 
+    protected Tree[] viewFactories(XClassDef c) {
+        Type[] constr = findConstructors(c);
+        Tree[] ts = new Tree[constr.length];
+        for (int i = 0; i < constr.length; i++) {
+            Type[] pt = constr[i].argtypes();
+            Type[] npt = new Type[pt.length];
+            System.arraycopy(pt, 1, npt, 1, npt.length - 1);
+            npt[0] = types.objectType;
+            VarDecl[] params = trees.Params(npt);
+            Tree[] args = trees.Idents(params);
+            args[0] = newdef.Typeop(TYPECAST, args[0], classTree(c));
+            ts[i] = newdef.MethodDecl(
+                viewMethodName(c),
+                ((c.modifiers & ABSTRACT) != 0) ?
+                    PUBLIC | ABSTRACT :
+                    PUBLIC,
+                //redirectTree(c),
+                trees.toTree(types.objectType),
+                params,
+                trees.toTree(constr[i].thrown()),
+                (((c.owner.modifiers & INTERFACE) != 0) ||
+                 ((c.modifiers & ABSTRACT) != 0)) ?
+                    null : new Tree[]{
+                    newdef.Return(
+                        newdef.NewObj(null, newdef.Ident(classfieldViewName(c)),
+                        args, null))
+                });
+        }
+        return ts;
+    }
+  */
+  
+/** create a class field view for the class field implementation
+ 
+    protected Tree classfieldView(XClassDef c) {
+        TreeList members = new TreeList();
+        // add private $sub field
+        members.append(
+            newdef.VarDecl(SUB_N, PRIVATE, classTree(c), null));
+        // add constructors
+        Type[] constr = findConstructors(c);
+        for (int i = 0; i < constr.length; i++) {
+            Type[] pt = constr[i].argtypes();
+            Type[] npt = new Type[pt.length - 1];
+            System.arraycopy(pt, 1, npt, 0, npt.length);
+            VarDecl[] params = trees.Params(npt);
+            VarDecl[] fullparams = new VarDecl[params.length + 1];
+            System.arraycopy(params, 0, fullparams, 1, params.length);
+            fullparams[0] = (VarDecl)newdef.VarDecl(SUB_N, 0, classTree(c), null);
+            Tree superQual = null;
+                if (!c.thisImpl && ((c.withClass.owner.modifiers & MODULE) != 0))
+                    superQual = accessModule(c.withClass.owner);
+            members.append(newdef.MethodDecl(
+                PredefConst.INIT_N, PUBLIC, // | SYNTHETIC,
+                null, fullparams, trees.toTree(constr[i].thrown()),
+                new Tree[]{
+                    newdef.Exec(
+                        newdef.Apply(newdef.Self(superQual, SUPER), trees.Idents(params))),
+                    trees.FieldInit(SUB_N)
+                }));
+        }
+        // add propagation methods
+        members.append(
+            propagationMethods(c));
+        // supertype
+        Tree t = c.thisImpl ? newdef.Select(classTree(c.owner), classfieldRepresentationName(c))
+                            : classTree(c.withClass);
+        // create view class
+        return newdef.ClassDecl(
+            classfieldViewName(c), PUBLIC,
+            t,
+            new Tree[]{classTree(c), redirectTree(c)},
+            members.toArray());
+    }
+    */
+    
+/** create a propagation method for method f (with qual as receiver)
+ */
+    protected Tree propagationMethod(Name name, Type t, String prefix, Tree qual) {
+        VarDecl[] params = trees.Params(t.argtypes());
+        Tree stat = newdef.Apply(newdef.Select(qual, name), trees.Idents(params));
+        if (t.restype() == Type.VoidType)
+            stat = newdef.Exec(stat);
+        else
+            stat = newdef.Return(stat);
+        return newdef.MethodDecl(
+            Name.fromString(prefix + name), PUBLIC,
+            trees.toTree(t.restype()),
+            params,
+            trees.toTree(t.thrown()),
+            new Tree[]{stat});
+    }
+
+/** add downwards and upwards propagation methods to members
+ */
+    public Tree[] propagationMethods(XClassDef c) {
+        FunTypeSet set = findInterfaceMethods(new FunTypeSet(types) , c);
+        Type[] fs = set.types();
+        Name[] ns = set.names();
+        Tree[] ts = new Tree[fs.length * 2];
+        for (int i = 0; i < fs.length; i++) {
+            ts[2*i] = propagationMethod(ns[i], fs[i], "", newdef.Ident(SUB_N));
+            ts[2*i+1] = propagationMethod(ns[i], fs[i], "$", newdef.Self(null, SUPER));
+        }
+        return ts;
+    }
+    
+/** create a class field adapter for extensions
+ */
+    protected Tree classfieldSuper(Type t, Name name) {
+        XClassDef c = (XClassDef)t.tdef();
+        TreeList members = new TreeList();
+        // add private $super field
+        members.append(
+            newdef.VarDecl(SUPER_N, PROTECTED, redirectTree(c), null));
+        // add constructors
+        Type[] constr = findConstructors(c);
+        for (int i = 0; i < constr.length; i++) {
+            Type[] pt = constr[i].argtypes();
+            Type[] npt = new Type[pt.length - 1];
+            System.arraycopy(pt, 1, npt, 0, npt.length);
+            VarDecl[] params = trees.Params(npt);
+            Tree[] args = trees.Idents(params);
+            Tree[] newargs = new Tree[args.length + 1];
+            System.arraycopy(args, 0, newargs, 1, args.length);
+            newargs[0] = trees.This();
+            Tree viewFun = (name == null) ?
+                newdef.Ident(viewMethodName(c)) :
+                newdef.Select(accessModule(t.outer()), viewMethodName(c));
+            members.append(newdef.MethodDecl(
+                PredefConst.INIT_N, PUBLIC, // | SYNTHETIC,
+                null, params, trees.toTree(constr[i].thrown()),
+                new Tree[]{
+                    newdef.Exec(
+                        newdef.Assign(
+                            newdef.Ident(SUPER_N),
+                            newdef.Typeop(TYPECAST,
+                                newdef.Apply(viewFun, newargs), redirectTree(c)))
+                            )}));
+        }
+        // generate name if not already given
+        if (name == null)
+            name = classfieldSuperName(c);
+        // add propagation methods
+        members.append(adaptorMethods(c));
+        // create view class
+        return newdef.ClassDecl(
+            name, ABSTRACT | PUBLIC,
+            null,
+            new Tree[]{classTree(c)},
+            members.toArray());
+    }
+
+    protected Tree classfieldSuper(XClassDef c) {
+        return classfieldSuper(c.type, null);
+    }
+
+/** create a propagation method for method f (with qual as receiver)
+ */
+    protected Tree adaptorMethod(Name name, Type t) {
+        VarDecl[] params = trees.Params(t.argtypes());
+        Tree stat = newdef.Apply(newdef.Select(newdef.Ident(SUPER_N),
+            Name.fromString("$" + name)), trees.Idents(params));
+        if (t.restype() == Type.VoidType)
+            stat = newdef.Exec(stat);
+        else
+            stat = newdef.Return(stat);
+        return newdef.MethodDecl(
+            name, PUBLIC,
+            trees.toTree(t.restype()),
+            params,
+            trees.toTree(t.thrown()),
+            new Tree[]{stat});
+    }
+
+/** add downwards and upwards propagation methods to members
+ */
+    public Tree[] adaptorMethods(XClassDef c) {
+        FunTypeSet set = findInterfaceMethods(new FunTypeSet(types) , c);
+        Type[] fs = set.types();
+        Name[] ns = set.names();
+        Tree[] ts = new Tree[fs.length];
+        for (int i = 0; i < fs.length; i++)
+            ts[i] = adaptorMethod(ns[i], fs[i]);
+        return ts;
+    }
+
+/** create a class field redirection interface
+ */
+    protected Tree classfieldRedirects(XClassDef c) {
+        TreeList members = new TreeList();
+        // add propagation methods
+        FunTypeSet set = findInterfaceMethods(new FunTypeSet(types) , c);
+        Type[] fs = set.types();
+        Name[] ns = set.names();
+        Tree[] ts = new Tree[fs.length];
+        for (int i = 0; i < fs.length; i++)
+            members.append(
+                newdef.MethodDecl(
+                    Name.fromString("$" + ns[i]),
+                    PUBLIC,
+                    trees.toTree(fs[i].restype()),
+                    trees.Params(fs[i].argtypes()),
+                    trees.toTree(fs[i].thrown()),
+                    null));
+        // add new compound interface to module
+        Tree[] ext = trees.noTrees;
+        if ((c.vcIntf != null) && (c.vcIntf.overrides != null)) {
+            Tree[] newext = new Tree[ext.length + c.vcIntf.overrides.length];
+            System.arraycopy(ext, 0, newext, c.vcIntf.overrides.length, ext.length);
+            for (int i = 0; i < c.vcIntf.overrides.length; i++)
+                newext[i] = redirectTree(c.vcIntf.overrides[i]);
+            ext = newext;
+        }
+        // create view class
+        return newdef.ClassDecl(
+            classfieldRedirectName(c), PUBLIC | INTERFACE, null, ext, members.toArray());
+    }
+
+/** access a module from module expression encl
+ */
+    protected Tree accessModule(Definition c, Tree encl) {
+        return newdef.Apply(
+            newdef.Select(encl, moduleAccessorMethodName((XClassDef)c)),
+            trees.noTrees);
+    }
+    
+/** access a module from the top-level module
+ */
+    protected Tree accessModule(Definition c) {
+        return newdef.Apply(
+            newdef.Ident(moduleAccessorMethodName((XClassDef)c)),
+            trees.noTrees);
+    }
+    
+/** access module with type t
+ */
+    protected Tree accessModule(Type t) {
+        switch ((XType)t) {
+            case ModuleType(Type outer):
+                if (outer == null)
+                    return accessModule(t.tdef());
+                switch ((XType)outer) {
+                    case ModuleType(_):
+                        return accessModule(t.tdef(), accessModule(outer));
+                    default:
+                        return accessModule(t.tdef());
+                }
+            default:
+                throw new Error();
+        }
+    }
+    
+/** translate expressions (pre/post processing)
+ */
+    public Tree transExpr(Tree tree, Env env) {
+        if (!lhsflag && (tree != null) && (tree.type != null) && ((tree.type.tdef().modifiers & CLASSFIELD) != 0)) {
+            Tree typeIdent = classTree((XClassDef)tree.type.tdef());
+            return newdef.Typeop(TYPECAST, super.transExpr(tree, env), typeIdent);
+        } else {
+            lhsflag = false;
+            return super.transExpr(tree, env);
+        }
+    }
+    
+/** translate expressions
+ */
+    protected Tree translateExpr(Tree tree, Env env) {
+        switch ((XTree)tree) {
+            case Select(Tree selected, Name selector, Definition def):
+                if (selector == PredefConst.CLASS_N)
+                    return super.translateExpr(tree, env);
+                else if ((def.modifiers & MODULE) != 0)
+                    return trees.at(tree).make(accessModule(def));
+                else if (((def.owner.modifiers & MODULE) != 0) && 
+                         selector.equals(MAIN_N))
+                    return trees.at(tree).make(
+                        redef.Select(transExpr(selected, env), DMAIN_N));
+                else // for now
+                if (selector == PredefConst.CLASS_N)
+                    return trees.at(tree).make(
+                        redef.Select(selected, selector));
+                else if ((def.kind == FUN) &&
+                         ((selected.type.tdef().modifiers & CLASSFIELD) != 0))
+                    switch (selected) {
+                        case Self(Tree clazz, TreeConst.SUPER, _):
+                            return trees.at(tree).make(
+                                redef.Select(
+                                    newdef.Select(
+                                        newdef.Self(transType(clazz, env), TreeConst.THIS),
+                                        SUPER_N),
+                                    Name.fromString("$" + selector)));
+                    }
+                return trees.at(tree).make(
+                    redef.Select(transExpr(selected, env), selector));
+            case Ident(Name name, Definition def):
+                if ((def.modifiers & MODULE) != 0)
+                    return trees.at(tree).make(accessModule(def));
+                else if (((def.owner.modifiers & MODULE) != 0) && 
+                         name.equals(MAIN_N))
+                    return trees.at(tree).make(
+                        newdef.Select(accessModule(def.owner), DMAIN_N));
+                else if ((def.owner.modifiers & MODULE) != 0)
+                    return trees.at(tree).make(
+                        newdef.Select(accessModule(def.owner), name));
+                else
+                    return super.translateExpr(tree, env);
+            case ModuleSelect(Tree from, _, Definition def):
+                if (def == null)
+                    def = tree.type.tdef();
+                if ((def.modifiers & MODULE) == 0)
+                    return transExpr(from, env);
+                else
+                    return trees.at(tree).make(
+                        accessModule(def, transExpr(from, env)));
+            case NewObj(Tree encl, Tree clazz, Tree[] args, Tree def,
+                        Definition constructor):
+                XClassDef xc = (XClassDef)clazz.type.tdef();
+                if ((xc.modifiers & CLASSFIELD) != 0) {
+                    return trees.at(tree).make(
+                        newdef.Apply(
+                            newdef.Select(transExpr(encl, env), factoryMethodName(xc)),
+                            transExprs(args, env)));
+                } else
+                    return super.translateExpr(tree, env);
+            case Self(Tree clazz, int tag, _):
+                if (tag == TreeConst.THIS) {
+                    return trees.at(tree).make(
+                            redef.Self(transType(clazz, env), tag));
+                } else if ((tree.type.tdef().modifiers & CLASSFIELD) != 0) {
+                    return trees.at(tree).make(
+                            newdef.Select(
+                                redef.Self(transType(clazz, env), TreeConst.THIS),
+                                SUPER_N));
+                } else {
+                    return trees.at(tree).make(
+                            redef.Self(transExpr(clazz, env), tag));
+                }
+            case Apply(Tree fn, Tree[] args):
+                switch (fn) {
+                    case Self(Tree clazz, TreeConst.SUPER, _):
+                        Type supertype = env.enclClass.def.supertype();
+                        //System.out.println("constructor: " + fn.type + " of " + supertype);
+                        if ((supertype.tdef().modifiers & CLASSFIELD) != 0) {
+                            //System.out.println("  classfield!");
+                            args = transExprs(args, env);
+                            Tree[] newargs = new Tree[args.length + 1];
+                            System.arraycopy(args, 0, newargs, 1, args.length);
+                            newargs[0] = trees.This();
+                            if ((supertype.outer().tdef().modifiers & INTERFACE) != 0)
+                                return trees.at(tree).make(newdef.Apply(
+                                    newdef.Self(null, TreeConst.SUPER),
+                                    args));
+                            else
+                                return trees.at(tree).make(newdef.Apply(
+                                    newdef.Self(accessModule(supertype.outer()), TreeConst.SUPER),
+                                    args));
+                            /* return trees.at(tree).make(newdef.Exec(
+                                newdef.Assign(
+                                    newdef.Ident(SUPER_N),
+                                    newdef.Apply(
+                                        viewMethodTree(supertype),
+                                        newargs)))); */
+                        }
+                }
+                return trees.at(tree).make(
+                    redef.Apply(transExpr(fn, env), transExprs(args, env)));
+            case Assign(Tree lhs, Tree rhs):
+                if ((lhs.type.tdef().owner.modifiers & STATIC) != 0)
+                    return super.translateExpr(tree, env);
+                else {
+                    lhsflag = true;
+                    return trees.at(tree).make(
+                        redef.Assign(transExpr(lhs, env), transExpr(rhs, env)));
+                }
+            case Assignop(int opcode, Tree lhs, Tree rhs, _):
+                if ((lhs.type.tdef().owner.modifiers & STATIC) != 0)
+                    return super.translateExpr(tree, env);
+                else {
+                    lhsflag = true;
+                    return trees.at(tree).make(
+                        redef.Assignop(opcode, transExpr(lhs, env),
+                                        transExpr(rhs, env)));
+                }
+            case Typeop(int opcode, Tree expr, Tree clazz):
+                Definition  def = clazz.type.tdef();
+                // change typecasts and insert checks
+                if (definitions.isAlgebraicSubclass(def)) {
+                    mainContext.algebraicClasses = false;
+                    boolean ignore = types.subtype(expr.type, def.type);
+                    mainContext.algebraicClasses = true;
+                    if (ignore) {
+                        if (opcode == TYPETEST)
+                            return trees.at(tree.pos).make(
+                                newdef.Binop(NE, transExpr(expr, env), trees.Null()));
+                        else
+                            return transExpr(expr, env);
+                    } else {
+                        Tree first = transExpr(expr, env);
+                        Tree second;
+                        int old = trees.setPos(tree.pos);
+                        if (algebraic.needForTemporaryInTypeop(first)) {
+                            second = algebraic.temporaryIdent(
+                                ((opcode != TYPETEST) ||
+                                (((XClassDef)def).baseClass == ((XClassDef)expr.type.tdef()).baseClass)) ?
+                                    ((XClassDef)def).baseClass.type :
+                                    expr.type);
+                            first = newdef.Assign(trees.copy(second),
+                                ((opcode != TYPETEST) &&
+                                (((XClassDef)def).baseClass != ((XClassDef)expr.type.tdef()).baseClass)) ?
+                                    newdef.Typeop(TYPECAST, first, trees.toTree(((XClassDef)def).baseClass.type)) :
+                                    first);
+                        } else {
+                            second = trees.copy(first);
+                            if ((opcode != TYPETEST) &&
+                                (((XClassDef)def).baseClass != ((XClassDef)expr.type.tdef()).baseClass))
+                                second = newdef.Typeop(TYPECAST, second, trees.toTree(((XClassDef)def).baseClass.type));
+                        }
+                        // translate typecasts
+                        if (opcode != TYPETEST) {
+                            first = newdef.If(
+                                    newdef.Binop(OR,
+                                        newdef.Binop(EQ, first, trees.Null()),
+                                        newdef.Index(
+                                            newdef.Select(
+                                                trees.toTree(clazz.type.tdef().owner.type),
+                                                algebraic.prefix(CASTABLE_N, clazz.type.tdef())),
+                                            newdef.Apply(
+                                                newdef.Select(second, GET_SUB_ID_N),
+                                                trees.noTrees))),
+                                    second,
+                                    newdef.Apply(
+                                        newdef.Select(
+                                            trees.ClassName(definitions.algebraicBase(def).owner),
+                                            algebraic.prefix(THROW_CAST_EXC_N, definitions.algebraicBase(def))),
+                                        trees.noTrees));
+                        // translate instanceof
+                        } else {
+                            if (((XClassDef)def).baseClass == ((XClassDef)expr.type.tdef()).baseClass) {
+                                first = newdef.Binop(AND,
+                                            newdef.Binop(NE, first, trees.Null()),
+                                            newdef.Index(
+                                                newdef.Select(
+                                                    trees.toTree(clazz.type.tdef().owner.type),
+                                                    algebraic.prefix(CASTABLE_N, clazz.type.tdef())),
+                                                newdef.Apply(
+                                                    newdef.Select(second, GET_SUB_ID_N),
+                                                    trees.noTrees)));
+                            } else {
+                                first = newdef.Binop(AND,
+                                            newdef.Typeop(TYPETEST, first,
+                                                trees.toTree(((XClassDef)def).baseClass.type)),
+                                            newdef.Index(
+                                                newdef.Select(
+                                                    trees.toTree(clazz.type.tdef().owner.type),
+                                                    algebraic.prefix(CASTABLE_N, clazz.type.tdef())),
+                                                newdef.Apply(
+                                                    newdef.Select(
+                                                        newdef.Typeop(TYPECAST, second,
+                                                            trees.toTree(((XClassDef)def).baseClass.type)),
+                                                        GET_SUB_ID_N),
+                                                    trees.noTrees)));
+                            }
+                        }
+                        trees.setPos(old);
+                        return first;
+                    }
+                // check impossible casts from 'this' to a CASEDEF
+                } else if ((opcode != TYPETEST) &&
+                    (def != null) &&
+                    ((def.modifiers & CASEDEF) != 0)) {
+                    expr = algebraic.removeTypecasts(expr);
+                    switch (expr) {
+                        case Self(_, int tag, Definition d):
+                            if (tag == THIS) {
+                                mainContext.algebraicClasses = false;
+                                boolean possible = types.subtype(tree.type, expr.type);
+                                mainContext.algebraicClasses = true;
+                                if (!possible)
+                                    report.error(tree.pos, "impossible to cast this to type " + tree.type);
+                            }
+                            break;
+                    }
+                }
+                return trees.at(tree).make(
+                        redef.Typeop(opcode,
+                                     transExpr(expr, env),
+                                     transType(clazz, env)));
+            default:
+                return super.translateExpr(tree, env);
+        }
+    }
+    
+/** translate statements
+ */
+    protected Tree translateStat(Tree tree, Env env) {
+        switch (tree) {
+            case Exec(Tree expr):
+                lhsflag = true;
+                return trees.at(tree).make(redef.Exec(transExpr(expr, env)));
+            case Switch(Tree selector, Case[] cases):
+                int tag = selector.type.tag();
+                if ((tag >= MIN_BASICTYPE_TAG) && (tag <= INT))
+                    return super.translateStat(tree, env);
+                else {
+                    PatternMatcher  pm = new PatternMatcher(
+                                                algebraic.PatternNodeFactory(),
+                                                algebraic,
+                                                trees, pretty, report,
+                                                transExpr(selector, env).
+                                                    setType(selector.type));
+                    pm.printNodes = debug(8);
+                    cases = transCases(cases, env);
+                    int len = cases.length - 1;
+                    for (int i = 0; i < len; i++)
+                        pm.addCase(cases[i]);
+                    if (len >= 0)
+                        pm.addLastCase(cases[len]);
+                    if (debug(4))
+                        pm.print();
+                    return pm.toTree();
+                }
+            default:
+                return super.translateStat(tree, env);
+        }
+    }
+    
+/** translate patterns
+ */
+    public Tree[] transPatterns(Tree[] ts, Env env) {
+        if (ts == null)
+            return null;
+        TreeList exprs = new TreeList();
+        Tree tree;
+        boolean inclDefault = false;
+        for (int i = 0; i < ts.length; i++)
+            if (ts[i] == null)
+                inclDefault = true;
+            else {
+                switch (ts[i]) {
+                    /* case Apply(Tree fn, Tree[] pats):
+                        tree = trees.at(ts[i]).make(
+                            redef.Apply(trees.copy(fn), transExprs(pats, env)));
+                        break; */
+                    default:
+                        tree = trees.copy(ts[i]);
+                }
+                if (tree != null) {
+                    Tree[] container = trees.getContainerContent(tree);
+                    if (container == null)
+                        exprs.append(tree);
+                    else
+                        exprs.append(container);
+                }
+            }
+        tree = null;
+        return inclDefault ? trees.append(tree, exprs.toArray()) :
+                             exprs.toArray();
+    }
+    
+/** translate types
+ */
+    protected Tree translateType(Tree tree, Env env) {
+        switch ((XTree)tree) {
+            case Select(Tree selected, Name selector, Definition c):
+                if (c == null)//DEBUG
+                    return tree;
+                if ((c.modifiers & CLASSFIELD) != 0)
+                    return viewTree((XClassDef)c);
+                else if (definitions.isAlgebraicClass(c))
+                    return ((XTrees)trees).QualidBase((XClassDef)c);
+                else if (definitions.isCase(c))
+                    return trees.ClassName(c);
+                else
+                    return trees.at(tree).make(
+                        redef.Select(transType(selected, env), selector));
+            case Ident(_, Definition c):
+                if ((c.modifiers & CLASSFIELD) != 0)
+                    return viewTree((XClassDef)c);
+                else if (definitions.isAlgebraicClass(c))
+                    return ((XTrees)trees).QualidBase((XClassDef)c);
+                break;
+            case ModuleSelect(_, _, _):
+                return trees.toTree(tree.type.tdef().type);
+        }
+        return super.translateType(tree, env);
+    }
+    
+/** special type translation (in declarations)
+ */
+    protected Tree[] specialTransTypes(Tree[] ts, Env env) {
+        if (ts == null)
+            return null;
+        TreeList types = new TreeList();
+        Tree tree;
+        for (int i = 0; i < ts.length; i++)
+            if ((tree = specialTransType(ts[i], env)) != null) {
+                Tree[] container = trees.getContainerContent(tree);
+                if (container == null)
+                    types.append(tree);
+                else
+                    types.append(container);
+            }
+        return types.toArray();
+    }
+    
+    protected Tree specialTransType(Tree tree, Env env) {
+        if (tree == null)
+            return null;
+        int old = trees.setPos(tree.pos);
+        Tree result = specialTranslateType(tree, env);
+        trees.setPos(old);
+        return result;
+    }
+
+    protected Tree specialTranslateType(Tree tree, Env env) {
+        switch ((XTree)tree) {
+            case ModuleSelect(_, _, _):
+                return trees.toTree(tree.type.tdef().type);
+            case Select(Tree selected, Name selector, Definition c):
+                return trees.at(tree).make(
+                            redef.Select(specialTransType(selected, env), selector));
+            case Ident(Name name, Definition c):
+                return trees.at(tree).make(redef.Ident(name));
+            case BasicType(int tag):
+                return trees.at(tree).make(redef.BasicType(tag));
+            case ArrayTypeTerm(Tree elemtype):
+                return trees.at(tree).make(
+                        redef.ArrayTypeTerm(specialTransType(elemtype, env)));
+            default:
+                throw new InternalError("specialTransType(" + tree + ")");
+        }
+    }
+}

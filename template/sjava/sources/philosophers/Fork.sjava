@@ -1,0 +1,23 @@
+public active class Fork {
+    
+  public void get () {
+  	System.out.println("Getting the fork");
+  }
+
+  public void put () {
+    System.out.println("Putting the fork");
+  }
+
+  public void run () {
+    for (;;) {
+	  select {
+	  	accept get;
+		//System.out.println("fork busy");
+	  }
+	  select {
+	    accept put;
+        //System.out.println("fork available");
+	  }
+    }
+  }
+}

@@ -1,0 +1,55 @@
+module SUBJECT requires OBSERVER, EVENT {
+    interface SubjectIntf {
+        void add(OBSERVER.Observer obs);
+        void notify(EVENT.Event evt);
+    }
+    class SubjectImpl implements SubjectIntf {
+        OBSERVER.Observer[] observers = new OBSERVER.Observer[0];
+        public void add(OBSERVER.Observer obs) {
+            
+        }
+        public void notify(EVENT.Event evt) {
+            for (int i = 0; i < observers.length; i++)
+                observers[i].notify(null, evt);
+        }
+    }
+    class Subject implements SubjectIntf with SubjectImpl;
+}
+
+module OBSERVER requires SUBJECT, EVENT {
+    interface ObserverIntf {
+        void notify(SUBJECT.Subject subj, EVENT.Event evt);
+    }
+    class ObserverImpl implements ObserverIntf {
+        public void notify(SUBJECT.Subject subj, EVENT.Event evt) {
+            
+        }
+    }
+    class Observer implements ObserverIntf with ObserverImpl;
+}
+
+module interface EVENT {
+    interface EventIntf {
+        EventIntf();
+    }
+    class Event implements EventIntf;
+}
+
+module RELIABLESUBJECT extends SUBJECT {
+	interface Reliable {
+		Reliable();
+		boolean isReliable(OBSERVER.Observer obs);
+	}
+	class ReliableSubject extends SubjectImpl implements Reliable {
+		public ReliableSubject() {
+			
+		}
+		public boolean isReliable(OBSERVER.Observer obs) {
+			return true;
+		}
+	}
+	class Subject implements SubjectIntf, Reliable with ReliableSubject;
+	Subject newSubject() {
+		return new Subject();
+	}
+}

@@ -1,0 +1,103 @@
+module M extends N implements I requires O {
+    module A;
+    module B for C;
+}
+
+interface $M extends $N, $I {
+    M $M();
+}
+
+class M extends N implements I {
+
+    private Object $encl;
+    private boolean init;
+    
+    M(Object $encl) {
+        super($encl);
+        this.$encl = $encl;
+    }
+
+// the connector class (implements all nested and contained modules;
+// as well as self)
+    class $Connector extends N.$Connector implements $A, $B, $O, $M {
+        M $M() {
+            return M.this;
+        }
+        O $O() {
+            return $req0;
+        }
+        A $A() {
+            if ($nes0 == null)
+                $nes0 = new A(M.this);
+            return $nes0;
+        }
+        B $B() {
+            if ($nes1 == null)
+                $nes1 = new B(M.this);
+            return $nes1;
+        }
+        C $C() {
+            return $nes1;
+        }
+    }
+
+// the required modules
+    private O $req0;
+
+    O $O() {
+        return $req0;
+    }    
+
+// the nested modules
+    private A $nes0;
+    private B $nes1;
+
+    A $A() {
+        return $nes0;
+    }
+    
+    B $B() {
+        return $nes1;
+    }
+
+
+/** setup module
+ */
+    public M $setup() {
+        if ($self == null) {
+            $self = this;
+            $req0 = (($O)$encl).$O();
+            $nes0 = new A(this);
+            $nes1 = new B(this);
+            super.$connect(new $Connector());
+            $nes0.$setup();
+            $nes1.$setup();
+            super.$import();
+        }
+        if (!init)
+            $init();
+        return this;
+    }
+    
+    protected void $import() {
+        $self = this;
+        $nes0.$setup();
+        $nes1.$setup();
+        super.$import();
+    }
+    
+    protected void $connect($Connector $c) {
+        $req0 = $c.$O();
+        $nes0 = $c.$A();
+        $nes1 = $c.$B();
+        super.$connect(new $Connector());
+    }
+    
+/** initialize module
+ */
+    protected void $init() {
+        init = true;
+        super.$init();
+        ...
+    }
+}

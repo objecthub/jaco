@@ -1,0 +1,33 @@
+module interface J {
+}
+
+module M requires J {
+}
+
+module N implements J requires M {
+}
+
+/*
+module O requires N {
+	module M;
+}
+
+module P {
+	module N;
+	module M;
+	module O;
+}
+*/
+
+module O requires M {
+	module N;
+}
+
+module P {
+	module O;
+	module M;
+	module NA;
+}
+
+module NA implements J {
+}

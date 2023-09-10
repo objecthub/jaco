@@ -1,0 +1,33 @@
+interface I {
+	I(String s);
+	void foo(int i);
+}
+
+module M {
+	class D implements I {
+		public D(String s) {}
+		public void foo(int i) {
+			test();
+		}
+	}
+	class C implements I with D;
+	void test() {}
+}
+
+interface J {
+	void bar();
+}
+
+module N extends M {
+	class C implements I, J with M.D {
+		public C(String s) {
+			super(s);
+			toga();
+		}
+		public void bar() {
+			System.out.println();
+		}
+	}
+	void toga() {
+	}
+}

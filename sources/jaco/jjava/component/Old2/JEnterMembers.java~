@@ -1,0 +1,41 @@
+// JEnterMembers
+// Stewart Itzstein
+
+package jaco.jjava.component;
+ 
+import jaco.framework.*;
+import jaco.java.struct.*;
+import jaco.java.component.*;
+import jaco.java.context.*;
+import jaco.jjava.struct.*;
+import jaco.jjava.component.*;
+import jaco.jjava.context.*;
+import java.util.*;
+import Type.*;
+import Tree.*;
+import Definition.*;
+ 
+ 
+
+public class JEnterMembers extends EnterMembers implements JModifierConst{
+	public String getName() {
+		return "JEnterMembers";
+	}
+        public Definition memberEnter(Tree tree, ContextEnv env) {
+		switch (tree) {
+			case MethodDecl(_, int mods, Tree restype,_,_,_,_):
+				Definition def = super.memberEnter(tree,env);
+				if (restype != null)
+					switch (restype) {
+						// select SIGNAL type and set def modifier to reflect this
+						case BasicType(JTypeConst.SIGNAL):
+							System.out.println("signal detected: " + def.name);
+							def.modifiers |= SIGNAL;
+							break;
+					}
+				return def;
+			default:
+				return super.memberEnter(tree,env);
+			}
+	}
+}

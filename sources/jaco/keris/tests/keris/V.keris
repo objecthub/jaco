@@ -1,0 +1,27 @@
+module M {
+	interface I {
+		I(int i);
+		void foo();
+	}
+	class A implements I {
+		public A(int i) {}
+		public void foo() { }
+	}
+	class C implements I with A;
+	void foo(C c) {}
+}
+
+module N requires M {
+	// module M;
+	class B extends M.C {
+		B() {
+			super(7);
+		}
+		public void foo() {
+			super.foo();
+		}
+	}
+	void test(B b) {
+		M.foo(b);
+	}
+}

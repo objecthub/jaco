@@ -1,0 +1,33 @@
+module M requires O {
+}
+
+module N requires Q {
+}
+
+module Q requires O {
+}
+
+module P requires M, N {
+}
+
+module O {
+}
+
+module M0 specializes M requires O0 as O {
+}
+
+module O0 specializes O {
+}
+
+module P0 specializes P requires M0 as M, N0 as N {
+}
+
+module N0 specializes N requires Q0 as Q {
+}
+
+module Q0 specializes Q requires O0 as O {
+}
+
+
+module O1 specializes O {
+}

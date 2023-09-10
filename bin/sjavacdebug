@@ -1,0 +1,2 @@
+#!/bin/sh
+java -Djava.compiler=NONE -ms10m -noclassgc jaco.sjava.Main $*

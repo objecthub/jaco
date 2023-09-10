@@ -1,0 +1,27 @@
+import keris.util.*;
+import keris.io.*;
+import keris.lang.*;
+
+module PRINTER implements OBSERVER requires SUBJECT, OUT {
+    
+    public class Observer implements ObserverIntf with {
+        public void notify(SUBJECT.Subject subj, Object event) {
+            OUT.println(this + " observes event " + event + " for " + subj);
+        }
+    }
+}
+
+module TEST {
+    
+    module SUBJECT;
+    module PRINTER;
+    module CONSOLE;
+    
+    public void main(String[] args) {
+        SUBJECT.Subject s0 = new SUBJECT.Subject();
+        OBSERVER.Observer o0 = new OBSERVER.Observer();
+        s0.add(o0);
+        s0.notify("MyEvent");
+    }
+}
+

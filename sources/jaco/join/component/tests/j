@@ -1,0 +1,407 @@
+{ 
+  rendezvous () = { 
+        barrier1 x = a2 () & a1 x,
+        barrier2 x = b2 () & b1 x,
+        a2 () & b1 x = x,
+        b2 () & a1 x = x } ;
+        (barrier1, barrier2),
+  barrier1 ((b, x$0), x) = b x,
+  barrier2 ((x$1, b), x) = b x } ;
+  { 
+     r = rendezvous (),
+     g () & h () = h (),
+     process1 x = { y = barrier1 (r, x) } ;
+           g (),
+     process2 x = barrier2 (r, x) } ;
+     process2 8 & process1 2
+
+(1)  rendezvous:: a
+(2)  ():: ()
+(3)  rendezvous ():: ab
+(4)  barrier1:: c
+(5)  x:: b
+(6)  barrier1 x:: ac
+(7)  a1:: k
+(8)  x:: b
+(9)  a1 x:: ad
+(10)  a2:: f
+(11)  ():: ()
+(12)  a2 ():: ae
+(13)  a2 () & a1 x:: ae
+(14)  barrier1 x = a2 () & a1 x:: ae
+(15)  barrier2:: e
+(16)  x:: d
+(17)  barrier2 x:: af
+(18)  b1:: h
+(19)  x:: d
+(20)  b1 x:: ag
+(21)  b2:: i
+(22)  ():: ()
+(23)  b2 ():: ah
+(24)  b2 () & b1 x:: ah
+(25)  barrier2 x = b2 () & b1 x:: ah
+(26)  b1:: d -> nil
+(27)  x:: g
+(28)  b1 x:: nil
+(29)  a2:: () -> ae
+(30)  ():: ()
+(31)  a2 ():: aj
+(32)  a2 () & b1 x:: aj
+(33)  x:: g
+(34)  a2 () & b1 x = x:: g
+(35)  a1:: b -> nil
+(36)  x:: j
+(37)  a1 x:: nil
+(38)  b2:: () -> ah
+(39)  ():: ()
+(40)  b2 ():: al
+(41)  b2 () & a1 x:: al
+(42)  x:: j
+(43)  b2 () & a1 x = x:: j
+(44)  { 
+  barrier1 x = a2 () & a1 x,
+  barrier2 x = b2 () & b1 x,
+  a2 () & b1 x = x,
+  b2 () & a1 x = x }:: {barrier1::b[b = j] -> ae[ae = g], barrier2::d[d = g] -> ah[ah = j], a2::() -> g, b1::h[h = d[d = g] -> nil], b2::() -> j, a1::k[k = b[b = j] -> nil]}
+(45)  barrier1:: j -> g
+(46)  barrier2:: g -> j
+(47)  (barrier1, barrier2):: (j -> g, g -> j)
+(48)  { 
+  barrier1 x = a2 () & a1 x,
+  barrier2 x = b2 () & b1 x,
+  a2 () & b1 x = x,
+  b2 () & a1 x = x } ;
+  (barrier1, barrier2):: (j -> g, g -> j)
+(49)  rendezvous () = { 
+     barrier1 x = a2 () & a1 x,
+     barrier2 x = b2 () & b1 x,
+     a2 () & b1 x = x,
+     b2 () & a1 x = x } ;
+     (barrier1, barrier2):: (j -> g, g -> j)
+(50)  barrier1:: o
+(51)  b:: l
+(52)  x$0:: m
+(53)  (b, x$0):: (l, m)
+(54)  x:: n
+(55)  ((b, x$0), x):: ((l, m), n)
+(56)  barrier1 ((b, x$0), x):: am
+(57)  b:: l
+(58)  x:: n
+(59)  b x:: an
+(60)  barrier1 ((b, x$0), x) = b x:: an
+(61)  barrier2:: s
+(62)  x$1:: p
+(63)  b:: q
+(64)  (x$1, b):: (p, q)
+(65)  x:: r
+(66)  ((x$1, b), x):: ((p, q), r)
+(67)  barrier2 ((x$1, b), x):: ao
+(68)  b:: q
+(69)  x:: r
+(70)  b x:: ap
+(71)  barrier2 ((x$1, b), x) = b x:: ap
+(72)  { 
+  rendezvous () = { 
+        barrier1 x = a2 () & a1 x,
+        barrier2 x = b2 () & b1 x,
+        a2 () & b1 x = x,
+        b2 () & a1 x = x } ;
+        (barrier1, barrier2),
+  barrier1 ((b, x$0), x) = b x,
+  barrier2 ((x$1, b), x) = b x }:: {rendezvous::Vj,g.() -> (j -> g, g -> j), barrier1::Vn,an,m.((n -> an, m), n) -> an, barrier2::Vp,r,ap.((p, r -> ap), r) -> ap}
+(73)  r:: t
+(74)  rendezvous:: () -> (aq -> ar, ar -> aq)
+(75)  ():: ()
+(76)  rendezvous ():: (aq -> ar, ar -> aq)
+(77)  r = rendezvous ():: (aq -> ar, ar -> aq)
+(78)  h:: v
+(79)  ():: ()
+(80)  h ():: at
+(81)  g:: u
+(82)  ():: ()
+(83)  g ():: au
+(84)  g () & h ():: au
+(85)  h:: () -> nil
+(86)  ():: ()
+(87)  h ():: nil
+(88)  g () & h () = h ():: nil
+(89)  process1:: x
+(90)  x:: w
+(91)  process1 x:: aw
+(92)  y:: y
+(93)  barrier1:: ((ax -> ay, b`), ax) -> ay
+(94)  r:: (ba -> bb, bb -> ba)
+(95)  x:: w
+(96)  (r, x):: ((ba -> bb, bb -> ba), w)
+(97)  barrier1 (r, x):: bc
+(98)  y = barrier1 (r, x):: bc
+(99)  { y = barrier1 (r, x) }:: {y::Vbc.bc}
+(100)  g:: () -> nil
+(101)  ():: ()
+(102)  g ():: nil
+(103)  { y = barrier1 (r, x) } ;
+  g ():: nil
+(104)  process1 x = { y = barrier1 (r, x) } ;
+     g ():: nil
+(105)  process2:: aa
+(106)  x:: a`
+(107)  process2 x:: be
+(108)  barrier2:: ((bf, bg -> bh), bg) -> bh
+(109)  r:: (bi -> bj, bj -> bi)
+(110)  x:: a`
+(111)  (r, x):: ((bi -> bj, bj -> bi), a`)
+(112)  barrier2 (r, x):: bk
+(113)  process2 x = barrier2 (r, x):: bk
+(114)  { 
+  r = rendezvous (),
+  g () & h () = h (),
+  process1 x = { y = barrier1 (r, x) } ;
+        g (),
+  process2 x = barrier2 (r, x) }:: {r::Vaq,ar.(aq -> ar, ar -> aq), g::() -> nil, h::v[v = () -> nil], process1::Vw.w -> nil, process2::Va`,bk.a` -> bk}
+(115)  process1:: bl -> nil
+(116)  2:: int
+(117)  process1 2:: nil
+(118)  process2:: bn -> bo
+(119)  8:: int
+(120)  process2 8:: bp
+(121)  process2 8 & process1 2:: bp
+(122)  { 
+  r = rendezvous (),
+  g () & h () = h (),
+  process1 x = { y = barrier1 (r, x) } ;
+        g (),
+  process2 x = barrier2 (r, x) } ;
+  process2 8 & process1 2:: bp
+(123)  { 
+  rendezvous () = { 
+        barrier1 x = a2 () & a1 x,
+        barrier2 x = b2 () & b1 x,
+        a2 () & b1 x = x,
+        b2 () & a1 x = x } ;
+        (barrier1, barrier2),
+  barrier1 ((b, x$0), x) = b x,
+  barrier2 ((x$1, b), x) = b x } ;
+  { 
+     r = rendezvous (),
+     g () & h () = h (),
+     process1 x = { y = barrier1 (r, x) } ;
+           g (),
+     process2 x = barrier2 (r, x) } ;
+     process2 8 & process1 2:: bp
+(124)  { 
+  rendezvous () = { 
+        barrier1 x = a2 () & a1 x,
+        barrier2 x = b2 () & b1 x,
+        a2 () & b1 x = x,
+        b2 () & a1 x = x } ;
+        (barrier1, barrier2),
+  barrier1 ((b, x$0), x) = b x,
+  barrier2 ((x$1, b), x) = b x } ;
+  { 
+     r = rendezvous (),
+     g () & h () = h (),
+     process1 x = { y = barrier1 (r, x) } ;
+           g (),
+     process2 x = barrier2 (r, x) } ;
+     process2 8 & process1 2
+
+:: bp
+FUNCTIONS
+
+  TOPLEVEL()
+    0: ENTER 0
+    3: GOTO 24
+    6: FUN 4
+    9: STORE 0
+    11: FUN 5
+    14: STORE 1
+    16: FUN 6
+    19: STORE 2
+    21: GOTO 27
+    24: GOTO 6
+    27: ENTER 2
+    30: GOTO 53
+    33: LOAD 1, 0
+    36: UNIT
+    37: APPLY
+    38: STORE 0
+    40: FUN 8
+    43: STORE 3
+    45: FUN 9
+    48: STORE 4
+    50: GOTO 64
+    53: TOKEN 2
+    55: STORE 1
+    57: TOKEN 1
+    59: STORE 2
+    61: GOTO 33
+    64: FORK 74
+    67: LOAD 0, 3
+    70: BYTE 2
+    72: YIELD
+    73: STOP
+    74: LOAD 0, 4
+    77: BYTE 8
+    79: APPLY
+    80: LEAVE
+    81: LEAVE
+    82: STOP
+
+  FUNCTION 0(1 variables, guard is 0,  left token map is 0)
+    0: STORE 0
+    2: FORK 13
+    5: LOAD 1, 5
+    8: LOAD 0, 0
+    11: APPLY
+    12: STOP
+    13: LOAD 1, 2
+    16: UNIT
+    17: APPLY
+    18: RET
+
+  FUNCTION 1(1 variables, guard is 0,  left token map is 0)
+    0: STORE 0
+    2: FORK 13
+    5: LOAD 1, 3
+    8: LOAD 0, 0
+    11: APPLY
+    12: STOP
+    13: LOAD 1, 4
+    16: UNIT
+    17: APPLY
+    18: RET
+
+  FUNCTION 2(1 variables, guard is 3,  left token map is 0)
+    0: POP
+    1: STORE 0
+    3: LOAD 0, 0
+    6: RET
+
+  FUNCTION 3(1 variables, guard is 12,  left token map is 0)
+    0: POP
+    1: STORE 0
+    3: LOAD 0, 0
+    6: RET
+
+  FUNCTION 4(0 variables, guard is 0,  left token map is 0)
+    0: POP
+    1: ENTER 1
+    4: GOTO 20
+    7: FUN 0
+    10: STORE 0
+    12: FUN 1
+    15: STORE 1
+    17: GOTO 39
+    20: TOKEN 2
+    22: STORE 2
+    24: TOKEN 1
+    26: STORE 3
+    28: TOKEN 4
+    30: STORE 4
+    32: TOKEN 3
+    34: STORE 5
+    36: GOTO 7
+    39: LOAD 0, 0
+    42: LOAD 0, 1
+    45: TUPEL 2
+    47: LEAVE
+    48: RET
+
+  FUNCTION 5(3 variables, guard is 0,  left token map is 0)
+    0: DECOMP
+    1: STORE 2
+    3: DECOMP
+    4: STORE 1
+    6: STORE 0
+    8: LOAD 0, 0
+    11: LOAD 0, 2
+    14: APPLY
+    15: RET
+
+  FUNCTION 6(3 variables, guard is 0,  left token map is 0)
+    0: DECOMP
+    1: STORE 2
+    3: DECOMP
+    4: STORE 1
+    6: STORE 0
+    8: LOAD 0, 1
+    11: LOAD 0, 2
+    14: APPLY
+    15: RET
+
+  FUNCTION 7(0 variables, guard is 3,  left token map is 0)
+    0: POP
+    1: POP
+    2: LOAD 1, 2
+    5: UNIT
+    6: YIELD
+    7: UNIT
+    8: RET
+
+  FUNCTION 8(1 variables, guard is 0,  left token map is 0)
+    0: STORE 0
+    2: ENTER 3
+    5: GOTO 25
+    8: LOAD 3, 1
+    11: LOAD 2, 0
+    14: LOAD 1, 0
+    17: TUPEL 2
+    19: APPLY
+    20: STORE 0
+    22: GOTO 28
+    25: GOTO 8
+    28: LOAD 2, 1
+    31: UNIT
+    32: YIELD
+    33: LEAVE
+    34: UNIT
+    35: RET
+
+  FUNCTION 9(1 variables, guard is 0,  left token map is 0)
+    0: STORE 0
+    2: LOAD 2, 2
+    5: LOAD 1, 0
+    8: LOAD 0, 0
+    11: TUPEL 2
+    13: APPLY
+    14: RET
+
+STATE SPACES
+
+  SPACE 0:
+    members: 3, tokens: 0, actions: 0
+
+  SPACE 1:
+    members: 6, tokens: 4, actions: 2
+    invoke function 2 for 3
+    invoke function 3 for 12
+
+  SPACE 2:
+    members: 5, tokens: 2, actions: 1
+    invoke function 7 for 3
+
+  SPACE 3:
+    members: 1, tokens: 0, actions: 0
+////// t4.join //////
+import join.runtime.*;
+
+public class t4 {
+   public static void main(String[] args) {
+      JoinProgram prog = new JoinProgram(4, 10);
+      prog.defineStateSpace(0, 3, null, null);
+      prog.defineStateSpace(1, 6, new int[]{2, 3}, new byte[]{-1, -1, -1, 0, -1, -1, -1, 0, -1, -1, -1, 0, 1, 1, 1, 0});
+      prog.defineStateSpace(2, 5, new int[]{7}, new byte[]{-1, -1, -1, 0});
+      prog.defineStateSpace(3, 1, null, null);
+      prog.defineFunction(0, 0, 0, 1, new byte[]{14, 0, 1, 0, 13, 13, 1, 5, 13, 0, 0, 22, 3, 13, 1, 2, 4, 22, 2});
+      prog.defineFunction(1, 0, 0, 1, new byte[]{14, 0, 1, 0, 13, 13, 1, 3, 13, 0, 0, 22, 3, 13, 1, 4, 4, 22, 2});
+      prog.defineFunction(2, 3, 0, 1, new byte[]{16, 14, 0, 13, 0, 0, 2});
+      prog.defineFunction(3, 12, 0, 1, new byte[]{16, 14, 0, 13, 0, 0, 2});
+      prog.defineFunction(4, 0, 0, 0, new byte[]{16, 17, 0, 1, 19, 0, 20, 11, 0, 0, 14, 0, 11, 0, 1, 14, 1, 19, 0, 39, 12, 2, 14, 2, 12, 1, 14, 3, 12, 4, 14, 4, 12, 3, 14, 5, 19, 0, 7, 13, 0, 0, 13, 0, 1, 9, 2, 18, 2});
+      prog.defineFunction(5, 0, 0, 3, new byte[]{10, 14, 2, 10, 14, 1, 14, 0, 13, 0, 0, 13, 0, 2, 22, 2});
+      prog.defineFunction(6, 0, 0, 3, new byte[]{10, 14, 2, 10, 14, 1, 14, 0, 13, 0, 1, 13, 0, 2, 22, 2});
+      prog.defineFunction(7, 3, 0, 0, new byte[]{16, 16, 13, 1, 2, 4, 23, 4, 2});
+      prog.defineFunction(8, 0, 0, 1, new byte[]{14, 0, 17, 0, 3, 19, 0, 25, 13, 3, 1, 13, 2, 0, 13, 1, 0, 9, 2, 22, 14, 0, 19, 0, 28, 19, 0, 8, 13, 2, 1, 4, 23, 18, 4, 2});
+      prog.defineFunction(9, 0, 0, 1, new byte[]{14, 0, 13, 2, 2, 13, 1, 0, 13, 0, 0, 9, 2, 22, 2});
+      prog.print(prog.execute(new byte[]{17, 0, 0, 19, 0, 24, 11, 0, 4, 14, 0, 11, 0, 5, 14, 1, 11, 0, 6, 14, 2, 19, 0, 27, 19, 0, 6, 17, 0, 2, 19, 0, 53, 13, 1, 0, 4, 22, 14, 0, 11, 0, 8, 14, 3, 11, 0, 9, 14, 4, 19, 0, 64, 12, 2, 14, 1, 12, 1, 14, 2, 19, 0, 33, 1, 0, 74, 13, 0, 3, 5, 2, 23, 3, 13, 0, 4, 5, 8, 22, 18, 18, 3}));
+   }
+}

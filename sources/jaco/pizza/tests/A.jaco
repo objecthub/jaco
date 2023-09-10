@@ -1,0 +1,17 @@
+class A {
+    case T;
+    case S(A a, A b);
+    
+    void foo() {
+        switch (this) {
+            case S(_, T):
+                System.out.println("1");
+                break;
+            case S(T, _):
+                System.out.println("2");
+                break;
+            default:
+                System.out.println("3");
+        }   
+    }
+}

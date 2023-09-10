@@ -1,0 +1,82 @@
+____    /   _ _     JaCo
+    \  //\ / / \    -- an extensible compiler
+     \//  \\_\_/    (c) 1997-2002, Matthias Zenger
+           \____________________________________________________________
+
+
+FEATURES
+
+This document briefly describes the features of PiCo. Further
+information can be found in the PDF files of this directory.
+
+
+EXTENSIBLE ALGEBRAIC DATATYPES
+
+PiCo supports extensible algebraic datatypes with defaults. A
+motivation for these types can be found in the PDF file icfp01.pdf.
+A specification is given by the file eat4j.pdf. It is still a draft
+version. All comments are welcome. A more detailed description of
+extensible algebraic types for Java including its compilation, is
+available only in German at http://lampwww.epfl.ch/~zenger/.
+
+
+COVARIANT METHOD OVERRIDING
+
+PiCo allows subclasses to override methods of superclasses with
+a refined return type (opposed to Java's invariant method over-
+riding). Thus, the following code can be legally compiled with
+PiCo, even though any Java compiler would reject this program:
+	
+	class Super {
+		Super myself() {
+			return this;
+		}
+	}
+	class Sub extends Super {
+		Sub myself() {
+			return this;
+		}
+	}
+
+
+META DATA DEFINITION AND STORAGE
+
+In Java it is difficult to attach meta data to the code compiled
+by a regular Java compiler. PiCo supports the doc-comment tag
+@meta. Information defined using this tag is stored in the
+resulting classfile. In future we will provide tools for
+retrieving this information again. Here is an example:
+	
+	class A {
+		/** this is a method declaration
+		 *  @meta precond=i>j
+		 *  @meta postcond=j>i
+		 */
+		void foo(int i, int j) {
+			int k = i;
+			i = j;
+			j = k;
+		}
+	}
+
+
+ASSERTS FOR J2SDK 1.3
+
+The J2SDK 1.4 introduces assert statements in the Java programming
+language. There are two different forms:
+
+    assert <cond>;                or
+    assert <cond> : <value>;
+    
+Assert statements can be activated using the compiler option
+-source 1.4. At runtime (if the switch -enableassertions is
+activated) an AssertionError occurs if the condition of an assert
+statement is false. Since AssertionErrors do not exist in pre 1.4
+J2SDKs, code that uses asserts can only run on the J2SDK 1.4
+platform. Therefore, PiCo introduces the compiler option
+-target 1.3 so that code gets generated that can be executed even
+on pre 1.4 J2SDKs.
+
+
+________________________________________________________________________
+           Copyright 1997-2002, Matthias Zenger (matthias@objecthub.com)

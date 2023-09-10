@@ -1,0 +1,22 @@
+module interface MI {
+    abstract module N;
+}
+
+module M implements MI {
+	module N;
+}
+
+module N {
+    void bar() {}
+}
+
+module P {
+    module M implements MI;
+}
+
+module O {
+    module P;
+    void foo() {
+    	P::MI::N.bar();
+    }
+}

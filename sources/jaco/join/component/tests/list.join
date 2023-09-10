@@ -1,0 +1,53 @@
+{
+    List = {
+    
+        Nil = {                         // Nil :: { 1 }
+            isEmpty = true,             // isEmpty :: bool
+            head = error,               // head :: <any>
+            tail = error                // tail :: <any>
+            //match f g = f               // match :: \forall e, f: e -> f -> e
+        },
+        
+        Cons (x, xs) = {                   // Cons :: \forall a, b: a -> b -> { 2 }
+                this = {
+                    isEmpty = false,    // isEmpty :: bool
+                    head = x,           // head :: a
+                    tail = xs           // tail :: b
+                    //match f g = g x xs  // match :: \forall c, d: c -> (a -> b -> d) -> d
+                }
+            } ; this
+            
+    }
+    
+} ; {
+        append (xs, ys) =
+            if (xs.isEmpty)
+                ys
+            else
+                List.Cons (xs.head, append (xs.tail, ys))
+
+
+// append :: a -> b -> b
+//
+// a < { isEmpty :: bool, head :: d, tail :: a }
+// { isEmpty :: bool, head :: d, tail :: b } = b
+//
+// append :: \forall d, a < { isEmpty :: bool, head :: d, tail :: a }. a -> m -> m
+//    m = mu b. { isEmpty :: bool, head :: d, tail :: b }
+// or m = exists b. b = { ... } => b
+// 
+// x = List.Nil
+// y = List.Cons true List.Nil
+// z = List.Cons 1 y
+// 
+// x :: { isEmpty :: bool, head :: \forall a.a, tail :: \forall a.a } = t(x)
+// y :: { isEmpty :: bool, head :: bool, tail :: t(x) } = t(y)
+// z :: { isEmpty :: bool, head :: int, tail:: t(y) } = t(z)
+// 
+// u = append y z
+
+//       rec append1 xs ys =
+//            xs.match
+//                ys
+//                (x,y| List.Cons x (append1 y ys))
+    } ; append

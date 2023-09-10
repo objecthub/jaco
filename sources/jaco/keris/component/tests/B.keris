@@ -1,0 +1,54 @@
+module M requires N, P {
+	module O1;
+	module R;
+	
+	void bar(O.A x) {
+	}
+	O1.A foo() { return null; }
+	
+	void main() {
+		N.bar(N.foo());
+		N.bar(P.foo());
+		P.bar(N.foo());
+		P.bar(P.foo());
+		bar(foo());
+		R::Q.bar(foo());
+		O1.A a = R::Q.foo();
+		bar(R::Q.foo());
+		R::Q.bar(foo());
+		R.bar(foo());
+		R.bar(R::Q.foo());
+		R::Q.bar(R.foo());
+		bar(R.foo());
+	}
+}
+
+module N requires O {
+	O.A foo() { return null; }
+	void bar(O.A x) {}
+}
+
+module P requires O1, Q {
+	void bar(O1.A x) {}
+	O1.A foo() { return null; }
+}
+
+module O {
+	class A = Object;
+}
+
+module O1 refines O {
+    class A = Object;
+}
+
+module Q requires O {
+    O.A foo() { return null; }
+	void bar(O.A x) {}
+}
+
+module R requires O1 {
+    module Q;
+    void bar(O.A x) {
+	}
+	O.A foo() { return null; }
+}

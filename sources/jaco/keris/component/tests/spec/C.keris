@@ -1,0 +1,42 @@
+module H {
+    class C = Object;
+    C id() {
+        return null;
+    }
+}
+
+module I specializes H {
+}
+
+/*
+module J specializes I {
+}
+
+module P refines H {
+}
+*/
+
+module M requires H {
+    void foo(H.C c) { /* foo(H.id()); */ }
+    // H.C goo() { return null; }
+}
+
+module N specializes M requires I as H, H, M {
+    I.C bar() { return null; }
+    void tar(H.C x) {}
+    void main() {
+        //foo(bar());
+        foo(H.id());
+        tar(bar());
+    }
+}
+
+module O requires H {
+    module I;
+    O::I.C bar() { return null; }
+    void tar(H.C x) {}
+    void main() {
+        O.tar(O.bar());
+        H.C x = bar();
+    }
+}

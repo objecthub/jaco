@@ -1,0 +1,23 @@
+module interface MI {
+
+}
+
+module interface MJ {
+
+}
+
+module interface MK for MI, MJ {
+
+}
+
+module M requires MI, MJ {
+
+}
+
+module N for M requires MK for MI, MK for MJ {
+
+}
+
+module O implements MI, MJ {
+
+}

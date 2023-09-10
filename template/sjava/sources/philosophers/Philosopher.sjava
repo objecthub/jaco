@@ -1,0 +1,50 @@
+import java.util.Random;
+
+public active class Philosopher {
+      
+  int myID;
+  Fork forks[];
+
+  Philosopher (int _myID, Fork[] _forks) {
+      myID = _myID;
+      forks = _forks;
+  }
+  
+  Random rndo = new Random();
+  int x () {
+    int rnd=rndo.nextInt();
+    if (rnd<0)
+      return (-rnd)%200;
+    else
+      return rnd%200;
+  }
+
+  public void run () {
+    for (;;) {
+      System.out.println("philosopher "+myID+" thinking");
+	  waituntil(x());
+	  //select {
+	  	forks[myID].get();
+	//	System.out.println("philosopher "+myID+" got left fork ("+myID+").");
+	  //}
+	   
+	  select {
+	  	forks[(myID+1)%5].get();
+		System.out.println("philosopher "+myID+" got right fork ("+((myID+1)%5)+").");
+ 		System.out.println("philosopher "+myID+" eating");
+	  }
+	  
+	  waituntil(x());
+	  
+ 	  select {
+	    forks[myID].put();
+		System.out.println("philosopher "+myID+" put down left fork ("+myID+").");
+	  }
+	  
+	  select {
+	    forks[(myID+1)%5].put();
+		System.out.println("philosopher "+myID+" put down right fork ("+((myID+1)%5)+").");
+	  }	  	      
+    }
+  }
+}

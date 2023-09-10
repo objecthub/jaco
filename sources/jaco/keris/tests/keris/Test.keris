@@ -1,0 +1,52 @@
+module L {
+    class A {}
+}
+
+module N {
+    module L = new L;
+}
+
+module M {
+    module N = new N;
+    
+    void foo(N::L.A a) {
+    
+    }
+}
+/*
+module O extends M {
+    module M for N = new M;
+}
+
+
+/* module M requires N {
+    void m() {
+        N.n();
+    }
+}
+
+module S requires M {
+    void s() {
+        M.m();
+    }
+}
+
+module N extends S {
+    void n() {
+        M.m();
+    }
+}
+
+module O {
+    module N = new N;
+    module M = new M;
+}
+
+module interface NI requires S {
+   
+}
+
+module interface MI extends NI {
+    module N for S;
+}
+*/

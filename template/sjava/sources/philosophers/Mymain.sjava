@@ -1,0 +1,28 @@
+public class Mymain {
+
+  Fork[] fork;
+
+  Philosopher[] ph;
+  
+  public Mymain() {
+  	fork = new Fork[5];
+	ph = new Philosopher[5];
+  }
+  
+  public void start() {
+  	for(int i=0;i<fork.length;i++) {
+		fork[i] = new Fork();			
+	}
+	for(int i=0;i<ph.length;i++) {
+		ph[i] = new Philosopher(i,fork);
+	}
+  }
+
+  static public void main (String args []) {
+  	new Mymain().start(); 
+  }
+}
+
+
+
+

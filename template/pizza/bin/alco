@@ -1,0 +1,16 @@
+#!/bin/sh
+# alco launcher
+# Feb 18, 2000, Matthias Zenger
+
+APP=$0
+while [ -h "$APP" ]; do
+    LOOKUP=`ls -ld "$APP"`
+    RESULT=`expr "$LOOKUP" : '^.*-> \(.*\)$'`
+    if expr "$RESULT" : '^/' > /dev/null; then
+	APP="$RESULT"
+    else
+	APP="`dirname $APP`/$RESULT"
+    fi
+done
+APPHOME=`dirname "$APP"`/..
+java -classpath $APPHOME/lib/jaco.jar:${CLASSPATH:=.} -ms10m jaco.pizza.Main $*

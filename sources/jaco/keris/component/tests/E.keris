@@ -1,0 +1,66 @@
+module interface I requires K {
+	interface CI {}
+	class C implements CI;
+    module J;
+    void foo(J.A a);
+    void bar(K.B b);
+    void take(C c);
+}
+
+module interface J {
+	class A;
+}
+
+module N implements J {
+	class A = Object;
+}
+
+module interface K {
+	class B;
+}
+
+module interface L {
+	interface CJ { CJ(int x); }
+	class C implements CJ;
+	C ret();
+}
+
+module M implements I, L requires K {
+	class C implements CI, CJ = {
+		public C(int x) {}
+	}
+	module N;// implements J;
+	public void foo(J.A a) {}
+	public void bar(K.B b) {}
+	public C ret() {
+		// return new C(1);
+		return null;
+	}
+	public void take(C c) {}
+	public void main() {
+		I.take(L.ret());
+	}
+}
+
+module Q refines M {
+	class C implements CI, CJ = {
+		public C(int x) {}
+	}
+	public C ret() {
+		return new C(1);
+	}
+}
+
+module O requires K {
+    module M implements I, L;
+    void main() {
+    	//I.take(L.ret());
+    }
+}
+
+module P refines O {
+	module M;
+	void main() {
+    	I.take(L.ret());
+    }
+}

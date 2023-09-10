@@ -1,0 +1,30 @@
+module M {
+    module N;
+    module O;
+    N::O.C foo() { return null; }
+    void bar(N::O.C c) {}
+    void main() {
+    	bar(foo());
+    	bar(N.foo());
+    	bar(N::O.foo());
+    	N.bar(foo());
+    	N.bar(N.foo());
+    	N.bar(N::O.foo());
+    	N::O.bar(foo());
+    	N::O.bar(N.foo());
+    	N::O.bar(N::O.foo());
+    	O.bar(O.foo());
+    }
+}
+
+module N {
+	module O;
+	O.C foo() { return null; }
+    void bar(O.C c) {}
+}
+
+module O {
+    class C = Object;
+    C foo() { return null; }
+    void bar(C c) {}
+}

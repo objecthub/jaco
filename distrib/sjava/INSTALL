@@ -1,0 +1,65 @@
+             _     _
+     __    //||  //|
+    (_ \  //_|| //_|    SYNCHRONOUS JAVA INSTALLATION
+______) \//  ||//  |____________________________________________________
+
+
+UNIX
+
+For installing the compiler on Unix systems, you just have
+to include the bin directory into your path. With tcsh this
+could be done with the following command (assuming that you
+installed sjava in directory $HOME/sjava):
+
+  set path=($HOME/sjava/bin $path)
+
+The compiler can be invoked using the command sjavac:
+
+  sjavac MyProgram.sjava
+  
+Compiled SJava programs are executed using sjava:
+
+  sjava MyProgram
+
+
+WINDOWS
+
+If you have the possibility: use another operating system!
+Microsoft produces low-quality software. Therefore supporting
+and using this platform is a pain. If you are forced to use
+Windows, then either get a copy of cygwin (http://cygwin.com)
+and follow the Unix installation or proceed according to the
+following steps:
+
+0) Install the J2SDK (at least JDK1.2)
+
+1) Copy the sjava archive to a directory, say c:\sjava
+
+2) Include the sjava tools in your path by adding the
+   entry c:\sjava\bin\win. The procedure for doing this is
+   platform specific. Please refer to the instructions
+   comming with the J2SDK. You can omit this step, but
+   then you have to prefix all sjava tools with
+   c:\sjava\bin\win; e.g. the compiler would then be
+   invoked with the following command:
+   
+     c:\sjava\bin\win\sjavac MyProgram.sjava
+
+3) Include the jar files in your classpath
+
+  set classpath=c:\sjava\lib\jaco.jar;c:\sjava\lib\sjava.jar
+
+   Alternatively, you can do it in the same way as step 2).
+   
+The compiler can now be invoked using the command sjavac:
+
+  sjavac MyProgram.sjava
+  
+Compiled SJava programs are executed using sjava:
+
+  sjava MyProgram
+
+
+________________________________________________________________________
+09/04/2001, Matthias Zenger
+

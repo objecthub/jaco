@@ -1,0 +1,181 @@
+<project name="Keris" default="usage" basedir=".">
+
+  <!-- the name of the extension and some local names -->
+  <property name="extension" value="keris"/>
+  <property name="grammar.spec" value="Keris.cup"/>
+  <property name="grammar.parser" value="XParser"/>
+  <property name="grammar.symbols" value="XSymbols"/>
+  
+  <!-- the bootstrap compiler jar archive -->
+  <property name="bootstrap.jar" value="bootstrap/jaco.jar"/>
+  
+  <!-- task definitions for the pico and jaco compilers -->
+  <taskdef name="jacoc"
+           classname="jaco.java.AntTask"
+           classpath="${bootstrap.jar}"/>
+  <taskdef name="picoc"
+           classname="jaco.pizza.AntTask"
+           classpath="${bootstrap.jar}"/>
+
+  <!-- the target directory -->
+  <property name="classes" value="../../../classes" />
+  
+  <!-- the source directory -->
+  <property name="sources" value="." />
+  
+  <!-- the classpath in the compilation process -->
+  <property name="classpath" value="${classes}:lib/ant.jar" />
+  
+  <!-- prefix of backup files -->  
+  <property name="backup.root" value="../../../archive"/>
+
+  <!-- print out the usage message
+    -->
+  <target name="usage">
+    <echo message="---- JACO -- extensible compiler (extension builder)"/>
+    <echo message="---- extension: ${extension}"/>
+    <echo message="---- (c) 24-10-2002, Matthias Zenger"/>
+    <echo message="--"/>
+    <echo message="-- make.parser       update the parser sources"/>
+    <echo message="-- compile.parser    compile the parser sources"/>
+    <echo message="-- make.resources    update the compiler resources"/>
+    <echo message="-- compile           compile the extension"/>
+    <echo message="-- clean             remove all classfiles from the repository"/>
+    <echo message="-- backup            backup all source files"/>
+    <echo message="-- normalize         cleanup source code"/>
+  </target>
+
+  <!-- apply the jcup parser generator;
+    -  uses parameters: parser.package, parser.class, parser.spec,
+    -                   parser.sym, parser.target
+    -->
+  <target name="jcup" unless="uptodate">
+    <java classname="jcup.Main" fork="true">
+      <classpath path="${classpath}"/>
+      <arg value="-package" />
+      <arg value="${parser.package}" />
+      <arg value="-parser" />
+      <arg value="${parser.class}" />
+      <arg value="-symbols" />
+      <arg value="${parser.sym}" />
+      <arg value="-o" />
+      <arg value="${parser.target}" />
+      <arg value="-f" />
+      <arg value="${parser.spec}" />
+    </java>
+  </target>
+
+  <!-- only apply parser generator if necessary;
+    -  uses parameters: parser.package, parser.class, parser.spec,
+    -                   parser.sym, parser.target
+    -->
+  <target name="check.jcup">
+    <uptodate property="uptodate" value="true"
+              targetfile="${parser.target}/${parser.class}.java" >
+      <srcfiles dir="." includes="${parser.spec}" />
+    </uptodate>
+    <antcall target="jcup">
+    </antcall>
+  </target>
+
+  <!-- make the parser
+    -->
+  <target name="make.parser">
+    <antcall target="check.jcup">
+      <param name="parser.package" value="jaco.${extension}.grammar" />
+      <param name="parser.class" value="${grammar.parser}" />
+      <param name="parser.spec" value="grammar/${grammar.spec}" />
+      <param name="parser.sym" value="${grammar.symbols}" />
+      <param name="parser.target" value="grammar/" />
+    </antcall>
+  </target>
+
+  <!-- copy the parser tables to the target directory
+    -->
+  <target name="copy.tables" depends="prepare.classes, make.parser">
+    <copy file="grammar/${grammar.parser}.tables"
+          todir="${classes}/jaco/${extension}/grammar/"/>
+  </target>
+  
+  <!-- compile the parsers for jaco and pico
+    -->
+  <target name="compile.parser" depends="copy.tables">
+    <picoc srcdir="${sources}" destdir="${classes}" >
+      <classpath path="${classpath}"/>
+      <include name="grammar/*.java"/>
+    </picoc>
+  </target>
+
+  <!-- copy the compiler resources into the target directory
+    -->
+  <target name="make.resources" depends="prepare.classes">
+    <copy todir="${classes}/jaco/${extension}/resources">
+      <fileset dir="resources"/>
+    </copy>
+  </target>
+  
+  <!-- prepare the target directory by creating some directories
+    -->
+  <target name="prepare.classes">
+    <mkdir dir="${classes}/jaco/${extension}/component"/>
+    <mkdir dir="${classes}/jaco/${extension}/grammar"/>
+  </target>
+  
+  <!-- compile the extension
+    -->
+  <target name="compile" depends="copy.tables, make.resources">
+    <picoc srcdir="${sources}"
+           destdir="${classes}"
+           force="true"
+           suffixes="java, pizza">
+      <classpath path="${classpath}"/>
+      <include name="struct/*.java"/>
+      <include name="component/*.java"/>
+      <include name="context/*.java"/>
+      <include name="grammar/*.java"/>
+      <include name="*.java"/>
+    </picoc>
+  </target>
+  
+  <!-- remove all classfiles
+    -->
+  <target name="clean">
+    <delete dir="${classes}/jaco/${extension}"/>
+  </target>
+  
+  <!-- backup the sources of a single compiler
+    -  uses parameters: package
+    -->
+  <target name="backup">
+    <tstamp>
+      <format property="date" pattern="yy-MM-dd"/>
+    </tstamp>
+    <mkdir dir="${backup.root}/${extension}"/>
+    <zip destfile="${backup.root}/${extension}/${extension}_${date}.zip">
+      <fileset dir=".." includes="${extension}/**/*"/>
+    </zip>
+  </target>
+  
+  <!-- normalize source files
+    -->
+  <target name="normalize">
+    <condition property="tabsize" value="4">
+      <os family="mac"/>
+    </condition>
+    <condition property="tabsize" value="8">
+      <not>
+        <os family="mac"/>
+      </not>
+    </condition>
+    <antcall target="import"/>
+  </target>
+  
+  <target name="import" if="tabsize">
+    <fixcrlf srcdir="${sources}"
+             tab="remove"
+             eol="lf"
+             tablength="${tabsize}"
+             javafiles="yes"
+             includes="**/*.java"/>
+  </target>
+</project>

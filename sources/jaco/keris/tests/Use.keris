@@ -1,0 +1,15 @@
+import xjava.util.*;
+import NameTable.*;
+
+module Use requires NameTable {
+    public void main(String[] args) {
+        System.out.println("Use");
+        Name n = NameTable.fromString("hello");
+        System.out.println(n);
+    }
+}
+
+context UseContext {
+    NameTable = new NameTable();
+    Conversions = new Conversions();
+}

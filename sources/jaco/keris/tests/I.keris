@@ -1,0 +1,6 @@
+module interface I {
+    virtual class C {
+        C();
+        C foo(int i);
+    }
+}

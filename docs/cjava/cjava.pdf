@@ -1,0 +1,3066 @@
+%PDF-1.3
+%âãÏÓ
+2 0 obj
+<<
+/Length 4085
+>>
+stream
+BT
+/TT2 1 Tf
+24 0 0 24 54 697.5 Tm
+0 g
+/GS1 gs
+0 Tc
+0 Tw
+(Compound Types in Java)Tj
+/TT4 1 Tf
+12 0 0 12 54 668.3 Tm
+(The aim of this project was to produce a working implementation of the extension of the java type)Tj
+0 -1.1083 TD
+[(system proposed by Büchi and Weck [1])7.7(. The two extensions described in that paper, compound types)]TJ
+T*
+0.0002 Tw
+[(and aliases, have been implemented as an extension of the jaco compiler [4])7.7(. )]TJ
+0 -2.2167 TD
+0 Tw
+(Büchi and Weck defined compound types as an anonymous reference type, defined by a set of interfaces)Tj
+0 -1.1083 TD
+(and zero or one non-final class, called the constituent types. The compound type an extension of its)Tj
+T*
+(constituent types. As such, every method and field defined in one of the constituent type is available in)Tj
+T*
+(the compound type and have the same accessibility. A compound type does not define any additional)Tj
+T*
+(method or field. If the set of types does not contain a class, the compound types is assumed to descend)Tj
+T*
+(from )Tj
+/TT6 1 Tf
+10 0 0 10 80.3 548.6 Tm
+(java.lang.Object)Tj
+/TT4 1 Tf
+12 0 0 12 176.3 548.6 Tm
+(. A variable whose declared type is a compound type must have as its value)Tj
+-10.1917 -1.1083 TD
+(either )Tj
+/TT6 1 Tf
+10 0 0 10 84.3 535.3 Tm
+(null)Tj
+/TT4 1 Tf
+12 0 0 12 108.3 535.3 Tm
+( or a reference to an object that inherits from the class, if one has been given, and that)Tj
+-4.525 -1.1083 TD
+(implements all the constituent interfaces. Compound types are meant to be used as a parameter type, a)Tj
+T*
+(variable type, a return type, the return type methods, cast operator and operand of the instanceof)Tj
+T*
+(operator. )Tj
+0 -2.2167 TD
+(This project also accepts compound types when they appear on a list of interface names, following)Tj
+/TT6 1 Tf
+10 0 0 10 54 455.5 Tm
+(extend)Tj
+/TT4 1 Tf
+12 0 0 12 90 455.5 Tm
+( in an interface declaration, or )Tj
+/TT6 1 Tf
+10 0 0 10 236.9 455.5 Tm
+(interfaces)Tj
+/TT4 1 Tf
+12 0 0 12 296.9 455.5 Tm
+( in a class declaration. In this case, it does not)Tj
+-20.2417 -1.1083 TD
+(represent a reference type, but a series of interface type names. )Tj
+0 -2.2167 TD
+(CJava, the compiler extension implemented in this project, consists of a new syntactic and semantic)Tj
+0 -1.1083 TD
+(analyzer that produces a tree containing both standard jaco nodes and the nodes added by cjava. The)Tj
+T*
+(core of the cjava extension, the translator, later removes the new nodes to produce a semantically correct)Tj
+T*
+(tree that can be parsed and converted into a java .class file. The main work of cjava is thus to translate)Tj
+T*
+(cjava code into standard java code. )Tj
+0 -2.2167 TD
+(This report is divided in two parts. The first part contains the description of the additions made to the)Tj
+0.0667 -1.1083 TD
+[(jaco compiler that were necessary to implement compound types. The second part)6.5( describe the)]TJ
+-0.0667 -1.1083 TD
+(modifications made to implement alias types. )Tj
+/TT2 1 Tf
+14 0 0 14 54 280.3 Tm
+(Naming Convention)Tj
+/TT4 1 Tf
+12 0 0 12 54 253.3 Tm
+(In the examples, the names )Tj
+/TT6 1 Tf
+10 0 0 10 187.3 253.3 Tm
+(C, C1, C2,)Tj
+/TT4 1 Tf
+12 0 0 12 247.3 253.3 Tm
+( etc. denote a class, and )Tj
+/TT6 1 Tf
+10 0 0 10 363.2 253.3 Tm
+(I, I1, I2,)Tj
+/TT4 1 Tf
+12 0 0 12 423.2 253.3 Tm
+( etc., an interface. )Tj
+/TT2 1 Tf
+18 0 0 18 54 220.6 Tm
+(Part 1: Compound Types)Tj
+14 0 0 14 54 190.4 Tm
+(1.1 Language modifications)Tj
+/TT4 1 Tf
+12 0 0 12 54 163.4 Tm
+(The java grammar has been modified to accept compound types wherever both instances and class)Tj
+T*
+(names are legal. A compound type is a comma-separated list of reference types enclosed within)Tj
+T*
+(brackets. Nesting is supported. )Tj
+0 -2.2167 TD
+(Compound types can contain zero or one non-final class and any number of interfaces. A compound)Tj
+0 -1.1083 TD
+(containing only one interface or one class is equivalent to that class or interface. If no class type is part)Tj
+T*
+(of the constituent type list, )Tj
+/TT6 1 Tf
+10 0 0 10 184.6 83.6 Tm
+(java.lang.Object)Tj
+/TT4 1 Tf
+12 0 0 12 280.6 83.6 Tm
+( is added to list. The order in which the types appear on)Tj
+ET
+endstream
+endobj
+3 0 obj
+<<
+/ProcSet [/PDF /Text ]
+/Font <<
+/TT2 4 0 R
+/TT4 5 0 R
+/TT6 6 0 R
+>>
+/ExtGState <<
+/GS1 7 0 R
+>>
+>>
+endobj
+10 0 obj
+<<
+/Length 2863
+>>
+stream
+BT
+/TT4 1 Tf
+12 0 0 12 54 709.2001 Tm
+0 g
+/GS1 gs
+0 Tc
+0 Tw
+(the type list is not significant. )Tj
+0 -2.2167 TD
+(For the compound type to be legal, it is necessary that all its constituent types be compatible. In)Tj
+0 -1.1083 TD
+(particular, two constituent types may not declare a method with the same name that have different return)Tj
+T*
+(types. )Tj
+0 -2.2167 TD
+(These are valid compound types : )Tj
+/TT6 1 Tf
+10 0 0 10 218.6 629.4 Tm
+([C, I1, I2])Tj
+/TT4 1 Tf
+12 0 0 12 284.6 629.4 Tm
+(, )Tj
+/TT6 1 Tf
+10 0 0 10 290.5 629.4 Tm
+([I1, I2])Tj
+/TT4 1 Tf
+12 0 0 12 338.5 629.4 Tm
+(, )Tj
+/TT6 1 Tf
+10 0 0 10 344.4 629.4 Tm
+([I])Tj
+/TT4 1 Tf
+12 0 0 12 362.4 629.4 Tm
+( \(equivalent to )Tj
+/TT6 1 Tf
+10 0 0 10 434.7 629.4 Tm
+([Object, I])Tj
+/TT4 1 Tf
+12 0 0 12 500.7 629.4 Tm
+(, and )Tj
+/TT6 1 Tf
+10 0 0 10 527 629.4 Tm
+(I)Tj
+/TT4 1 Tf
+12 0 0 12 533 629.4 Tm
+(\). )Tj
+/TT2 1 Tf
+-39.9167 -2.2583 TD
+(1.1.1 New Syntax)Tj
+/TT4 1 Tf
+0 -2.2167 TD
+(Here are modifications made to the standard java grammar, in EBNF form. It is based on the grammar)Tj
+0 -1.1083 TD
+0.0001 Tw
+[(defined in the java language specification [2])7.7(. Note that, although creation of arrays of compound types)]TJ
+T*
+0 Tw
+(are accepted by this grammar, they are rejected by the semantic analyzer. )Tj
+ET
+q
+1 i 
+54 72 504 648 re
+W n
+BT
+/TT6 1 Tf
+10 0 0 10 54 514.7 Tm
+(A)Tj
+ET
+Q
+BT
+/TT6 1 Tf
+10 0 0 10 60.001 514.7 Tm
+(DDITIONS:)Tj
+-0.6001 -2.1 TD
+(  ClassOrInterfaceTypeNoCompound ::=  )Tj
+0 -1.05 TD
+(                ClassType)Tj
+T*
+(              | InterfaceType)Tj
+0 -2.1 TD
+(  CompoundType ::=)Tj
+0 -1.05 TD
+(                "[" CompoundList "]")Tj
+T*
+( )Tj
+T*
+(  CompoundList ::=)Tj
+T*
+(                ClassOrInterfaceType:n )Tj
+T*
+(              | CompoundList "," ClassOrInterfaceType)Tj
+0 -2.1 TD
+(CHANGES:)Tj
+T*
+(  ClassOrInterfaceType ::=)Tj
+0 -1.05 TD
+(                ClassOrInterfaceTypeNoCompound )Tj
+T*
+(              | CompoundType            )Tj
+0 -3.15 TD
+(  ClassDeclaration ::= [Modifiers] "class" Identifier )Tj
+0 -1.05 TD
+(                        [ "extends" ClassType ])Tj
+T*
+(                        [ "implements" InterfaceTypeList ])Tj
+T*
+(                        ClassBody)Tj
+0 -2.1 TD
+(  ArrayType ::=)Tj
+0 -1.05 TD
+(        \( PrimitiveTypeType | Name | CompoundType \) Dims)Tj
+0 -3.15 TD
+(  ClassInstanceCreationExpression ::=    )Tj
+0 -1.05 TD
+(                 [ Primary "." ] "new" ClassOrInterfaceTypeNoCompound "\(" ArgumentLi)Tj
+T*
+(                 | "new" ClassOrInterfaceTypeNoCompound "\(" ArgumentList "\)")Tj
+0 -2.1 TD
+(  CastExpression ::= )Tj
+0 -1.05 TD
+(               ... )Tj
+T*
+(              | "\(" CompoundType [Dims] "\)" UnaryExpressionNotPlusMinus)Tj
+0 -2.1 TD
+(  ClassOrArray ::= )Tj
+0 -1.05 TD
+(                 Name                    )Tj
+T*
+(               | ArrayType               )Tj
+T*
+(               | CompoundType            )Tj
+ET
+endstream
+endobj
+11 0 obj
+<<
+/ProcSet [/PDF /Text ]
+/Font <<
+/TT2 4 0 R
+/TT4 5 0 R
+/TT6 6 0 R
+>>
+/ExtGState <<
+/GS1 7 0 R
+>>
+>>
+endobj
+13 0 obj
+<<
+/Length 3454
+>>
+stream
+BT
+/TT6 1 Tf
+10 0 0 10 54 711.9 Tm
+0 g
+/GS1 gs
+0 Tc
+0 Tw
+(            )Tj
+/TT2 1 Tf
+14 0 0 14 54 685.9 Tm
+(1.2 Translation)Tj
+/TT4 1 Tf
+12 0 0 12 54 658.9 Tm
+(The translator receives a semantically correct tree with cjava extensions and transforms it into a tree)Tj
+0 -1.1083 TD
+(composed of the nodes understood by jaco. The tree will go through a semantic analyzer accepting only)Tj
+T*
+(standard java and is then compiled normally. )Tj
+/TT2 1 Tf
+0 -2.2583 TD
+(1.2.1 General case)Tj
+/TT4 1 Tf
+0 -2.2167 TD
+(The translator needs to convert compound types to standard java types in order to produce valid java)Tj
+0 -1.1083 TD
+(code. For that, it selects one of the constituent types and replaces the compound type with this type. The)Tj
+T*
+(algorithm for selecting the standard type from the type list is: )Tj
+ET
+1 i 
+75.42 529.5 m
+75.42 531.322 73.942 532.8 72.12 532.8 c
+70.298 532.8 68.82 531.322 68.82 529.5 c
+68.82 527.678 70.298 526.2 72.12 526.2 c
+73.942 526.2 75.42 527.678 75.42 529.5 c
+f
+BT
+12 0 0 12 82 525.4 Tm
+(if a class different from )Tj
+/TT6 1 Tf
+10 0 0 10 197.6 525.4 Tm
+(java.lang.Object)Tj
+/TT4 1 Tf
+12 0 0 12 293.6 525.4 Tm
+( is found, select that class to represent the compound)Tj
+-17.6333 -1.1083 TD
+-0.001 Tc
+(type. )Tj
+ET
+75.42 502.86 m
+75.42 504.682 73.942 506.16 72.12 506.16 c
+70.298 506.16 68.82 504.682 68.82 502.86 c
+68.82 501.038 70.298 499.56 72.12 499.56 c
+73.942 499.56 75.42 501.038 75.42 502.86 c
+f
+BT
+12 0 0 12 82 498.8 Tm
+0 Tc
+(otherwise, alphabetically sort the full name of the types in the compound and choose the last one. )Tj
+-2.3333 -2.2167 TD
+(For example, the standard type used to represent )Tj
+/TT6 1 Tf
+10 0 0 10 289.6 472.2 Tm
+([I1, I3, I2])Tj
+/TT4 1 Tf
+12 0 0 12 361.6 472.2 Tm
+( is )Tj
+/TT6 1 Tf
+10 0 0 10 375.6 472.2 Tm
+(I3)Tj
+/TT4 1 Tf
+12 0 0 12 387.6 472.2 Tm
+(, since I1, I2 and I3 are all)Tj
+-27.8 -1.1083 TD
+(interfaces, and the standard type for )Tj
+/TT6 1 Tf
+10 0 0 10 228.9 458.9 Tm
+([java.util.Vector, I1, I2])Tj
+/TT4 1 Tf
+12 0 0 12 384.9 458.9 Tm
+( is the object class)Tj
+/TT6 1 Tf
+10 0 0 10 54 445.6 Tm
+(java.util.Vector)Tj
+/TT4 1 Tf
+12 0 0 12 150 445.6 Tm
+(. )Tj
+-8 -2.2167 TD
+(Prior to applying this algorithm, nested compound types are converted into a simple list of standard)Tj
+0 -1.1083 TD
+(types, duplicates are removed as well as the )Tj
+/TT6 1 Tf
+10 0 0 10 266.9 405.7 Tm
+(java.lang.Object)Tj
+/TT4 1 Tf
+12 0 0 12 362.9 405.7 Tm
+( type. This means that the following)Tj
+-25.7417 -1.1083 TD
+(types are all equivalent : )Tj
+/TT6 1 Tf
+10 0 0 10 174.3 392.4 Tm
+([I, [Object, I], I], [Object, I], [I], [[I]], I )Tj
+/TT4 1 Tf
+12 0 0 12 462.3 392.4 Tm
+(. )Tj
+/TT2 1 Tf
+-34.025 -2.2583 TD
+(1.2.2 Basic Operations)Tj
+10 0 0 10 54 340.1 Tm
+(1.2.2.1 Variable Declaration)Tj
+/TT4 1 Tf
+12 0 0 12 54 314 Tm
+(Compound types in declarations are simply converted into standard java types using the algorithm)Tj
+0 -1.1083 TD
+(described above. The same holds true for array declarations. )Tj
+/TT2 1 Tf
+0 -2.2583 TD
+(Example:)Tj
+/TT4 1 Tf
+4.1083 0 TD
+( These variable declarations: )Tj
+/TT6 1 Tf
+10 0 0 10 54 249.7 Tm
+(      )Tj
+0 -1.05 TD
+([I1, I2] i1i2;)Tj
+T*
+([I1, I2, C1] i1i2c1;)Tj
+T*
+([I1, C3] i1;)Tj
+T*
+([Object, I2] i2;)Tj
+T*
+([[I1], [Object, I3]] i1i3;)Tj
+T*
+([I1, I2][] a1; )Tj
+T*
+([I2][][] a2;)Tj
+T*
+(                 )Tj
+/TT4 1 Tf
+12 0 0 12 54 142 Tm
+(will be translated into: )Tj
+/TT6 1 Tf
+10 0 0 10 54 118.1 Tm
+(      )Tj
+T*
+(I2 i1i2;)Tj
+T*
+(C1 i1i2c1;)Tj
+T*
+(C3 i1;)Tj
+T*
+(I2 i2;)Tj
+ET
+endstream
+endobj
+14 0 obj
+<<
+/ProcSet [/PDF /Text ]
+/Font <<
+/TT2 4 0 R
+/TT4 5 0 R
+/TT6 6 0 R
+>>
+/ExtGState <<
+/GS1 7 0 R
+>>
+>>
+endobj
+16 0 obj
+<<
+/Length 1564
+>>
+stream
+BT
+/TT6 1 Tf
+10 0 0 10 54 711.9 Tm
+0 g
+/GS1 gs
+0 Tc
+0 Tw
+(I3 i1i3;)Tj
+0 -1.05 TD
+(I2[] a1;)Tj
+T*
+(I2[][] a2;)Tj
+T*
+(                 )Tj
+/TT2 1 Tf
+0 -2.23 TD
+(1.2.2.2 Assignment)Tj
+/TT4 1 Tf
+12 0 0 12 54 632 Tm
+(It is often necessary to add casts in assignment operations containing instances of compound types, since)Tj
+0 -1.1083 TD
+(the full type of the variables will not be known by the standard java compiler. )Tj
+/TT2 1 Tf
+0 -2.2583 TD
+(Example:)Tj
+/TT4 1 Tf
+4.1083 0 TD
+( )Tj
+/TT6 1 Tf
+10 0 0 10 54 567.7001 Tm
+(      )Tj
+0 -1.05 TD
+(public class C extends C1 implements I1, I2)Tj
+T*
+({)Tj
+T*
+(    void dummy\(\))Tj
+T*
+(    {)Tj
+T*
+(        [I1, I2] a;)Tj
+T*
+(        [I1, I2, C1] b;)Tj
+T*
+(        [I1, I2, I3][] d;)Tj
+T*
+(        [I1, I2][] e;)Tj
+T*
+(        )Tj
+T*
+(        b = this;)Tj
+T*
+(        a = b;)Tj
+T*
+(        b = null;)Tj
+0 -2.1 TD
+(        d = null;)Tj
+0 -1.05 TD
+(        e = d;)Tj
+T*
+(    })Tj
+T*
+(    Object[] getArray\(\) )Tj
+T*
+(    {)Tj
+T*
+(      return new C[2];)Tj
+T*
+(    })Tj
+T*
+(})Tj
+T*
+(                 )Tj
+/TT4 1 Tf
+12 0 0 12 54 313 Tm
+(will be translated into: )Tj
+/TT6 1 Tf
+10 0 0 10 54 289.1 Tm
+(      )Tj
+T*
+(public class C extends C1 implements I1, I2 {)Tj
+T*
+(   void dummy\(\) {)Tj
+T*
+(      I2 a;)Tj
+T*
+(      C1 b;)Tj
+T*
+(      I3[] d;)Tj
+T*
+(      I2[] e;)Tj
+0 -2.1 TD
+(      b = this;)Tj
+0 -1.05 TD
+(      a = \(I2\)b;)Tj
+T*
+(      b = null;)Tj
+T*
+( )Tj
+T*
+(      d = null;)Tj
+T*
+(      e = \(I2[]\)d;)Tj
+T*
+(   })Tj
+T*
+(})Tj
+T*
+(                 )Tj
+/TT2 1 Tf
+0 -2.23 TD
+(1.2.2.3 Accessing Methods and Fields)Tj
+ET
+endstream
+endobj
+17 0 obj
+<<
+/ProcSet [/PDF /Text ]
+/Font <<
+/TT2 4 0 R
+/TT4 5 0 R
+/TT6 6 0 R
+>>
+/ExtGState <<
+/GS1 7 0 R
+>>
+>>
+endobj
+19 0 obj
+<<
+/Length 2011
+>>
+stream
+BT
+/TT4 1 Tf
+12 0 0 12 54 709.2001 Tm
+0 g
+/GS1 gs
+0 Tc
+0 Tw
+(When accessing methods and fields of an expression whose type is a compound, the expression first)Tj
+0 -1.1083 TD
+(needs to be converted into the type it is used as. The translator keeps note of where the appropriate)Tj
+T*
+(method or field was found and adds casts whenever necessary. )Tj
+0 -2.2167 TD
+(Getting the class object of a compound type using )Tj
+/TT6 1 Tf
+10 0 0 10 296.9 656 Tm
+(.class)Tj
+/TT4 1 Tf
+12 0 0 12 332.9 656 Tm
+( \(as in )Tj
+/TT6 1 Tf
+10 0 0 10 365.2 656 Tm
+([I1, I2].class)Tj
+/TT4 1 Tf
+12 0 0 12 449.2 656 Tm
+(\) is not possible, since)Tj
+-32.9333 -1.1083 TD
+(no )Tj
+/TT6 1 Tf
+10 0 0 10 68.9 642.7 Tm
+(Class)Tj
+/TT4 1 Tf
+12 0 0 12 98.9 642.7 Tm
+( object exists in this case. Expressions of this type are rejected by the grammar. )Tj
+/TT2 1 Tf
+-3.7417 -2.2583 TD
+(Example:)Tj
+/TT4 1 Tf
+4.1083 0 TD
+( )Tj
+/TT6 1 Tf
+10 0 0 10 54 591.7 Tm
+(      )Tj
+0 -1.05 TD
+(public class C extends C1 implements I1, I2)Tj
+T*
+({)Tj
+T*
+(    [I1, I2] a;)Tj
+T*
+(    [I1, I2, C1] b;)Tj
+0 -2.1 TD
+(    void dummy\(\))Tj
+0 -1.05 TD
+(    {)Tj
+T*
+(        b = this;)Tj
+T*
+(        a = this;)Tj
+T*
+(        b.i1\(\);)Tj
+T*
+(        b.i2\(\);)Tj
+T*
+(        b.c1\(\);)Tj
+T*
+(        a.i1\(\);)Tj
+T*
+(        a.i2\(\);)Tj
+T*
+(        int w = a.i1 + a.i2;)Tj
+T*
+(    })Tj
+T*
+(})Tj
+0 -2.1 TD
+(interface I1 )Tj
+0 -1.05 TD
+({)Tj
+T*
+(  void i1\(\);)Tj
+T*
+(})Tj
+0 -2.1 TD
+(interface I2\(\))Tj
+0 -1.05 TD
+({)Tj
+T*
+(  void i2\(\);)Tj
+T*
+(})Tj
+0 -2.1 TD
+(class C1 )Tj
+0 -1.05 TD
+({)Tj
+T*
+(  void c1\(\);)Tj
+T*
+(})Tj
+T*
+(                 )Tj
+/TT4 1 Tf
+12 0 0 12 54 221.5 Tm
+(the class C will be translated into: )Tj
+/TT6 1 Tf
+10 0 0 10 54 197.6 Tm
+(      )Tj
+T*
+(public class C extends C1 implements I1, I2 {)Tj
+T*
+(   I2 a;)Tj
+T*
+(   C1 b;)Tj
+T*
+(   void dummy\(\) {)Tj
+T*
+(      b = this;)Tj
+T*
+(      a = this;)Tj
+T*
+(      \(\(I1\)b\).i1\(\);)Tj
+T*
+(      \(\(I2\)b\).i2\(\);)Tj
+T*
+(      b.c1\(\);)Tj
+T*
+(      \(\(I1\)a\).i1\(\);)Tj
+T*
+(      a.i2\(\);)Tj
+ET
+endstream
+endobj
+20 0 obj
+<<
+/ProcSet [/PDF /Text ]
+/Font <<
+/TT2 4 0 R
+/TT4 5 0 R
+/TT6 6 0 R
+>>
+/ExtGState <<
+/GS1 7 0 R
+>>
+>>
+endobj
+22 0 obj
+<<
+/Length 2336
+>>
+stream
+BT
+/TT6 1 Tf
+10 0 0 10 54 711.9 Tm
+0 g
+/GS1 gs
+0 Tc
+0 Tw
+(      int w = \(\(I1\)a\).i1 + a.i2;)Tj
+0 -1.05 TD
+(   })Tj
+T*
+(})Tj
+T*
+(                 )Tj
+/TT2 1 Tf
+0 -2.23 TD
+(1.2.2.4 Cast)Tj
+/TT4 1 Tf
+12 0 0 12 54 632 Tm
+(Casts to a compound type are converted into a series of casts to each constituent type. This ensures that)Tj
+0 -1.1083 TD
+(the run-time type of the object will be checked, and that any )Tj
+/TT6 1 Tf
+10 0 0 10 345.6 618.7 Tm
+(java.lang.ClassCastExpression)Tj
+/TT4 1 Tf
+12 0 0 12 519.6 618.7 Tm
+( will be)Tj
+-38.8 -1.1083 TD
+(thrown at this point, and not later. )Tj
+/TT2 1 Tf
+0 -2.2583 TD
+(Example:)Tj
+/TT4 1 Tf
+4.1083 0 TD
+( )Tj
+/TT6 1 Tf
+10 0 0 10 54 554.4 Tm
+(      )Tj
+0 -1.05 TD
+([I1, I2, I3] b = \([I1, I2, I3]\)a;)Tj
+T*
+([I1, I2] b = \([I2, I1]\)a;)Tj
+T*
+([I1, I2, I3][] b = \([I1, I2, I3][]\)a;)Tj
+T*
+(                 )Tj
+/TT4 1 Tf
+12 0 0 12 54 488.7 Tm
+(will be translated into: )Tj
+/TT6 1 Tf
+10 0 0 10 54 464.8 Tm
+(      )Tj
+T*
+(I3 b = \(I3\)\(\(I2\)\(\(I1\)a\)\);)Tj
+T*
+(I2 b = \(I2\)\(\(I1\)a\);)Tj
+T*
+(I3[] b = \(I3[]\)\(\(I2[]\)\(\(I1[]\)a\)\);)Tj
+T*
+(                 )Tj
+/TT2 1 Tf
+0 -2.23 TD
+(1.2.2.5 Instanceof)Tj
+/TT4 1 Tf
+12 0 0 12 54 374.4 Tm
+(Checking that a variable can be safely cast to a compound type is equivalent to checking that it)Tj
+0 -1.1083 TD
+(implements or extends each of the constituent types. Therefore, the translator converts Instanceof)Tj
+T*
+(operations on compound types into a series of standard instanceof operations. )Tj
+0 -2.2167 TD
+(To avoid duplicating side effects in a method call or breaking atomicity, a temporary local variable is)Tj
+0 -1.1083 TD
+(used to store the result of the expression between instanceof operations unless the expression being)Tj
+T*
+(tested is already a local variable. )Tj
+/TT2 1 Tf
+0 -2.2583 TD
+(Example:)Tj
+/TT4 1 Tf
+4.1083 0 TD
+( These variable declarations: )Tj
+/TT6 1 Tf
+10 0 0 10 54 243.6 Tm
+(      )Tj
+0 -1.05 TD
+(public class C )Tj
+T*
+({)Tj
+T*
+(    [I1, I2] a;)Tj
+T*
+(    [I1, I2, C1] b;)Tj
+0 -2.1 TD
+(    void dummy\(Object o\))Tj
+0 -1.05 TD
+(    {)Tj
+T*
+(        if\( o instanceof [I1, I2]\))Tj
+T*
+(            {)Tj
+T*
+(            })Tj
+T*
+(                )Tj
+T*
+(        if\(getObject\(\) instanceof [I1, I2, C1]\))Tj
+T*
+(            {)Tj
+T*
+(            })Tj
+0 -2.1 TD
+(        if\(getObject\(\) instanceof [I1, I2][]\))Tj
+ET
+endstream
+endobj
+23 0 obj
+<<
+/ProcSet [/PDF /Text ]
+/Font <<
+/TT2 4 0 R
+/TT4 5 0 R
+/TT6 6 0 R
+>>
+/ExtGState <<
+/GS1 7 0 R
+>>
+>>
+endobj
+25 0 obj
+<<
+/Length 1974
+>>
+stream
+BT
+/TT6 1 Tf
+10 0 0 10 54 711.9 Tm
+0 g
+/GS1 gs
+0 Tc
+0 Tw
+(            {)Tj
+0 -1.05 TD
+(            })Tj
+0 -2.1 TD
+(        if\(a instanceof [I1, I2, C1]\))Tj
+0 -1.05 TD
+(            {)Tj
+T*
+(            })Tj
+T*
+(    })Tj
+0 -2.1 TD
+(    Object getObject\(\))Tj
+0 -1.05 TD
+(    {)Tj
+T*
+(        return this;)Tj
+T*
+(    })Tj
+T*
+(})Tj
+T*
+(                 )Tj
+/TT4 1 Tf
+12 0 0 12 54 551.7 Tm
+(will be translated into: )Tj
+/TT6 1 Tf
+10 0 0 10 54 527.8 Tm
+(      )Tj
+T*
+(public class C {)Tj
+T*
+(   I2 a;)Tj
+T*
+(   C1 b;)Tj
+0 -2.1 TD
+(   void dummy\(Object o\) {)Tj
+0 -1.05 TD
+(      java.lang.Object __cjava_t$0;)Tj
+T*
+(      if \( o instanceof I2 && o instanceof I1\) {)Tj
+T*
+(      })Tj
+0 -2.1 TD
+(      if \( \(__cjava_t$0 = getObject\(\)\) instanceof C1 )Tj
+0 -1.05 TD
+(           && __cjava_t$0 instanceof I2 )Tj
+T*
+(           && __cjava_t$0 instanceof I1\) {)Tj
+T*
+(      })Tj
+0 -2.1 TD
+(      if \( \(__cjava_t$0 = getObject\(\)\) instanceof I2[] )Tj
+0 -1.05 TD
+(           && __cjava_t$0 instanceof I1[]\) {)Tj
+T*
+(      })Tj
+0 -2.1 TD
+(      if \( \(__cjava_t$0 = a\) instanceof C1 )Tj
+0 -1.05 TD
+(           && __cjava_t$0 instanceof I2 )Tj
+T*
+(           && __cjava_t$0 instanceof I1\) {)Tj
+T*
+(      })Tj
+T*
+(   })Tj
+T*
+(   Object getObject\(\) {)Tj
+T*
+(      return this;)Tj
+T*
+(   })Tj
+T*
+(   public C\(\) {)Tj
+T*
+(      super\(\);)Tj
+T*
+(   })Tj
+T*
+(})Tj
+T*
+(                 )Tj
+/TT2 1 Tf
+12 0 0 12 54 178.1 Tm
+(1.2.3 Exception Handling)Tj
+/TT4 1 Tf
+0 -2.2167 TD
+(Exception handling is normally done by the virtual machine, and not by the compiler. A standard java)Tj
+0 -1.1083 TD
+(compiler needs only check which exceptions can be thrown and caught at a certain point in the source)Tj
+T*
+(code. But in order to accept compound types in catch clauses, it is necessary to writes code that)Tj
+T*
+(simulates what the JVM does for standard types. )Tj
+0 -2.2167 TD
+(The main idea of the algorithm that writes the exception handling code for compound types is to)Tj
+ET
+endstream
+endobj
+26 0 obj
+<<
+/ProcSet [/PDF /Text ]
+/Font <<
+/TT2 4 0 R
+/TT4 5 0 R
+/TT6 6 0 R
+>>
+/ExtGState <<
+/GS1 7 0 R
+>>
+>>
+endobj
+28 0 obj
+<<
+/Length 1767
+>>
+stream
+BT
+/TT4 1 Tf
+12 0 0 12 54 709.2001 Tm
+0 g
+/GS1 gs
+0 Tc
+0 Tw
+(transform a catch clause that is passed a compound type into a clause catching a standard class type and)Tj
+0 -1.1083 TD
+(then checking what interfaces the class implements using instanceof operations: )Tj
+/TT6 1 Tf
+10 0 0 10 54 672 Tm
+(      )Tj
+0 -1.05 TD
+(catch\([Exception, Serializable] e\) )Tj
+T*
+({ )Tj
+T*
+(    ... )Tj
+T*
+(} )Tj
+T*
+(                 )Tj
+/TT4 1 Tf
+12 0 0 12 54 595.8 Tm
+(becomes )Tj
+/TT6 1 Tf
+10 0 0 10 54 571.9 Tm
+(      )Tj
+T*
+(catch\(Exception e\) {)Tj
+T*
+(    if\(e instanceof Serializable\) {)Tj
+T*
+(        ...)Tj
+T*
+(    })Tj
+T*
+(    else {)Tj
+T*
+(        throw e; // re-throw, will be handled later)Tj
+T*
+(    })Tj
+T*
+(})Tj
+T*
+(                 )Tj
+/TT4 1 Tf
+12 0 0 12 54 453.7 Tm
+(When more than one catch clause is present, re-throwing the exception if it does not implement the)Tj
+0 -1.1083 TD
+(constituent interfaces is not always enough: )Tj
+/TT6 1 Tf
+10 0 0 10 54 416.5 Tm
+(      )Tj
+0 -1.05 TD
+(catch\([Exception, Serializable] e\) )Tj
+T*
+({ )Tj
+T*
+(    ... )Tj
+T*
+(} )Tj
+T*
+(catch\(Exception e\) )Tj
+T*
+({ )Tj
+T*
+(    ... )Tj
+T*
+(} )Tj
+T*
+(                 )Tj
+/TT4 1 Tf
+12 0 0 12 54 298.3 Tm
+(must becomes )Tj
+/TT6 1 Tf
+10 0 0 10 54 274.4 Tm
+(      )Tj
+T*
+(catch\(Exception e\))Tj
+T*
+({)Tj
+T*
+(  if\(e instanceof Serializable\))Tj
+T*
+(  {)Tj
+T*
+(     ... code for [Exception, Serializable] )Tj
+T*
+(  })Tj
+T*
+(  else)Tj
+T*
+(  {)Tj
+T*
+(     ... code for Exception)Tj
+T*
+(  })Tj
+T*
+(})Tj
+T*
+(                 )Tj
+/TT4 1 Tf
+12 0 0 12 54 124.7 Tm
+(The algorithm tries to guess which clauses must be put together in that way so that the right exception)Tj
+0 -1.1083 TD
+(handling code is executed. )Tj
+/TT2 1 Tf
+10 0 0 10 54 86.2 Tm
+(1.2.3.1 Details of the algorithm)Tj
+ET
+endstream
+endobj
+29 0 obj
+<<
+/ProcSet [/PDF /Text ]
+/Font <<
+/TT2 4 0 R
+/TT4 5 0 R
+/TT6 6 0 R
+>>
+/ExtGState <<
+/GS1 7 0 R
+>>
+>>
+endobj
+31 0 obj
+<<
+/Length 3338
+>>
+stream
+BT
+/TT4 1 Tf
+12 0 0 12 54 708.1 Tm
+0 g
+/GS1 gs
+0 Tc
+0 Tw
+(The algorithm is based the fact that catchable compound types always contain exactly one class, which)Tj
+0 -1.1083 TD
+(is a subclass of Throwable, as well as some interfaces. )Tj
+0 -2.2167 TD
+(The original catch clauses that have to be put together in one catch clause by the translator form a)Tj
+/TT6 1 Tf
+10 0 0 10 54 654.9 Tm
+(CatchFamily)Tj
+/TT4 1 Tf
+12 0 0 12 120 654.9 Tm
+(. The choice of which family a clause must belong to is based on the possibility of an)Tj
+-5.5 -1.1083 TD
+(object matching the class of the compound, but not the interfaces, having to ’fall through’ to another)Tj
+T*
+(catch clause. )Tj
+0 -2.2167 TD
+(This is done by iterating over the array of catch clauses: )Tj
+ET
+1 i 
+75.42 579.18 m
+75.42 581.002 73.942 582.48 72.12 582.48 c
+70.298 582.48 68.82 581.002 68.82 579.18 c
+68.82 577.358 70.298 575.88 72.12 575.88 c
+73.942 575.88 75.42 577.358 75.42 579.18 c
+f
+BT
+12 0 0 12 82 575.1 Tm
+(As long as there are no families that may receive new members \(they are said to be closed\): )Tj
+ET
+0 G
+0 J 0 j 1 w 10 M []0 d
+103.38 565.86 m
+103.38 567.682 101.902 569.16 100.08 569.16 c
+98.258 569.16 96.78 567.682 96.78 565.86 c
+96.78 564.038 98.258 562.56 100.08 562.56 c
+101.902 562.56 103.38 564.038 103.38 565.86 c
+S
+BT
+12 0 0 12 110 561.8 Tm
+(when a compound type is found, a new family is created that contains the compound type.)Tj
+0 -1.1083 TD
+(The ’head’ of the family, the real class that will be caught by the resulting catch clause, is set)Tj
+T*
+(to the class found in the compound. The new family is open. )Tj
+ET
+103.38 526.02 m
+103.38 527.842 101.902 529.32 100.08 529.32 c
+98.258 529.32 96.78 527.842 96.78 526.02 c
+96.78 524.198 98.258 522.72 100.08 522.72 c
+101.902 522.72 103.38 524.198 103.38 526.02 c
+S
+BT
+12 0 0 12 110 521.9 Tm
+(when a class type is found, no family is created. Or rather, a new closed family is created)Tj
+T*
+(containing only this catch clause. )Tj
+-4.6667 -2.2167 TD
+(If there are open families, they are checked in turn to find one that may receive the new catch clause. It)Tj
+0 -1.1083 TD
+(is the case when the class caught by the clause is a subclass or a superclass of the head of a family. If a)Tj
+T*
+(family is found for the clause, it receives the new member, and if the clause caught a non-compound)Tj
+T*
+(type, the family is closed. Closing at this time is OK, since the java compiler ensures that catch clauses)Tj
+T*
+(appearing afterwards cannot catch a subtype of any of the family’s class.)Tj
+0 -2.2167 TD
+(If no family were found for the new catch clause, it is handled as if there were no open families. )Tj
+T*
+(A case may need special handling: when a new catch clause is superclass of more than one head of open)Tj
+0 -1.1083 TD
+(families, the families must be merged into one, with the class caught by the new clause as the head. )Tj
+/TT2 1 Tf
+10 0 0 10 54 337.1 Tm
+(1.2.3.2 Complete example)Tj
+/TT6 1 Tf
+0 -2.34 TD
+(      )Tj
+0 -1.05 TD
+(import java.io.*;)Tj
+0 -2.1 TD
+(interface A1 )Tj
+0 -1.05 TD
+({)Tj
+T*
+( void a1\(\);)Tj
+T*
+( Object obj\(\);)Tj
+T*
+(})Tj
+0 -2.1 TD
+(interface A2 )Tj
+0 -1.05 TD
+({)Tj
+T*
+(})Tj
+0 -2.1 TD
+(interface A3)Tj
+0 -1.05 TD
+({)Tj
+T*
+(})Tj
+0 -2.1 TD
+(class Test )Tj
+0 -1.05 TD
+({)Tj
+T*
+(    void boo\(\) throws Throwable, IOException, EOFException)Tj
+T*
+(    {)Tj
+T*
+(    })Tj
+ET
+endstream
+endobj
+32 0 obj
+<<
+/ProcSet [/PDF /Text ]
+/Font <<
+/TT2 4 0 R
+/TT4 5 0 R
+/TT6 6 0 R
+>>
+/ExtGState <<
+/GS1 7 0 R
+>>
+>>
+endobj
+34 0 obj
+<<
+/Length 1811
+>>
+stream
+BT
+/TT6 1 Tf
+10 0 0 10 54 711.9 Tm
+0 g
+/GS1 gs
+0 Tc
+0 Tw
+(    void dummy\(\) throws Throwable)Tj
+0 -1.05 TD
+(    {)Tj
+T*
+(        try)Tj
+T*
+(            {)Tj
+T*
+(                boo\(\);)Tj
+T*
+(            })Tj
+T*
+(        catch\([NullPointerException, A1] npea1\))Tj
+T*
+(            {)Tj
+T*
+(                System.out.println\("npea1"\); )Tj
+T*
+(            })Tj
+T*
+(        catch\([EOFException, A2] iieo\))Tj
+T*
+(            {)Tj
+T*
+(                System.out.println\("iioe"\); )Tj
+T*
+(            })Tj
+T*
+(        catch\(NumberFormatException nfe\))Tj
+T*
+(            {)Tj
+T*
+(                System.out.println\("nfe"\);)Tj
+T*
+(            })Tj
+T*
+(        catch\(NullPointerException npe\))Tj
+T*
+(            {)Tj
+T*
+(                System.out.println\("npe"\); )Tj
+T*
+(            })Tj
+T*
+(        catch\(IOException ioe\))Tj
+T*
+(            {)Tj
+T*
+(                System.out.println\("ioe"\); )Tj
+T*
+(            })Tj
+T*
+(        catch\(RuntimeException rte\))Tj
+T*
+(            {)Tj
+T*
+(                System.out.println\("rte"\); )Tj
+T*
+(            })Tj
+T*
+(        catch\([Exception, A1] ea1\))Tj
+T*
+(            {)Tj
+T*
+(                System.out.println\("ea1"\); )Tj
+T*
+(            })Tj
+0 -2.1 TD
+(    })Tj
+0 -1.05 TD
+(})Tj
+T*
+(                 )Tj
+/TT4 1 Tf
+12 0 0 12 54 299.7 Tm
+(will be translated into: )Tj
+/TT6 1 Tf
+10 0 0 10 54 275.8 Tm
+(      )Tj
+T*
+(import java.io.*;)Tj
+0 -2.1 TD
+(interface A1 {)Tj
+0 -1.05 TD
+(   void a1\(\);)Tj
+T*
+(   Object obj\(\);)Tj
+T*
+(})Tj
+0 -2.1 TD
+(interface A2 {)Tj
+0 -1.05 TD
+(})Tj
+0 -2.1 TD
+(interface A3 {)Tj
+0 -1.05 TD
+(})Tj
+0 -2.1 TD
+(class Test {)Tj
+0 -1.05 TD
+(   void boo\(\) throws Throwable, IOException, EOFException {)Tj
+T*
+(   })Tj
+0 -2.1 TD
+(   void dummy\(\) throws Throwable {)Tj
+0 -1.05 TD
+(      java.lang.Object __cjava_t$0;)Tj
+ET
+endstream
+endobj
+35 0 obj
+<<
+/ProcSet [/PDF /Text ]
+/Font <<
+/TT4 5 0 R
+/TT6 6 0 R
+>>
+/ExtGState <<
+/GS1 7 0 R
+>>
+>>
+endobj
+37 0 obj
+<<
+/Length 3228
+>>
+stream
+BT
+/TT6 1 Tf
+10 0 0 10 54 703.3 Tm
+0 g
+/GS1 gs
+0 Tc
+0 Tw
+(      try {)Tj
+0 -1.05 TD
+(         boo\(\);)Tj
+T*
+(      }  catch \(NumberFormatException nfe\) {)Tj
+0 -2.1 TD
+(         System.out.println\("nfe"\);                     // handle NumberFormatExcept)Tj
+T*
+(      } catch \(java.lang.NullPointerException __cjava_t$1\) {)Tj
+0 -1.05 TD
+(         if \(__cjava_t$1 instanceof A1\) {)Tj
+T*
+(            java.lang.NullPointerException npea1 = __cjava_t$1;)Tj
+0 -2.1 TD
+(            System.out.println\("npea1"\);                // handle [NullPointerExcept)Tj
+T*
+(         } else {)Tj
+0 -1.05 TD
+(            java.lang.NullPointerException npe = __cjava_t$1;)Tj
+0 -2.1 TD
+(            System.out.println\("npe"\);                  // handle NullPointerExcepti)Tj
+T*
+(         })Tj
+T*
+(      } catch \(java.io.IOException __cjava_t$1\) {)Tj
+0 -1.05 TD
+(         if \(__cjava_t$1 instanceof java.io.EOFException && __cjava_t$1 instanceof )Tj
+ET
+q
+1 i 
+54 72 504 648 re
+W n
+BT
+10 0 0 10 552.081 493.3 Tm
+(A)Tj
+ET
+Q
+BT
+10 0 0 10 54 482.8 Tm
+(            java.io.EOFException iieo = \(java.io.EOFException\)__cjava_t$1;)Tj
+0 -2.1 TD
+(            System.out.println\("iioe"\);                // handle [EOFException, A2])Tj
+T*
+(         } else {)Tj
+0 -1.05 TD
+(            java.io.IOException ioe = __cjava_t$1;)Tj
+0 -2.1 TD
+(            System.out.println\("ioe"\);                 // handle IOException)Tj
+T*
+(         })Tj
+T*
+(      } catch \(RuntimeException rte\) {)Tj
+T*
+(         System.out.println\("rte"\);e                   // handle RuntimeException )Tj
+0 -1.05 TD
+(   )Tj
+T*
+(      } catch \(java.lang.Exception __cjava_t$1\) {)Tj
+T*
+(         if \(__cjava_t$1 instanceof A1\) {)Tj
+T*
+(            java.lang.Exception ea1 = __cjava_t$1;)Tj
+0 -2.1 TD
+(            System.out.println\("ea1"\);                 // handle [Exception, A1])Tj
+T*
+(         } else )Tj
+0 -1.05 TD
+(            throw __cjava_t$1;                        // rethrow exception if not ha)Tj
+T*
+(      })Tj
+T*
+(   })Tj
+T*
+(   Test\(\) {)Tj
+T*
+(      super\(\);)Tj
+T*
+(   })Tj
+T*
+(})Tj
+/TT4 1 Tf
+12 0 0 12 54 165.1 Tm
+(Here, the code for handling )Tj
+/TT6 1 Tf
+10 0 0 10 188.6 165.1 Tm
+([NullPointerException, A1])Tj
+/TT4 1 Tf
+12 0 0 12 344.6 165.1 Tm
+( and the one for handling)Tj
+/TT6 1 Tf
+10 0 0 10 54 151.8 Tm
+(NullPointerException)Tj
+/TT4 1 Tf
+12 0 0 12 174 151.8 Tm
+( have been put together, so that if the exception implements A1, it is treated as)Tj
+-10 -1.1083 TD
+(a )Tj
+/TT6 1 Tf
+10 0 0 10 62.3 138.5 Tm
+([NullPointerException, A1])Tj
+/TT4 1 Tf
+12 0 0 12 218.3 138.5 Tm
+( Otherwise the code for handling )Tj
+/TT6 1 Tf
+10 0 0 10 378.9 138.5 Tm
+(NullPointerException)Tj
+/TT4 1 Tf
+12 0 0 12 498.9 138.5 Tm
+( is)Tj
+-37.075 -1.1083 TD
+(executed. )Tj
+/TT6 1 Tf
+10 0 0 10 54 98.6 Tm
+([EOFException, A2])Tj
+/TT4 1 Tf
+12 0 0 12 162 98.6 Tm
+( and its superclass )Tj
+/TT6 1 Tf
+10 0 0 10 251.9 98.6 Tm
+(IOException)Tj
+/TT4 1 Tf
+12 0 0 12 317.9 98.6 Tm
+( are handled in the same way: )Tj
+/TT6 1 Tf
+10 0 0 10 463.5 98.6 Tm
+(IOException)Tj
+/TT4 1 Tf
+12 0 0 12 54 85.3 Tm
+(objects are caught and a check is made to see whether they are actually )Tj
+/TT6 1 Tf
+10 0 0 10 397.8 85.3 Tm
+([EOFException, A2])Tj
+/TT4 1 Tf
+12 0 0 12 505.8 85.3 Tm
+( or plain)Tj
+ET
+endstream
+endobj
+38 0 obj
+<<
+/ProcSet [/PDF /Text ]
+/Font <<
+/TT4 5 0 R
+/TT6 6 0 R
+>>
+/ExtGState <<
+/GS1 7 0 R
+>>
+>>
+endobj
+42 0 obj
+<<
+/Length 2529
+>>
+stream
+BT
+/TT6 1 Tf
+10 0 0 10 54 709.2001 Tm
+0 g
+/GS1 gs
+0 Tc
+0 Tw
+(IOException)Tj
+/TT4 1 Tf
+12 0 0 12 120 709.2001 Tm
+(. )Tj
+/TT2 1 Tf
+-5.5 -2.2583 TD
+(1.2.4 Class and Interface Declaration)Tj
+/TT4 1 Tf
+0 -2.2167 TD
+(The only place a compound type may be found in a class or interface declaration is on the list of)Tj
+0 -1.1083 TD
+(interfaces implemented by a class or extended by an interface. Such compound types may only contain)Tj
+T*
+(interfaces. The translator replaces the compound type with an enumeration of its constituent interfaces. )Tj
+0 -2.2167 TD
+-0.0002 Tw
+[(This behavior differs from Büchi and Weck’s definition of compound types [1])7.7(; they didn’t allow)]TJ
+0 -1.1083 TD
+0 Tw
+(compound types in )Tj
+/TT6 1 Tf
+10 0 0 10 148.3 589 Tm
+(implements)Tj
+/TT4 1 Tf
+12 0 0 12 208.3 589 Tm
+( or )Tj
+/TT6 1 Tf
+10 0 0 10 224.2 589 Tm
+(extends)Tj
+/TT4 1 Tf
+12 0 0 12 266.2 589 Tm
+( clauses. )Tj
+/TT2 1 Tf
+-17.6833 -2.2583 TD
+(Example:)Tj
+/TT4 1 Tf
+4.1083 0 TD
+( )Tj
+/TT6 1 Tf
+10 0 0 10 54 538 Tm
+(      )Tj
+0 -1.05 TD
+(abstract public class C implements [I1, I3, I2] I4 )Tj
+T*
+({)Tj
+0 -2.1 TD
+(})Tj
+T*
+(public interface I extends [I2, I4, I1], I3)Tj
+0 -1.05 TD
+({)Tj
+0 -2.1 TD
+(})Tj
+T*
+(                 )Tj
+/TT4 1 Tf
+12 0 0 12 54 398.8 Tm
+(will be translated into: )Tj
+/TT6 1 Tf
+10 0 0 10 54 374.9 Tm
+(      )Tj
+0 -1.05 TD
+(abstract public class C implements I3, I2, I1, I4 {)Tj
+0 -2.1 TD
+(})Tj
+T*
+(public interface I extends I4, I2, I1, I3 {)Tj
+T*
+(})Tj
+0 -1.05 TD
+(                 )Tj
+/TT2 1 Tf
+12 0 0 12 54 266.7 Tm
+(1.2.5 Method Declaration)Tj
+/TT4 1 Tf
+0 -2.2167 TD
+(In method declarations, translating compound types into their standard types is not sufficient, because in)Tj
+0 -1.1083 TD
+(some cases, it may be possible to overload a method taking a compound type as an argument with)Tj
+T*
+(another one taking the standard type corresponding to the compound type. After the compound type has)Tj
+T*
+(been translated into a standard type, the two methods would have the same name and signature. )Tj
+0 -2.2167 TD
+(To avoid this, the translator renames all methods taking compound type arguments. The cjava compiler)Tj
+0 -1.1083 TD
+(keeps track of these name changes and modifies method calls wherever necessary. )Tj
+/TT2 1 Tf
+0 -2.2583 TD
+(Example:)Tj
+/TT4 1 Tf
+4.1083 0 TD
+( A very heavily overloaded )Tj
+/TT6 1 Tf
+10 0 0 10 236.9 133.2 Tm
+(val\(\))Tj
+/TT4 1 Tf
+12 0 0 12 266.9 133.2 Tm
+( method in a class. )Tj
+/TT6 1 Tf
+10 0 0 10 54 109.3 Tm
+(      )Tj
+0 -1.05 TD
+(public class C)Tj
+T*
+({)Tj
+T*
+(    int val\(\))Tj
+ET
+endstream
+endobj
+43 0 obj
+<<
+/ProcSet [/PDF /Text ]
+/Font <<
+/TT2 4 0 R
+/TT4 5 0 R
+/TT6 6 0 R
+>>
+/ExtGState <<
+/GS1 7 0 R
+>>
+>>
+endobj
+45 0 obj
+<<
+/Length 1645
+>>
+stream
+BT
+/TT6 1 Tf
+10 0 0 10 54 711.9 Tm
+0 g
+/GS1 gs
+0 Tc
+0 Tw
+(    {)Tj
+0 -1.05 TD
+(        return 1;)Tj
+T*
+(    })Tj
+T*
+(    int val\(int base\))Tj
+T*
+(    {)Tj
+T*
+(        return base+val\(\);)Tj
+T*
+(    })Tj
+T*
+(    int val\(Object o\))Tj
+T*
+(    {)Tj
+T*
+(        return o.hashCode\(\);)Tj
+T*
+(    })Tj
+T*
+(    int val\(I1 i\))Tj
+T*
+(    {)Tj
+T*
+(        return i.i1*2 + val\(\(Object\)i\);)Tj
+T*
+(    })Tj
+T*
+(    int val\(I2 i\))Tj
+T*
+(    {)Tj
+T*
+(        return i.i2*2 + val\(\(Object\)i\);)Tj
+T*
+(    })Tj
+T*
+(    int val\([I1, I2] i\))Tj
+T*
+(    {)Tj
+T*
+(        return val\(\(I1\)i\) + val\(\(I2\)i\);)Tj
+T*
+(    })Tj
+0 -2.1 TD
+(    int val\([I3, I1, I2] i\))Tj
+0 -1.05 TD
+(    {)Tj
+T*
+(        return i.i3 + val\(\([I2, I1]\)i\);)Tj
+T*
+(    })Tj
+T*
+(})Tj
+T*
+(                 )Tj
+/TT4 1 Tf
+12 0 0 12 54 383.7 Tm
+(will be translated into: )Tj
+/TT6 1 Tf
+10 0 0 10 54 359.8 Tm
+(      )Tj
+T*
+(public class C {)Tj
+T*
+(   int val\(\) {)Tj
+T*
+(      return 1;)Tj
+T*
+(   })Tj
+T*
+(   int val\(int base\) {)Tj
+T*
+(      return base + val\(\);)Tj
+T*
+(   })Tj
+T*
+(   int val\(Object o\) {)Tj
+T*
+(      return o.hashCode\(\);)Tj
+T*
+(   })Tj
+T*
+(   int val\(I1 i\) {)Tj
+T*
+(      return i.i1 * 2 + val\(\(Object\)i\);)Tj
+T*
+(   })Tj
+T*
+(   int val\(I2 i\) {)Tj
+T*
+(      return i.i2 * 2 + val\(\(Object\)i\);)Tj
+T*
+(   })Tj
+T*
+(   int val$cj$XPLI1$LI2$$XI\(I2 i\) {)Tj
+T*
+(      return val\(\(I1\)i\) + val\(\(I2\)i\);)Tj
+T*
+(   })Tj
+T*
+(   public C\(\) {)Tj
+T*
+(      super\(\);)Tj
+T*
+(   })Tj
+0 -2.1 TD
+(   int val$cj$XPLI1$LI2$LI3$$XI\(I3 i\) {)Tj
+0 -1.05 TD
+(      return i.i3 + val$cj$XPLI1$LI2$$XI\(\(I2\)\(\(I1\)i\)\);)Tj
+T*
+(   })Tj
+T*
+(})Tj
+ET
+endstream
+endobj
+46 0 obj
+<<
+/ProcSet [/PDF /Text ]
+/Font <<
+/TT4 5 0 R
+/TT6 6 0 R
+>>
+/ExtGState <<
+/GS1 7 0 R
+>>
+>>
+endobj
+48 0 obj
+<<
+/Length 4824
+>>
+stream
+BT
+/TT6 1 Tf
+10 0 0 10 54 711.9 Tm
+0 g
+/GS1 gs
+0 Tc
+0 Tw
+(                 )Tj
+/TT2 1 Tf
+14 0 0 14 54 685.9 Tm
+(1.3 Class Attributes)Tj
+/TT4 1 Tf
+12 0 0 12 54 658.9 Tm
+(When importing a class, the cjava compiler needs to be able to find out the real signature and name of)Tj
+0 -1.1083 TD
+(the methods taking compound types as their argument, as in the example of the previous section. This is)Tj
+T*
+(done using class attributes. )Tj
+0 -2.2167 TD
+(CJava defines two new attributes, )Tj
+/TT6 1 Tf
+10 0 0 10 218.6 605.7001 Tm
+(CJRealSig)Tj
+/TT4 1 Tf
+12 0 0 12 272.6 605.7001 Tm
+( and )Tj
+/TT6 1 Tf
+10 0 0 10 295.9 605.7001 Tm
+(CJRealVar)Tj
+/TT4 1 Tf
+12 0 0 12 349.9 605.7001 Tm
+(. )Tj
+/TT6 1 Tf
+10 0 0 10 355.8 605.7001 Tm
+(CJRealSig)Tj
+/TT4 1 Tf
+12 0 0 12 409.8 605.7001 Tm
+( saves the signature and name)Tj
+-29.65 -1.1083 TD
+(of the methods having compound types in their arguments, return value, or thrown exception list, and)Tj
+/TT6 1 Tf
+10 0 0 10 54 579.1 Tm
+(CJRealVar)Tj
+/TT4 1 Tf
+12 0 0 12 108 579.1 Tm
+(, the type of class variables. )Tj
+-4.5 -2.2167 TD
+-0.0001 Tw
+[(The new attributes are ignored by the JVM, as defined in the JVM specifications [2])7.7(. Only the cjava)]TJ
+0 -1.1083 TD
+0 Tw
+(compiler reads and interprets them. )Tj
+0 -2.2167 TD
+(An extended version of java signatures has been defined for these attributes. In addition to the standard)Tj
+0 -1.1083 TD
+(types, the extended signature may contain compound types. The format used to convert compound types)Tj
+T*
+(into strings is : )Tj
+/TT6 1 Tf
+10 0 0 10 128 486 Tm
+("P" { constituent-type-signature } ";")Tj
+/TT4 1 Tf
+12 0 0 12 356 486 Tm
+(. For example, the signature of )Tj
+/TT6 1 Tf
+10 0 0 10 505.9 486 Tm
+([Vector,)Tj
+-45.19 -1.33 TD
+(I1])Tj
+/TT4 1 Tf
+12 0 0 12 72 472.7 Tm
+( is )Tj
+/TT6 1 Tf
+10 0 0 10 86 472.7 Tm
+(PLjava/util/Vector;LI1;;)Tj
+/TT4 1 Tf
+12 0 0 12 230 472.7 Tm
+(. )Tj
+/TT2 1 Tf
+10 0 0 10 54 447.5 Tm
+(1.3.1 Class Variable Declarations)Tj
+/TT6 1 Tf
+0 -2.61 TD
+(CJRealVar)Tj
+/TT4 1 Tf
+12 0 0 12 108 421.4 Tm
+( is a field attribute that contains the index in the pool of the extended signature of the field’s)Tj
+-4.5 -1.1083 TD
+(type. )Tj
+/TT2 1 Tf
+10 0 0 10 54 382.9 Tm
+(1.3.2 Method Declarations)Tj
+/TT6 1 Tf
+0 -2.61 TD
+(CJRealSig)Tj
+/TT4 1 Tf
+12 0 0 12 108 356.8 Tm
+( is a method attribute.)Tj
+-4.5 -2.2167 TD
+(It contains : )Tj
+ET
+1 i 
+75.42 307.74 m
+75.42 309.562 73.942 311.04 72.12 311.04 c
+70.298 311.04 68.82 309.562 68.82 307.74 c
+68.82 305.918 70.298 304.44 72.12 304.44 c
+73.942 304.44 75.42 305.918 75.42 307.74 c
+f
+BT
+12 0 0 12 82 303.6 Tm
+(the real name of the method, as the programmer would write it )Tj
+ET
+75.42 294.42 m
+75.42 296.242 73.942 297.72 72.12 297.72 c
+70.298 297.72 68.82 296.242 68.82 294.42 c
+68.82 292.598 70.298 291.12 72.12 291.12 c
+73.942 291.12 75.42 292.598 75.42 294.42 c
+f
+BT
+12 0 0 12 82 290.3 Tm
+(the extended signature of the method )Tj
+ET
+75.42 281.1 m
+75.42 282.922 73.942 284.4 72.12 284.4 c
+70.298 284.4 68.82 282.922 68.82 281.1 c
+68.82 279.278 70.298 277.8 72.12 277.8 c
+73.942 277.8 75.42 279.278 75.42 281.1 c
+f
+BT
+12 0 0 12 82 277 Tm
+(the number of exceptions declared to be thrown by the method )Tj
+ET
+75.42 267.78 m
+75.42 269.602 73.942 271.08 72.12 271.08 c
+70.298 271.08 68.82 269.602 68.82 267.78 c
+68.82 265.958 70.298 264.48 72.12 264.48 c
+73.942 264.48 75.42 265.958 75.42 267.78 c
+f
+BT
+12 0 0 12 82 263.7 Tm
+(the extended signature of these exceptions, if any )Tj
+/TT2 1 Tf
+14 0 0 14 54 234.8 Tm
+(1.4 Limitations)Tj
+/TT4 1 Tf
+12 0 0 12 54 207.8 Tm
+(While arrays of compounds are legal, the compiler refuses to create new ones, because element types)Tj
+0 -1.1083 TD
+(must have a run-time type that actually implements the constituent interfaces and extends the constituent)Tj
+T*
+(class. Otherwise the JVM throws an exception at some point. If arrays of compound types were created,)Tj
+T*
+(a seemingly innocent conversion from one array to another would lead to an invalid cast operation that)Tj
+T*
+(the JVM would not accept. )Tj
+/TT2 1 Tf
+0 -2.2583 TD
+(Example:)Tj
+/TT4 1 Tf
+4.1083 0 TD
+( In this code, the conversion from )Tj
+/TT6 1 Tf
+10 0 0 10 267.9 127.5 Tm
+([I1, I2][])Tj
+/TT4 1 Tf
+12 0 0 12 327.9 127.5 Tm
+( to )Tj
+/TT6 1 Tf
+10 0 0 10 343.2 127.5 Tm
+(I1[])Tj
+/TT4 1 Tf
+12 0 0 12 367.2 127.5 Tm
+( should be valid, since )Tj
+/TT6 1 Tf
+10 0 0 10 477.1 127.5 Tm
+(I1)Tj
+/TT4 1 Tf
+12 0 0 12 489.1 127.5 Tm
+( is a supertype)Tj
+-36.2583 -1.1083 TD
+(of )Tj
+/TT6 1 Tf
+10 0 0 10 66.9 114.2 Tm
+([I1, I2])Tj
+/TT4 1 Tf
+12 0 0 12 114.9 114.2 Tm
+(. Yet, the JVM cannot accept it, since what it sees is a conversion from an array of )Tj
+/TT6 1 Tf
+10 0 0 10 513.1 114.2 Tm
+(I2)Tj
+/TT4 1 Tf
+12 0 0 12 525.1 114.2 Tm
+( to an)Tj
+-39.2583 -1.1083 TD
+(array of )Tj
+/TT6 1 Tf
+10 0 0 10 94.6 100.9 Tm
+(I1)Tj
+/TT4 1 Tf
+12 0 0 12 106.6 100.9 Tm
+(. )Tj
+/TT6 1 Tf
+10 0 0 10 54 77 Tm
+(      )Tj
+ET
+endstream
+endobj
+49 0 obj
+<<
+/ProcSet [/PDF /Text ]
+/Font <<
+/TT2 4 0 R
+/TT4 5 0 R
+/TT6 6 0 R
+>>
+/ExtGState <<
+/GS1 7 0 R
+>>
+>>
+endobj
+51 0 obj
+<<
+/Length 2852
+>>
+stream
+BT
+/TT6 1 Tf
+10 0 0 10 54 711.9 Tm
+0 g
+/GS1 gs
+0 Tc
+0 Tw
+([I1, I2][] array = new [I1, I2]\(3\);)Tj
+0 -1.05 TD
+(I1[] array2 = array;)Tj
+T*
+(                 )Tj
+/TT4 1 Tf
+12 0 0 12 54 667.2001 Tm
+(would have been be translated into: )Tj
+/TT6 1 Tf
+10 0 0 10 54 643.3 Tm
+(      )Tj
+T*
+(I2[] array = new I2\(3\);)Tj
+T*
+(I1[] array2 = \(I1[]\)array; // a ClassCastException is thrown when this line is execu)Tj
+T*
+(                 )Tj
+/TT4 1 Tf
+12 0 0 12 54 588.1 Tm
+(It would have been possible to create arrays of compounds but forbid conversion. It would however be)Tj
+0 -1.1083 TD
+(even more limiting, since perfectly safe conversions would have then been impossible. )Tj
+/TT2 1 Tf
+18 0 0 18 54 542.1 Tm
+(Part 2: Type aliases)Tj
+/TT4 1 Tf
+12 0 0 12 54 514.2 Tm
+[(Büchi and Weck )5.7([1])7.7( described another extension to the java type system that would make compound)]TJ
+T*
+(types simpler to use. The idea is to use an arbitrary name as a synonym of a class, interface or compound)Tj
+T*
+(type, much in the way of C’s )Tj
+/TT6 1 Tf
+10 0 0 10 195.9 487.6 Tm
+(typedef)Tj
+/TT4 1 Tf
+12 0 0 12 237.9 487.6 Tm
+(. Then, it would not always be necessary to write long compound)Tj
+-15.325 -1.1083 TD
+(type definitions. )Tj
+/TT2 1 Tf
+14 0 0 14 54 445.4 Tm
+(2.1 Language Modifications)Tj
+/TT4 1 Tf
+12 0 0 12 54 418.4 Tm
+(The grammar has been modified so that it is possible to declare aliases wherever class declaration is)Tj
+T*
+(legal. That is, in a package, and within a class or method body. Alias declarations are of the form :)Tj
+T*
+(modifiers \("class" | "interface" \) name "=" type ";". Only classes, interfaces and compound types may be)Tj
+T*
+(aliased. )Tj
+0 -2.2167 TD
+(Some alias declarations: )Tj
+/TT6 1 Tf
+10 0 0 10 54 328 Tm
+(      )Tj
+0 -1.05 TD
+(public class AliasToVector = java.util.Vector;)Tj
+T*
+(interface AliasToList = java.util.List;)Tj
+T*
+(public class Alias1 = [C1, I1, I2];)Tj
+T*
+(                 )Tj
+/TT4 1 Tf
+12 0 0 12 54 262.3 Tm
+(An alias defined in a package may be public or package-local. In a class, it can also be private or)Tj
+0 -1.1083 TD
+(protected. A local alias defined in the body of a method has the same scope as a variable defined at the)Tj
+T*
+(same place in the code would have. )Tj
+0 -2.2167 TD
+(Defining an alias with a more relaxed protection than the class or interface it is aliased to is illegal. For)Tj
+0 -1.1083 TD
+(example, it is not possible to define a public alias to a private inner class, because it would have the)Tj
+T*
+(effect of making the inner class public. )Tj
+/TT2 1 Tf
+0 -2.2583 TD
+(2.1.1 New Syntax)Tj
+/TT4 1 Tf
+0 -2.2167 TD
+(The modifications that have been made to the standard java grammar, following those described in)Tj
+0 -1.1083 TD
+(1.1.1, EBNF form : )Tj
+ET
+q
+1 i 
+54 72 504 648 re
+W n
+BT
+/TT6 1 Tf
+10 0 0 10 54 91.6 Tm
+(A)Tj
+ET
+Q
+BT
+/TT6 1 Tf
+10 0 0 10 60.001 91.6 Tm
+(DDITIONS:)Tj
+ET
+endstream
+endobj
+52 0 obj
+<<
+/ProcSet [/PDF /Text ]
+/Font <<
+/TT2 4 0 R
+/TT4 5 0 R
+/TT6 6 0 R
+>>
+/ExtGState <<
+/GS1 7 0 R
+>>
+>>
+endobj
+54 0 obj
+<<
+/Length 2362
+>>
+stream
+BT
+/TT6 1 Tf
+10 0 0 10 54 711.9 Tm
+0 g
+/GS1 gs
+0 Tc
+0 Tw
+(   AliasDeclaration ::=)Tj
+0 -1.05 TD
+(                  Modifiers \( "class" | "interface" \) Identifier "=" ClassOrInterfac)Tj
+0 -2.1 TD
+(   LocalAliasDeclarationStatement ::= Modifiers \( "class" | "interface" \) LocalAlias)Tj
+T*
+(   LocalAliasDeclarations ::=)Tj
+0 -1.05 TD
+(                 Identifier "=" ClassOrInterfaceType)Tj
+T*
+(               | LocalAliasDeclarations "," Identifier "=" ClassOrInterfaceType)Tj
+0 -2.1 TD
+(CHANGES:)Tj
+T*
+(  TypeDeclaration ::= )Tj
+0 -1.05 TD
+(                 ClassDeclaration)Tj
+T*
+(               | InterfaceDeclaration)Tj
+T*
+(               | AliasDeclaration)Tj
+T*
+(        )Tj
+0 -2.1 TD
+(  BlockStatement ::=    )Tj
+0 -1.05 TD
+(                 LocalVariableDeclarationStatement)Tj
+T*
+(               | LocalAliasDeclarationStatement  )Tj
+T*
+(               | Statement)Tj
+T*
+(               | ClassDeclaration)Tj
+0 -2.1 TD
+(  ClassMemberDeclaration ::=)Tj
+0 -1.05 TD
+(                 FieldDeclaration)Tj
+T*
+(               | MethodDeclaration)Tj
+T*
+(               | InnerClassDeclaration)Tj
+T*
+(               | AliasDeclaration)Tj
+/TT2 1 Tf
+14 0 0 14 54 402.4 Tm
+(2.2 Translation)Tj
+/TT4 1 Tf
+12 0 0 12 54 375.4 Tm
+(Aliases are always translated into the type they represent. )Tj
+/TT2 1 Tf
+0 -2.2583 TD
+(2.2.1 Alias Declaration)Tj
+/TT4 1 Tf
+0 -2.2167 TD
+(The translator converts alias declarations into declarations of classes with the same name and protection)Tj
+0 -1.1083 TD
+(flags. Private and local aliase declarations can be removed from the tree, since they cannot be accessed)Tj
+T*
+(from outside the current source file and are never needed at run-time. )Tj
+0 -2.2167 TD
+(Classes representing aliases are exported with a special attribute tagging them as alias definitions. To the)Tj
+0 -1.1083 TD
+(virtual machine, they appear as empty classes. )Tj
+/TT2 1 Tf
+0 -2.2583 TD
+(Example:)Tj
+/TT4 1 Tf
+4.1083 0 TD
+( )Tj
+/TT6 1 Tf
+10 0 0 10 54 204.2 Tm
+(      )Tj
+0 -1.05 TD
+(public interface AliasToI1 = I1;)Tj
+T*
+(interface AliasToI1I2 = [I1, I2];)Tj
+0 -2.1 TD
+(public class C)Tj
+0 -1.05 TD
+({)Tj
+T*
+(    private interface AliasToI2 = I2;)Tj
+T*
+(    public interface AliasToI1I2I3 = [I1, I2, I3];)Tj
+0 -2.1 TD
+(    void dummy\(Object o\))Tj
+0 -1.05 TD
+(    {)Tj
+T*
+(        class LocalAlias = I1;)Tj
+T*
+(        LocalAlias a = \(LocalAlias\)o;)Tj
+ET
+endstream
+endobj
+55 0 obj
+<<
+/ProcSet [/PDF /Text ]
+/Font <<
+/TT2 4 0 R
+/TT4 5 0 R
+/TT6 6 0 R
+>>
+/ExtGState <<
+/GS1 7 0 R
+>>
+>>
+endobj
+57 0 obj
+<<
+/Length 3275
+>>
+stream
+BT
+/TT6 1 Tf
+10 0 0 10 54 711.9 Tm
+0 g
+/GS1 gs
+0 Tc
+0 Tw
+(        a.i1\(\);)Tj
+0 -1.05 TD
+(    })Tj
+T*
+(})Tj
+T*
+(             )Tj
+/TT4 1 Tf
+12 0 0 12 54 656.7001 Tm
+(will be translated into: )Tj
+/TT6 1 Tf
+10 0 0 10 54 632.8 Tm
+(      )Tj
+T*
+(public class AliasToI1 {)Tj
+T*
+(})Tj
+0 -2.1 TD
+(class AliasToI1I2 {)Tj
+0 -1.05 TD
+(})Tj
+0 -2.1 TD
+(public class C {)Tj
+0 -1.05 TD
+(    /* AliasToI2 declaration removed */)Tj
+T*
+(  )Tj
+T*
+(    static public class AliasToI1I2I3 { )Tj
+T*
+(    })Tj
+0 -2.1 TD
+(    void dummy\(Object o\) {)Tj
+0 -1.05 TD
+(        I1 a = \(I1\)o;)Tj
+T*
+(        a.i1\(\);)Tj
+T*
+(    })Tj
+T*
+(})Tj
+T*
+(             )Tj
+/TT2 1 Tf
+14 0 0 14 54 417.8 Tm
+(2.3 Class Attributes)Tj
+/TT4 1 Tf
+12 0 0 12 54 390.8 Tm
+(Classes representing aliases are tagged with the class attribute )Tj
+/TT6 1 Tf
+10 0 0 10 354.2 390.8 Tm
+(CJAlias)Tj
+/TT4 1 Tf
+12 0 0 12 396.2 390.8 Tm
+(. This attribute tells the cjava)Tj
+-28.5167 -1.1083 TD
+(compiler which alias has been defined without it having to recompile the the source code. )Tj
+0 -2.2167 TD
+(The attribute contains an index to the extended signature of the aliased type in the pool. This signature)Tj
+0 -1.1083 TD
+(supports compound types as well as aliases. Since aliases are indistinguishable from classes in the)Tj
+T*
+(extended signature, the compiler can only tell the difference after parsing the class file. )Tj
+/TT2 1 Tf
+14 0 0 14 54 295.4 Tm
+(2.4 Limitations)Tj
+/TT4 1 Tf
+12 0 0 12 54 268.4 Tm
+(Since most alias definitions are saved in class files, the cjava compiler generates many files that are)Tj
+T*
+(never used at run-time. Only the cjava compiler needs them. This has the drawback of mixing class files)Tj
+T*
+(used at run-time with pure compiler constructs. )Tj
+/TT2 1 Tf
+18 0 0 18 54 209.1 Tm
+(Bibliography)Tj
+ET
+1 i 
+75.42 185.34 m
+75.42 187.162 73.942 188.64 72.12 188.64 c
+70.298 188.64 68.82 187.162 68.82 185.34 c
+68.82 183.518 70.298 182.04 72.12 182.04 c
+73.942 182.04 75.42 183.518 75.42 185.34 c
+f
+BT
+/TT4 1 Tf
+12 0 0 12 82 181.2 Tm
+(M Büchi, W Weck. Java Needs Compound Types. TUCS Technical Report No. 182, June 1998.)Tj
+T*
+-0.0001 Tc
+(http://www.tucs.abo.fi/publications/techreports/TR182.html )Tj
+ET
+75.42 158.7 m
+75.42 160.522 73.942 162 72.12 162 c
+70.298 162 68.82 160.522 68.82 158.7 c
+68.82 156.878 70.298 155.4 72.12 155.4 c
+73.942 155.4 75.42 156.878 75.42 158.7 c
+f
+BT
+12 0 0 12 82 154.6 Tm
+0 Tc
+(J. Gosling, B. Joy, G. Steele. The Java Language Specification.)Tj
+T*
+[(http://java.sun.com/docs/books/jls/html/index.html 1996)8.3( )]TJ
+ET
+75.42 132.06 m
+75.42 133.882 73.942 135.36 72.12 135.36 c
+70.298 135.36 68.82 133.882 68.82 132.06 c
+68.82 130.238 70.298 128.76 72.12 128.76 c
+73.942 128.76 75.42 130.238 75.42 132.06 c
+f
+BT
+12 0 0 12 82 128 Tm
+(T. Lindholm, F. Yellin. The Java\(tm\) Virtual Machine Specification, Second Edition.)Tj
+T*
+[(http://java.sun.com/docs/books/vmspec/2nd-edition/html/VMSpecTOC.doc.html. 1999)8.3( )]TJ
+ET
+75.42 105.54 m
+75.42 107.362 73.942 108.84 72.12 108.84 c
+70.298 108.84 68.82 107.362 68.82 105.54 c
+68.82 103.718 70.298 102.24 72.12 102.24 c
+73.942 102.24 75.42 103.718 75.42 105.54 c
+f
+BT
+12 0 0 12 82 101.4 Tm
+(M. Zenger. Erweiterbare Übersetzer. Diplomarbeit Universität Karlsruhe. 1998 )Tj
+/TT8 1 Tf
+-2.3333 -2.2 TD
+(Stephane Zermatten)Tj
+ET
+endstream
+endobj
+58 0 obj
+<<
+/ProcSet [/PDF /Text ]
+/Font <<
+/TT2 4 0 R
+/TT4 5 0 R
+/TT6 6 0 R
+/TT8 59 0 R
+>>
+/ExtGState <<
+/GS1 7 0 R
+>>
+>>
+endobj
+61 0 obj
+<<
+/Length 110
+>>
+stream
+BT
+/TT4 1 Tf
+12 0 0 12 54 696.4 Tm
+0 g
+/GS1 gs
+0 Tc
+0 Tw
+(Last modified: Wed Jun 21 14:55:19 CEST 2000 )Tj
+ET
+endstream
+endobj
+62 0 obj
+<<
+/ProcSet [/PDF /Text ]
+/Font <<
+/TT4 5 0 R
+>>
+/ExtGState <<
+/GS1 7 0 R
+>>
+>>
+endobj
+7 0 obj
+<<
+/Type /ExtGState
+/SA false
+/SM 0.02
+/OP false
+/op false
+/OPM 1
+/BG2 /Default
+/UCR2 /Default
+/HT /Default
+/TR2 /Default
+>>
+endobj
+63 0 obj
+<<
+/Type /FontDescriptor
+/Ascent 750
+/CapHeight 676
+/Descent -250
+/Flags 262178
+/FontBBox [-168 -218 1000 935]
+/FontName /Times-Bold
+/ItalicAngle 0
+/StemV 133
+/XHeight 461
+/StemH 139
+>>
+endobj
+64 0 obj
+<<
+/Type /FontDescriptor
+/Ascent 750
+/CapHeight 662
+/Descent -250
+/Flags 34
+/FontBBox [-168 -218 1000 898]
+/FontName /Times-Roman
+/ItalicAngle 0
+/StemV 84
+/XHeight 450
+/StemH 84
+>>
+endobj
+65 0 obj
+<<
+/Type /FontDescriptor
+/Ascent 753
+/CapHeight 562
+/Descent -246
+/Flags 35
+/FontBBox [-28 -250 628 805]
+/FontName /Courier
+/ItalicAngle 0
+/StemV 51
+/XHeight 426
+/StemH 51
+>>
+endobj
+66 0 obj
+<<
+/Type /FontDescriptor
+/Ascent 750
+/CapHeight 653
+/Descent -250
+/Flags 98
+/FontBBox [-169 -217 1010 883]
+/FontName /Times-Italic
+/ItalicAngle -15
+/StemV 76
+/XHeight 441
+/StemH 76
+>>
+endobj
+4 0 obj
+<<
+/Type /Font
+/Subtype /TrueType
+/FirstChar 32
+/LastChar 121
+/Widths [250 0 0 0 0 0 0 0 0 0 0 0 0 0 250 0 
+0 500 500 500 500 500 0 0 0 0 333 0 0 0 0 0 
+0 722 667 722 722 667 611 778 778 389 500 0 667 944 722 778 
+611 0 0 556 667 0 722 0 0 0 0 0 0 0 0 0 
+0 500 556 444 556 444 333 500 556 278 0 0 278 833 556 500 
+556 0 444 389 333 556 500 722 500 500 ]
+/Encoding /WinAnsiEncoding
+/BaseFont /Times-Bold
+/FontDescriptor 63 0 R
+>>
+endobj
+5 0 obj
+<<
+/Type /Font
+/Subtype /TrueType
+/FirstChar 32
+/LastChar 252
+/Widths [250 0 408 0 0 0 0 0 333 333 0 0 250 333 250 278 
+500 500 500 500 500 500 500 0 500 500 278 278 0 564 0 0 
+0 722 667 667 722 611 556 722 722 333 389 722 611 889 722 722 
+556 0 667 556 611 722 722 944 0 722 611 333 0 333 0 0 
+0 444 500 444 500 444 333 500 500 278 278 500 278 778 500 500 
+500 500 333 389 278 500 500 722 500 500 444 0 200 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 333 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 722 0 0 0 
+0 0 0 0 444 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 500 ]
+/Encoding /WinAnsiEncoding
+/BaseFont /Times-Roman
+/FontDescriptor 64 0 R
+>>
+endobj
+6 0 obj
+<<
+/Type /Font
+/Subtype /TrueType
+/FirstChar 32
+/LastChar 125
+/Widths [600 0 600 0 600 0 600 0 600 600 600 600 600 600 600 600 
+600 600 600 600 600 0 0 0 0 0 600 600 0 600 0 0 
+0 600 600 600 600 600 600 600 600 600 600 0 600 600 600 600 
+600 0 600 600 600 600 600 0 600 0 0 600 0 600 0 600 
+0 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 
+600 0 600 600 600 600 600 600 600 600 600 600 600 600 ]
+/Encoding /WinAnsiEncoding
+/BaseFont /Courier
+/FontDescriptor 65 0 R
+>>
+endobj
+59 0 obj
+<<
+/Type /Font
+/Subtype /TrueType
+/FirstChar 32
+/LastChar 116
+/Widths [250 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 500 0 0 0 0 0 0 556 0 0 0 0 0 
+0 500 0 0 0 444 0 0 500 0 0 0 0 722 500 0 
+500 0 389 0 278 ]
+/Encoding /WinAnsiEncoding
+/BaseFont /Times-Italic
+/FontDescriptor 66 0 R
+>>
+endobj
+1 0 obj
+<<
+/Type /Page
+/Parent 8 0 R
+/Resources 3 0 R
+/Contents 2 0 R
+>>
+endobj
+9 0 obj
+<<
+/Type /Page
+/Parent 8 0 R
+/Resources 11 0 R
+/Contents 10 0 R
+>>
+endobj
+12 0 obj
+<<
+/Type /Page
+/Parent 8 0 R
+/Resources 14 0 R
+/Contents 13 0 R
+>>
+endobj
+15 0 obj
+<<
+/Type /Page
+/Parent 8 0 R
+/Resources 17 0 R
+/Contents 16 0 R
+>>
+endobj
+18 0 obj
+<<
+/Type /Page
+/Parent 8 0 R
+/Resources 20 0 R
+/Contents 19 0 R
+>>
+endobj
+21 0 obj
+<<
+/Type /Page
+/Parent 8 0 R
+/Resources 23 0 R
+/Contents 22 0 R
+>>
+endobj
+24 0 obj
+<<
+/Type /Page
+/Parent 8 0 R
+/Resources 26 0 R
+/Contents 25 0 R
+>>
+endobj
+27 0 obj
+<<
+/Type /Page
+/Parent 8 0 R
+/Resources 29 0 R
+/Contents 28 0 R
+>>
+endobj
+30 0 obj
+<<
+/Type /Page
+/Parent 8 0 R
+/Resources 32 0 R
+/Contents 31 0 R
+>>
+endobj
+33 0 obj
+<<
+/Type /Page
+/Parent 8 0 R
+/Resources 35 0 R
+/Contents 34 0 R
+>>
+endobj
+36 0 obj
+<<
+/Type /Page
+/Parent 40 0 R
+/Resources 38 0 R
+/Contents 37 0 R
+>>
+endobj
+41 0 obj
+<<
+/Type /Page
+/Parent 40 0 R
+/Resources 43 0 R
+/Contents 42 0 R
+>>
+endobj
+44 0 obj
+<<
+/Type /Page
+/Parent 40 0 R
+/Resources 46 0 R
+/Contents 45 0 R
+>>
+endobj
+47 0 obj
+<<
+/Type /Page
+/Parent 40 0 R
+/Resources 49 0 R
+/Contents 48 0 R
+>>
+endobj
+50 0 obj
+<<
+/Type /Page
+/Parent 40 0 R
+/Resources 52 0 R
+/Contents 51 0 R
+>>
+endobj
+53 0 obj
+<<
+/Type /Page
+/Parent 40 0 R
+/Resources 55 0 R
+/Contents 54 0 R
+>>
+endobj
+56 0 obj
+<<
+/Type /Page
+/Parent 40 0 R
+/Resources 58 0 R
+/Contents 57 0 R
+>>
+endobj
+60 0 obj
+<<
+/Type /Page
+/Parent 40 0 R
+/Resources 62 0 R
+/Contents 61 0 R
+>>
+endobj
+67 0 obj
+<<
+/S /D
+>>
+endobj
+68 0 obj
+<<
+/Nums [0 67 0 R ]
+>>
+endobj
+8 0 obj
+<<
+/Type /Pages
+/Kids [1 0 R 9 0 R 12 0 R 15 0 R 18 0 R 21 0 R 24 0 R 27 0 R 30 0 R 33 0 R]
+/Count 10
+/Parent 39 0 R
+>>
+endobj
+40 0 obj
+<<
+/Type /Pages
+/Kids [36 0 R 41 0 R 44 0 R 47 0 R 50 0 R 53 0 R 56 0 R 60 0 R]
+/Count 8
+/Parent 39 0 R
+>>
+endobj
+39 0 obj
+<<
+/Type /Pages
+/Kids [8 0 R 40 0 R ]
+/Count 18
+/MediaBox [0 0 612 792]
+>>
+endobj
+69 0 obj
+<<
+/CreationDate (D:20230910125047+02'00')
+/ModDate (D:20230910125047+02'00')
+/Producer (PSNormalizer.framework)
+>>
+endobj
+70 0 obj
+<<
+/Type /Catalog
+/Pages 39 0 R
+/PageLabels 68 0 R
+>>
+endobj
+xref
+0 71
+0000000000 65535 f 
+0000052083 00000 n 
+0000000016 00000 n 
+0000004153 00000 n 
+0000050006 00000 n 
+0000050450 00000 n 
+0000051223 00000 n 
+0000049076 00000 n 
+0000053649 00000 n 
+0000052163 00000 n 
+0000004270 00000 n 
+0000007186 00000 n 
+0000052245 00000 n 
+0000007304 00000 n 
+0000010811 00000 n 
+0000052328 00000 n 
+0000010929 00000 n 
+0000012546 00000 n 
+0000052411 00000 n 
+0000012664 00000 n 
+0000014728 00000 n 
+0000052494 00000 n 
+0000014846 00000 n 
+0000017235 00000 n 
+0000052577 00000 n 
+0000017353 00000 n 
+0000019380 00000 n 
+0000052660 00000 n 
+0000019498 00000 n 
+0000021318 00000 n 
+0000052743 00000 n 
+0000021436 00000 n 
+0000024827 00000 n 
+0000052826 00000 n 
+0000024945 00000 n 
+0000026809 00000 n 
+0000052909 00000 n 
+0000026916 00000 n 
+0000030197 00000 n 
+0000053907 00000 n 
+0000053784 00000 n 
+0000052993 00000 n 
+0000030304 00000 n 
+0000032886 00000 n 
+0000053077 00000 n 
+0000033004 00000 n 
+0000034702 00000 n 
+0000053161 00000 n 
+0000034809 00000 n 
+0000039686 00000 n 
+0000053245 00000 n 
+0000039804 00000 n 
+0000042709 00000 n 
+0000053329 00000 n 
+0000042827 00000 n 
+0000045242 00000 n 
+0000053413 00000 n 
+0000045360 00000 n 
+0000048688 00000 n 
+0000051720 00000 n 
+0000053497 00000 n 
+0000048818 00000 n 
+0000048980 00000 n 
+0000049216 00000 n 
+0000049418 00000 n 
+0000049615 00000 n 
+0000049806 00000 n 
+0000053581 00000 n 
+0000053609 00000 n 
+0000053998 00000 n 
+0000054130 00000 n 
+trailer
+<<
+/Size 71
+/Root 70 0 R
+/Info 69 0 R
+/ID [<58b9e4b49254e523a13514d304765179><58b9e4b49254e523a13514d304765179>]
+>>
+startxref
+54200
+%%EOF
+1 0 obj
+<< /Resources 3 0 R /Type /Page /Contents 2 0 R /Rotate 0 /Parent 8 0 R >>
+endobj
+9 0 obj
+<< /Resources 11 0 R /Type /Page /Contents 10 0 R /Rotate 0 /Parent 8 0 R
+>>
+endobj
+12 0 obj
+<< /Resources 14 0 R /Type /Page /Contents 13 0 R /Rotate 0 /Parent 8 0 R
+>>
+endobj
+15 0 obj
+<< /Resources 17 0 R /Type /Page /Contents 16 0 R /Rotate 0 /Parent 8 0 R
+>>
+endobj
+18 0 obj
+<< /Resources 20 0 R /Type /Page /Contents 19 0 R /Rotate 0 /Parent 8 0 R
+>>
+endobj
+21 0 obj
+<< /Resources 23 0 R /Type /Page /Contents 22 0 R /Rotate 0 /Parent 8 0 R
+>>
+endobj
+24 0 obj
+<< /Resources 26 0 R /Type /Page /Contents 25 0 R /Rotate 0 /Parent 8 0 R
+>>
+endobj
+27 0 obj
+<< /Resources 29 0 R /Type /Page /Contents 28 0 R /Rotate 0 /Parent 8 0 R
+>>
+endobj
+30 0 obj
+<< /Resources 32 0 R /Type /Page /Contents 31 0 R /Rotate 0 /Parent 8 0 R
+>>
+endobj
+33 0 obj
+<< /Resources 35 0 R /Type /Page /Contents 34 0 R /Rotate 0 /Parent 8 0 R
+>>
+endobj
+36 0 obj
+<< /Resources 38 0 R /Type /Page /Contents 37 0 R /Rotate 0 /Parent 40 0 R
+>>
+endobj
+41 0 obj
+<< /Resources 43 0 R /Type /Page /Contents 42 0 R /Rotate 0 /Parent 40 0 R
+>>
+endobj
+44 0 obj
+<< /Resources 46 0 R /Type /Page /Contents 45 0 R /Rotate 0 /Parent 40 0 R
+>>
+endobj
+47 0 obj
+<< /Resources 49 0 R /Type /Page /Contents 48 0 R /Rotate 0 /Parent 40 0 R
+>>
+endobj
+50 0 obj
+<< /Resources 52 0 R /Type /Page /Contents 51 0 R /Rotate 0 /Parent 40 0 R
+>>
+endobj
+53 0 obj
+<< /Resources 55 0 R /Type /Page /Contents 54 0 R /Rotate 0 /Parent 40 0 R
+>>
+endobj
+56 0 obj
+<< /Resources 58 0 R /Type /Page /Contents 57 0 R /Rotate 0 /Parent 40 0 R
+>>
+endobj
+60 0 obj
+<< /Resources 62 0 R /Type /Page /Contents 61 0 R /Rotate 0 /Parent 40 0 R
+>>
+endobj
+69 0 obj
+<< /ModDate (D:20230910105134Z00'00') /Producer (macOS Version 12.6.5 \(Build 21G531\) Quartz PDFContext, AppendMode 1.1)
+/CreationDate (D:20230910105047Z00'00') >>
+endobj
+xref
+0 2
+0000000000 65535 f 
+0000055776 00000 n 
+9 1
+0000055866 00000 n 
+12 1
+0000055958 00000 n 
+15 1
+0000056051 00000 n 
+18 1
+0000056144 00000 n 
+21 1
+0000056237 00000 n 
+24 1
+0000056330 00000 n 
+27 1
+0000056423 00000 n 
+30 1
+0000056516 00000 n 
+33 1
+0000056609 00000 n 
+36 1
+0000056702 00000 n 
+41 1
+0000056796 00000 n 
+44 1
+0000056890 00000 n 
+47 1
+0000056984 00000 n 
+50 1
+0000057078 00000 n 
+53 1
+0000057172 00000 n 
+56 1
+0000057266 00000 n 
+60 1
+0000057360 00000 n 
+69 1
+0000057454 00000 n 
+trailer
+<< /ID [<58B9E4B49254E523A13514D304765179><2093AD7123747E57CD818B9EDB7257D4> ] /Root 70 0 R /Size 71 /Prev 54200 /Info 69 0 R >> 
+startxref
+57635
+%%EOF

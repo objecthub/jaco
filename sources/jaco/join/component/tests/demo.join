@@ -1,0 +1,14 @@
+{
+	ref z = {
+				get () & state x = x & state x,  // function 0
+				put x & state y = state x        // function 1
+			};
+			(get, put) & state z,			 	 // function 2
+	get (g, _) = g (),							 // function 3
+	put ((_, p), x) = p x						 // function 4
+};
+{												 // toplevel
+	a = ref 1,
+	b = ref true
+};
+get a & put (b, false)

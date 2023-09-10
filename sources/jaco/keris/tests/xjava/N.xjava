@@ -1,0 +1,9 @@
+module N extends M requires N {
+    void bar() {
+    
+    }
+    {
+        N.bar();
+        System.out.println("initialize N");
+    }
+}

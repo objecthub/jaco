@@ -1,0 +1,21 @@
+public class C extends C1 implements I1, I2 {
+   I2 a;
+   C1 b;
+   void dummy() {
+      b = this;
+      a = this;
+      ((I1)b).i1();
+      ((I2)b).i2();
+      b.c1();
+      ((I1)a).i1();
+      a.i2();
+      int w = ((I1)a).i1 + a.i2;
+   }
+   public void i1() {
+   }
+   public void i2() {
+   }
+   public C() {
+      super();
+   }
+}

@@ -1,0 +1,5 @@
+module I requires M {
+    void bar() {
+        M.goo();
+    }
+}

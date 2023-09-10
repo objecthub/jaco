@@ -1,0 +1,32 @@
+public class C {
+   int val() {
+      return 1;
+   }
+   int val(int base) {
+      return base + val();
+   }
+   int val(Object o) {
+      return o.hashCode();
+   }
+   int val(I1 i) {
+      return i.i1 * 2 + val((Object)i);
+   }
+   int val(I2 i) {
+      return i.i2 * 2 + val((Object)i);
+   }
+   int val$cj$XPLI1$LI2$$XI(I2 i) {
+      return val((I1)i) + val((I2)i);
+   }
+   public C() {
+      super();
+   }
+}
+
+class C2 extends C {
+   int val$cj$XPLI1$LI2$LI3$$XI(I3 i) {
+      return i.i3 + val$cj$XPLI1$LI2$$XI((I2)((I1)i));
+   }
+   C2() {
+      super();
+   }
+}

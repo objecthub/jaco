@@ -1,0 +1,24 @@
+module M {
+	module N;
+	
+	void bar(N.Expr expr) {
+		//N.foo(expr);
+		//N.foo(N.One());
+		//bar(N.One());
+		N.Expr x = N.one();
+	}
+}
+
+module N {
+	class Expr
+		case One(),
+		case Two(Expr expr);
+	
+	Expr foo(Expr expr) {
+		return expr;
+	}
+	
+	One one() {
+		return One();
+	}
+}

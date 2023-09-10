@@ -1,0 +1,106 @@
+FUNCTIONS
+
+  TOPLEVEL()
+    0: ENTER 0
+    3: GOTO 27
+    6: FUN 2
+    9: STORE 0, 1
+    12: FUN 3
+    15: STORE 0, 2
+    18: FUN 4
+    21: STORE 0, 3
+    24: GOTO 30
+    27: GOTO 6
+    30: ENTER 2
+    33: GOTO 56
+    36: LOAD 1, 1
+    39: BYTE 1
+    41: APPLY
+    42: STORE 0, 1
+    45: LOAD 1, 1
+    48: TRUE
+    49: APPLY
+    50: STORE 0, 2
+    53: GOTO 59
+    56: GOTO 36
+    59: LOAD 1, 3
+    62: LOAD 0, 2
+    65: FALSE
+    66: TUPEL 2
+    68: YIELD
+    69: LOAD 1, 2
+    72: LOAD 0, 1
+    75: APPLY
+    76: LEAVE
+    77: LEAVE
+
+  FUNCTION 0(1 variables, guard is 3)
+    0: STORE 0, 1
+    3: POP
+    4: LOAD 1, 2
+    7: LOAD 0, 1
+    10: YIELD
+    11: LOAD 0, 1
+    14: RET
+
+  FUNCTION 1(2 variables, guard is 6)
+    0: STORE 0, 1
+    3: STORE 0, 2
+    6: LOAD 1, 2
+    9: LOAD 0, 1
+    12: YIELD
+    13: STOP
+
+  FUNCTION 2(1 variables, guard is 0)
+    0: STORE 0, 1
+    3: ENTER 1
+    6: GOTO 12
+    9: GOTO 30
+    12: TOKEN 1
+    14: STORE 0, 1
+    17: TOKEN 2
+    19: STORE 0, 2
+    22: TOKEN 3
+    24: STORE 0, 3
+    27: GOTO 9
+    30: LOAD 0, 2
+    33: LOAD 1, 1
+    36: YIELD
+    37: LOAD 0, 1
+    40: LOAD 0, 3
+    43: TUPEL 2
+    45: LEAVE
+    46: RET
+
+  FUNCTION 3(2 variables, guard is 0)
+    0: DECOMP
+    1: STORE 0, 2
+    4: STORE 0, 1
+    7: LOAD 0, 1
+    10: UNIT
+    11: APPLY
+    12: RET
+
+  FUNCTION 4(3 variables, guard is 0)
+    0: DECOMP
+    1: STORE 0, 3
+    4: DECOMP
+    5: STORE 0, 2
+    8: STORE 0, 1
+    11: LOAD 0, 2
+    14: LOAD 0, 3
+    17: APPLY
+    18: RET
+
+STATE SPACES
+
+  SPACE 0:
+    members: 3, tokens: 0, actions: 0
+
+  SPACE 1:
+    members: 3, tokens: 3, actions: 2
+    invoke function 0 for 3
+    invoke function 1 for 6
+
+  SPACE 2:
+    members: 2, tokens: 0, actions: 0

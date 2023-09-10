@@ -1,0 +1,12 @@
+module M {
+    public void main(String[] args) {
+        if (args != null) {
+            for (int i = 0; i < args.length; i++)
+                System.out.println(i + ". Argument: " + args[i]);
+        }
+    }
+    void goo() {}
+    {
+        System.out.println("initialize M");
+    }
+}

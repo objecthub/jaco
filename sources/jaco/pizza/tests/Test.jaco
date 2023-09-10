@@ -1,0 +1,24 @@
+public class Test {
+    public static class A1 {
+	public case C1 (A1 a);
+	public case C2 (A1[] a);
+    }
+
+    public static class A2 extends A1 {
+	public case C3 (A2 a);
+    }
+
+    final public static void main (String[] args) {
+	A1 a = new A2.C3 (null);
+	switch ((A2) a) {
+	case C1 (A1 a1):
+	    return;
+		
+	case C2 (A1[] a2):
+	    return;
+	    
+	case C3 (A2 a3):
+	    return;
+	}
+    }
+}

@@ -1,0 +1,36 @@
+public class AlphaTest
+{
+	public static void main(String[] args)
+	{
+		Object	o = new Beta.Inner();
+		Alpha	a = Beta.C4(null, "hi");
+		Beta	b = Alpha.C1;
+		b = (Beta.C4)a;
+		a = Beta.C4(Beta.C5, "alpha");
+		b = (Beta)a;
+		o = a;
+		b = (Beta)o;
+		System.out.println("this was alright");
+		a = Gamma.C6(null);
+		System.out.println("should never be reached");
+		y: x: switch ((Gamma)a)
+		{
+			case C6(_):
+				System.out.println("(1)");
+				while (true)
+					break x;
+				
+			case C0:
+				System.out.println("(2)");
+				break;
+			
+			case C1:
+				System.out.println("(3)");
+				break;
+			
+			default:
+				System.out.println("(4)");
+				break;
+		}
+	}
+}

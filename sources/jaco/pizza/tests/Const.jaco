@@ -1,0 +1,55 @@
+package jac;
+
+public strictfp class Const
+{
+/** type tag
+ */
+	public int	tag;
+	
+	public case NullConst;
+	final public case IntConst(int value);
+	public case LongConst(long value);
+	public case FloatConst(float value);
+	public case DoubleConst(double value);
+	
+	static
+	{
+		NullConst.tag = 0;
+	}
+	
+	static Const getConst() {
+		return NullConst;
+	}
+	
+	public static void foo(Const c) {
+		switch (getConst()) {
+		
+		}
+	}
+	
+	public int intValue()
+	{
+		switch (this)
+		{
+			case IntConst(int value):
+				return value;
+			
+			case LongConst(long value):
+				return (int)value;
+			
+			case FloatConst(float value):
+				return (int)value;
+			
+			case DoubleConst(double value):
+				return (int)value;
+			
+			default:
+				throw new InternalError();
+		}
+	}
+}
+
+class NewDoubleConst extends Const.DoubleConst {
+	case Double1();
+	case Double2(double two);
+}

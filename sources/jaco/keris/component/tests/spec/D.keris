@@ -1,0 +1,12 @@
+module M {
+    void foo() {}
+    void goo() {
+        foo();
+    }
+}
+
+module N refines M {
+    void bar() {
+        N.foo();
+    }
+}

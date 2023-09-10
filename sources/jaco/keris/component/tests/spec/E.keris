@@ -1,0 +1,21 @@
+module N {
+}
+
+module NX specializes N {
+}
+
+module M requires N {
+	module O;
+}
+
+module MX specializes M requires NX as N, N {
+	
+}
+
+module O requires P {
+
+}
+
+module P requires N {
+
+}

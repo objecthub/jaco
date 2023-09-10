@@ -1,0 +1,21 @@
+module T {
+    class D with Object;
+}
+
+module interface MI {
+    interface I {
+        void foo(C c, T.D d);
+    }
+    class C implements I;
+}
+
+module X implements MI {
+    class C implements MI.I with {
+        void foo(C c) {
+            c.test();
+        }
+        void test() {}
+    }
+    
+    void bar() {}
+}

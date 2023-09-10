@@ -1,0 +1,26 @@
+public class C {
+   I2 a;
+   C1 b;
+
+   void dummy(Object o) {
+      java.lang.Object __cjava_t$0;
+      if ( o instanceof I2 && o instanceof I1) {
+      }
+
+      if ( (__cjava_t$0 = getObject()) instanceof C1 
+           && __cjava_t$0 instanceof I2 
+           && __cjava_t$0 instanceof I1) {
+      }
+
+      if ( (__cjava_t$0 = a) instanceof C1 
+           && __cjava_t$0 instanceof I2 
+           && __cjava_t$0 instanceof I1) {
+      }
+   }
+   Object getObject() {
+      return this;
+   }
+   public C() {
+      super();
+   }
+}

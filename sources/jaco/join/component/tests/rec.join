@@ -1,0 +1,6 @@
+{
+    f x = if (x) g else h,
+    g = 1,
+    h = { this = { t = f false }, g = f false } ; g
+} ; h
+ 

@@ -1,0 +1,7 @@
+module interface MI {
+    void foo();
+}
+
+module interface MJ {
+    void bar();
+}

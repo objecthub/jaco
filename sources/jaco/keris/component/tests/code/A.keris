@@ -1,0 +1,36 @@
+module H {
+}
+
+module I refines H {
+    public void main(String[] args) {}
+}
+
+module J specializes I {
+}
+
+module K {
+}
+
+module L specializes K {
+}
+
+module M requires K {
+	interface I { I(); }
+	class CI implements I {}
+    class A implements I = CI;
+    
+    public void main(String[] args) {
+    	new A();
+    }
+    
+    module H;
+}
+
+module N refines M {
+    module I;
+}
+
+module O specializes N requires L as K {
+   module J as I;
+   module H;
+}

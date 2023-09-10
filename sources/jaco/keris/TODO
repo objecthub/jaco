@@ -1,0 +1,26 @@
+|/(_|)|(       modular, object-oriented programming
+|\( |\| )      (c) 2001 by Matthias Zenger
+
+=======================================================================
+
+RESOLVE:
+
+- class cast to class fields is always possible
+- for specialized modules inherit every class field
+- generate static main method if main$ gets inherited
+- main$ does not get found
+- allow 'for' in nested modules only for module specifications
+- sealed class fields in interfaces
+
+IMPLEMENT:
+
+- mixin support
+- class fields with anonymous definitions
+
+
+TEST:
+
+- everything
+
+
+=======================================================================

@@ -1,0 +1,17 @@
+context D {
+    M = null;
+}
+
+module interface I {
+    void foo();
+}
+
+module S requires I() {
+    void bar() {}
+}
+
+module M extends S {
+    void bar() {
+        I().foo();
+    }
+}

@@ -1,0 +1,43 @@
+import java.net.*;
+import java.io.*;
+
+public active class MySocket extends java.net.Socket {
+
+	public MySocket(String host, int port) throws UnknownHostException,
+												  IOException {
+		super(host,port);
+	}
+
+	public String read() {
+		String str = "";
+		try {
+			InputStream inStream = getInputStream();
+			BufferedReader reader = new BufferedReader(new InputStreamReader(inStream));
+			str = reader.readLine();
+		}
+		catch(Throwable th) {th.printStackTrace();}
+		return str;
+	}
+	
+	public void send(String str) {
+		try {
+			OutputStream outStream = getOutputStream();
+			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outStream));
+			writer.write(str,0,str.length());
+		}
+		catch(Throwable th) {th.printStackTrace();}
+	}
+	
+	public void run() {
+		for(;;) {
+			select {
+				accept read;
+			||
+				accept send;
+			}
+		}
+	}
+}
+	
+	
+	

@@ -1,0 +1,15 @@
+{
+	ref(z) = {
+				get() & state(x) = x & state(x),
+				put(x) & state(y) = state(x)
+			};
+			(get, put) & state(z),
+	get(g, _) = g(),
+	put((_, p), x) = p(x)
+};
+{
+	a = ref(1),
+	b = ref(true)
+};
+get(a) & put(b, false) & put(a, 2) & put(a, 3);
+get(b)

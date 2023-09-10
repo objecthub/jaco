@@ -1,0 +1,4 @@
+{
+	kill() & first() = (first, kill)
+};
+kill

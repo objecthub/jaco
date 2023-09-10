@@ -1,0 +1,9 @@
+public class C extends C1 implements I1, I2 {
+   I2 a;
+   C1 b;
+   void dummy() {
+      b = this;
+      a = (I2)b;
+      b = null;
+   }
+}

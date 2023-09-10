@@ -1,0 +1,49 @@
+class T {
+
+  void foo(int i) { i = i+1; return; }
+  
+  int (int t) +% this { return 2 + t;}
+  //int (int t) +% this { return 1;}
+ 
+  //int this %+%* (T t) { return 1;}
+  int this *@ (int t) { return 2 * t;}
+
+  int this + (int t) { return 2 * t;}
+
+  int (T t) ** this { return 1;}
+    //  int this ** (T t) { return 1;}
+
+  // T bar() {
+  //  int i = this %+* 4;
+  // }
+
+  //const () {}
+
+  void goo() {
+    T t = new T();
+    int i = 3 +% t;
+    int j = (t *@ (true ? 1 : 2)) / 2;
+
+    StringBuffer str = new StringBuffer("j = ");
+    str.append(j);
+    str.append(", i = ");
+    str.append(i);
+
+    System.out.println(str);
+
+    //int l = t ** t;
+
+    //int k = 1 *@ t;
+    //int j = 1 + 4;
+    //int k = 1 @ 4;
+    //    int l = 1 ++ 4;
+    // int m = 1 +++ 4;
+    //int o = 1 +++ 4;    
+  }
+
+  public static void main(String[] args) {
+      T t = new T();
+      t.goo();
+  }
+
+}

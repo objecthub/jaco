@@ -1,0 +1,2 @@
+#!/bin/sh
+java -ms10m -mx32m -noclassgc -Djava.compiler=NONE jaco.pizza.Main $*

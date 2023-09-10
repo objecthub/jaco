@@ -1,0 +1,137 @@
+//                 _
+//   _  _____ _ __(_)___     Keris API
+//  | |/ / _ \ '__| / __|    (c) 2001 Matthias Zenger
+//  |   <  __/ |  | \__ \
+//  |_|\_\___|_|  |_|___/    System module
+//                           
+//  [OPTIONS.keris (6262) 6-Jul-01 12:03 -> 6-Jul-01 16:09]
+
+package keris.lang;
+
+import java.lang.reflect.*;
+
+
+public module SYSTEM {
+    
+    /** copy array s
+     */
+    public Object[] arraycopy(Object[] s) {
+        if (s == null)
+            return null;
+        Object[] res = (Object[])Array.newInstance(
+            s.getClass().getComponentType(), s.length);
+        System.arraycopy(s, 0, res, 0, s.length);
+        return res;
+    }
+    
+    /** copy array s into new array of length len
+     */
+    public Object[] arraycopy(Object[] s, int len) {
+        Object[] res = (Object[])Array.newInstance(
+            s.getClass().getComponentType(), len);
+        System.arraycopy(s, 0, res, 0, s.length);
+        return res;
+    }
+    
+    /** copy array s into new array of length len at offset dpos
+     */
+    public Object[] arraycopy(Object[] s, int dpos, int len) {
+        Object[] res = (Object[])Array.newInstance(
+            s.getClass().getComponentType(), len);
+        System.arraycopy(s, 0, res, dpos, s.length);
+        return res;
+    }
+    
+    /** copy array s into array d
+     */
+    public void arraycopy(Object[] s, Object[] d) {
+        System.arraycopy(s, 0, d, 0, s.length);
+    }
+    
+    /** copy array s from offset sp with length len into array d
+     *  starting at offset dp
+     */
+    public void arraycopy(Object[] s, int sp, Object[] d, int dp, int len) {
+        System.arraycopy(s, sp, d, dp, len);
+    }
+    
+    /** prepend object a to array as
+     */
+    public Object[] arrayappend(Object a, Object[] as) {
+        Object[] res = (Object[])Array.newInstance(
+            as.getClass().getComponentType(), as.length + 1);
+        System.arraycopy(as, 0, res, 1, res.length);
+        res[0] = a;
+        return res;
+    }
+    
+    /** append object a to array as
+     */
+    public Object[] arrayappend(Object[] as, Object a) {
+        Object[] res = (Object[])Array.newInstance(
+            as.getClass().getComponentType(), as.length + 1);
+        System.arraycopy(as, 0, res, 0, res.length);
+        res[as.length] = a;
+        return res;
+    }
+    
+    /** append arrays as and bs
+     */
+    public Object[] arrayappend(Object[] as, Object[] bs) {
+        if (as == null)
+            return bs;
+        if (bs == null)
+            return as;
+        Object[] res = (Object[])Array.newInstance(
+            as.getClass().getComponentType(), as.length + bs.length);
+        System.arraycopy(as, 0, res, 0, as.length);
+        System.arraycopy(bs, 0, res, as.length, bs.length);
+        return res;
+    }
+    
+    /** return the current time
+     */
+    public long currentTimeMillis() {
+        return System.currentTimeMillis();
+    }
+    
+    /** simple stop watch
+     */
+    protected long[] stopWatchStart = new long[4];
+    protected int stopWatches = 0;
+    
+    public void startTimer() {
+        if (stopWatchStart.length == stopWatches) {
+            long[] res = new long[stopWatches * 2];
+            System.arraycopy(stopWatchStart, 0, res, 0, stopWatches);
+            stopWatchStart = res;
+        }
+        stopWatchStart[stopWatches++] = System.currentTimeMillis();
+    }
+    
+    public long stopTimer() {
+        return System.currentTimeMillis() - stopWatchStart[--stopWatches];
+    }
+    
+    /** the original hash code
+     */
+    public int identityHashCode(Object x) {
+        return System.identityHashCode(x);
+    }
+    
+    /** exit the program
+     */
+    public void exit() {
+        System.exit(0);
+    }
+    
+    public void exit(int i) {
+        System.exit(i);
+    }
+    
+    /** propose to run the garbage collector
+     */
+    public void gc() {
+        System.gc();
+    }
+}

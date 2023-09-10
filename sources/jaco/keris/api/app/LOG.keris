@@ -1,0 +1,217 @@
+//                 _
+//   _  _____ _ __(_)___     Keris API
+//  | |/ / _ \ '__| / __|    (c) 2001 Matthias Zenger
+//  |   <  __/ |  | \__ \
+//  |_|\_\___|_|  |_|___/    Logging module
+//                           
+//  [LOG.keris (4916) 12-Jul-01 18:35 -> 13-Jul-01 15:18]
+
+package keris.app;
+
+import java.util.*;
+import java.io.*;
+
+
+public module LOG {
+
+    /** logging levels
+     */
+    public final int NONE = 100;
+    public final int SEVERE = 50;
+    public final int WARNING = 40;
+    public final int INFO = 30;
+    public final int FINE = 20;
+    public final int STATUS = 10;
+    public final int ALL = 0;
+    
+    /** an interface for publishers
+     */
+    public interface Publisher {
+        void publish(int mlevel, String message, String context);
+        void close();
+    }
+    
+    /** a standard publisher
+     */
+    public class DefaultPublisher implements Publisher {
+        protected PrintStream ps;
+        
+        public DefaultPublisher(PrintStream ps) {
+            this.ps = ps;
+        }
+    
+        public void publish(int mlevel, String message, String context) {
+            ps.println(message);
+            if (mlevel >= contextInclLevel)
+                ps.println("<=== " + context);
+        }
+        
+        public void close() {
+        	ps.close();
+        }
+    }
+    
+    /** current logging level; all messages with levels
+     *  over this level are logged
+     */
+    protected int level = NONE;
+    
+    protected int defaultLevel = WARNING;
+    
+    /** include context?
+     */
+    protected int contextInclLevel = NONE;
+    
+    /** current log message publisher
+     */
+    protected Publisher publisher = new DefaultPublisher(System.err);
+    
+    /** the time of the last status message
+     */
+    protected long statusTime = System.currentTimeMillis();
+    
+    /** set logging level
+     */
+    public int setLevel(int level) {
+        int oldLevel = this.level;
+        this.level = level;
+        if (level != NONE)
+       		defaultLevel = level;
+        return oldLevel;
+    }
+    
+    /** set the level for context inclusion
+     */
+   	public int setContextLevel(int level) {
+   		int oldLevel = this.contextInclLevel;
+   		this.contextInclLevel = level;
+   		return oldLevel;
+   	}
+    
+    /** set the message publisher
+     */
+    public Publisher setPublisher(Publisher publisher) {
+    	Publisher oldPublisher = this.publisher;
+    	this.publisher = publisher;
+    	return oldPublisher;
+    }
+    
+    /** use a console publisher
+     */
+    public Publisher onConsole() {
+    	return setPublisher(new DefaultPublisher(System.err));
+    }
+    
+    /** use a file publisher
+     */
+    public Publisher inFile(String filename) throws FileNotFoundException {
+    	return setPublisher(
+    		new DefaultPublisher(new PrintStream(new FileOutputStream(filename))));
+    }
+    
+    /** switch logging on
+     */
+    public int on() {
+        int oldLevel = this.level;
+        this.level = defaultLevel;
+        return oldLevel;
+    }
+    
+    /** switch logging off
+     */
+    public int off() {
+        defaultLevel = this.level;
+        this.level = NONE;
+        return defaultLevel;
+    }
+ 
+    /** return the current log level
+     */
+    public int currentLevel() {
+        return level;
+    }
+    
+    /** return the current context inclusion level
+     */
+    public int currentContextLevel() {
+    	return contextInclLevel;
+    }
+    
+    private String levelToString(int level) {
+        switch (level) {
+            case SEVERE: return "severe";
+            case WARNING: return "warning";
+            case INFO: return "info";
+            case FINE: return "fine";
+            case STATUS: return "status";
+            default: return "unknown level";
+        }
+    }
+    
+    /** log a general message
+     */
+    public void message(int mlevel, String message) {
+        if (mlevel >= level)
+            try {
+                throw new Exception(levelToString(mlevel));
+            } catch (Exception e) {
+                StringWriter sw = new StringWriter();
+                PrintWriter pw = new PrintWriter(sw);
+                e.printStackTrace(pw);
+                pw.flush();
+                publisher.publish(mlevel, message, sw.toString());
+                pw.close();
+            }
+    }
+    
+    /** log a severe message
+     */
+    public void severe(String message) {
+        this.message(SEVERE, message);
+    }
+    
+    /** log a warning
+     */
+    public void warning(String message) {
+        this.message(WARNING, message);
+    }
+    
+    /** log an info message
+     */
+    public void info(String message) {
+        this.message(INFO, message);
+    }
+    
+    /** log a fine message
+     */
+    public void fine(String message) {
+        this.message(FINE, message);
+    }
+    
+    /** log a status message with time
+     */
+    public void timedStatus(String message) {
+        this.message(STATUS, "[" + message + "; " +
+        	(System.currentTimeMillis() - statusTime) + "ms]");
+        statusTime = System.currentTimeMillis();
+    }
+    
+    /** log a status message without time
+     */
+    public void status(String message) {
+    	this.message(STATUS, "[" + message + "]");
+   		statusTime = System.currentTimeMillis();
+    }
+    
+    /** start timer
+     */
+    public void start() {
+   		statusTime = System.currentTimeMillis();
+    }
+    
+    /** finalizer
+     */
+    public void finalize() {
+        publisher.close();
+    }
+}

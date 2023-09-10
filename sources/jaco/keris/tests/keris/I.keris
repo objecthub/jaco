@@ -1,0 +1,48 @@
+interface I {
+	void foo();
+}
+interface J {
+	J(int i);
+}
+module interface MI {
+	class C implements I;
+}
+module interface MJ {
+	class C implements J;
+}
+module M implements MI, MJ {
+	class D implements I, J {
+		public D(int i) {}
+		public void foo() {
+		}
+	}
+	class C implements I, J with D;
+	public C test() {
+		return new C(7);
+	}
+	C[] cs;
+}
+module N extends M requires O {
+	interface K {
+		int bar(C x);
+	}
+	class E extends M.D implements K {
+		public E(int i) {
+			super(i);
+		}
+		public int bar(C c) {
+			c.bar(c);
+			return 0;
+		}
+	}
+	class C implements I, J, K with E;
+	public void main(String[] args) {
+		test().bar(test());
+		cs[0].bar(O.run(test()));
+	}
+}
+module O requires M {
+	M.C run(M.C c) {
+		return c;
+	}
+}

@@ -1,0 +1,12 @@
+public class C {
+   I2 a;
+   C1 b;
+   void dummy(Object o) {
+      I3 e = (I3)((I2)((I1)b));
+      e = (I3)((I2)((I1)a));
+   }
+   public C() {
+      super();
+   }
+}
+

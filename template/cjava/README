@@ -1,0 +1,24 @@
+             _     _
+     __    //||  //|
+    /  \  //_|| //_|    JAVA WITH COMPOUND TYPES
+____\__ \//  ||//  |____________________________________________________
+
+
+cJava is an extension of the Java Programming Language. It adds
+Compound Types to the language according to the specification of
+Martin Buechi and Wolfgang Weck. See
+http://www.tucs.abo.fi/publications/techreports/TR182.html
+for their technical report "Java Needs Compound Types".
+
+The cJava compiler cjavac is an extension of Jaco, an extensible
+Java compiler. This distribution contains two compilers: jaco and
+cjavac. jaco can be used as a replacement for Sun's javac whereas
+cjavac implements Java + compound types.
+
+For installing the compilers just include the bin directory into
+your path.
+
+-- Matthias                                                 July, 2000
+________________________________________________________________________
+                Copyright 2000, Stephane Zermatten and
+                                Matthias Zenger (matthias@objecthub.com)

@@ -1,0 +1,39 @@
+module H {
+}
+
+module I specializes H {
+}
+
+module J specializes I {
+}
+
+module K requires L {
+}
+
+module K2 specializes K requires L2 as L {
+}
+
+module L requires I {
+}
+
+module L2 specializes L requires J as I {
+}
+
+module M requires H, L {
+    module K;
+}
+
+module P requires I {
+}
+
+module P2 specializes P requires J as I {
+}
+
+module N specializes M requires I as H {
+    module P;
+}
+
+module O specializes N requires J as I, L2 as L {
+    module P2 as P;
+    module K2 as K;
+}

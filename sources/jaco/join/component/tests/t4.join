@@ -1,0 +1,197 @@
+{
+	rendezvous() =	{
+						barrier1(x) = a2() & a1(x),	// function 0
+						barrier2(x) = b2() & b1(x),	// function 1
+						a2() & b1(x) = x,			// function 2
+						b2() & a1(x) = x			// function 3
+					};
+					(barrier1, barrier2),			// function 4
+	barrier1((b, _), x) = b(x),						// function 5
+	barrier2((_, b), x) = b(x)						// function 6
+};
+{
+	r = rendezvous(),
+	g() & h() = h(),								// function 7
+	process1(x) = { y = barrier1(r, x) }; g(),		// function 8
+	process2(x) = barrier2(r, x)					// function 9
+};
+process2(8) & process1(2)
+
+/*
+FUNCTIONS
+
+  TOPLEVEL()
+    0: ENTER 0
+    3: GOTO 24
+    6: FUN 4
+    9: STORE 0
+    11: FUN 5
+    14: STORE 1
+    16: FUN 6
+    19: STORE 2
+    21: GOTO 27
+    24: GOTO 6
+    27: ENTER 2
+    30: GOTO 53
+    33: LOAD 1, 0
+    36: UNIT
+    37: APPLY
+    38: STORE 0
+    40: FUN 8
+    43: STORE 3
+    45: FUN 9
+    48: STORE 4
+    50: GOTO 64
+    53: TOKEN 2
+    55: STORE 1
+    57: TOKEN 1
+    59: STORE 2
+    61: GOTO 33
+    64: FORK 74
+    67: LOAD 0, 3
+    70: BYTE 2
+    72: YIELD
+    73: STOP
+    74: LOAD 0, 4
+    77: BYTE 8
+    79: APPLY
+    80: LEAVE
+    81: LEAVE
+    82: STOP
+
+  FUNCTION 0(1 variables, guard is 0,  left token map is 0)
+    0: STORE 0
+    2: FORK 13
+    5: LOAD 1, 5
+    8: LOAD 0, 0
+    11: APPLY
+    12: STOP
+    13: LOAD 1, 2
+    16: UNIT
+    17: APPLY
+    18: RET
+
+  FUNCTION 1(1 variables, guard is 0,  left token map is 0)
+    0: STORE 0
+    2: FORK 13
+    5: LOAD 1, 3
+    8: LOAD 0, 0
+    11: APPLY
+    12: STOP
+    13: LOAD 1, 4
+    16: UNIT
+    17: APPLY
+    18: RET
+
+  FUNCTION 2(1 variables, guard is 3,  left token map is 0)
+    0: POP
+    1: STORE 0
+    3: LOAD 0, 0
+    6: RET
+
+  FUNCTION 3(1 variables, guard is 12,  left token map is 0)
+    0: POP
+    1: STORE 0
+    3: LOAD 0, 0
+    6: RET
+
+  FUNCTION 4(0 variables, guard is 0,  left token map is 0)
+    0: POP
+    1: ENTER 1
+    4: GOTO 20
+    7: FUN 0
+    10: STORE 0
+    12: FUN 1
+    15: STORE 1
+    17: GOTO 39
+    20: TOKEN 2
+    22: STORE 2
+    24: TOKEN 1
+    26: STORE 3
+    28: TOKEN 4
+    30: STORE 4
+    32: TOKEN 3
+    34: STORE 5
+    36: GOTO 7
+    39: LOAD 0, 0
+    42: LOAD 0, 1
+    45: TUPEL 2
+    47: LEAVE
+    48: RET
+
+  FUNCTION 5(3 variables, guard is 0,  left token map is 0)
+    0: DECOMP
+    1: STORE 2
+    3: DECOMP
+    4: STORE 1
+    6: STORE 0
+    8: LOAD 0, 0
+    11: LOAD 0, 2
+    14: APPLY
+    15: RET
+
+  FUNCTION 6(3 variables, guard is 0,  left token map is 0)
+    0: DECOMP
+    1: STORE 2
+    3: DECOMP
+    4: STORE 1
+    6: STORE 0
+    8: LOAD 0, 1
+    11: LOAD 0, 2
+    14: APPLY
+    15: RET
+
+  FUNCTION 7(0 variables, guard is 3,  left token map is 0)
+    0: POP
+    1: POP
+    2: LOAD 1, 2
+    5: UNIT
+    6: YIELD
+    7: UNIT
+    8: RET
+
+  FUNCTION 8(1 variables, guard is 0,  left token map is 0)
+    0: STORE 0
+    2: ENTER 3
+    5: GOTO 25
+    8: LOAD 3, 1
+    11: LOAD 2, 0
+    14: LOAD 1, 0
+    17: TUPEL 2
+    19: APPLY
+    20: STORE 0
+    22: GOTO 28
+    25: GOTO 8
+    28: LOAD 2, 1
+    31: UNIT
+    32: YIELD
+    33: LEAVE
+    34: UNIT
+    35: RET
+
+  FUNCTION 9(1 variables, guard is 0,  left token map is 0)
+    0: STORE 0
+    2: LOAD 2, 2
+    5: LOAD 1, 0
+    8: LOAD 0, 0
+    11: TUPEL 2
+    13: APPLY
+    14: RET
+
+STATE SPACES
+
+  SPACE 0:
+    members: 3, tokens: 0, actions: 0
+
+  SPACE 1:
+    members: 6, tokens: 4, actions: 2
+    invoke function 2 for 3
+    invoke function 3 for 12
+
+  SPACE 2:
+    members: 5, tokens: 2, actions: 1
+    invoke function 7 for 3
+
+  SPACE 3:
+    members: 1, tokens: 0, actions: 0
+*/

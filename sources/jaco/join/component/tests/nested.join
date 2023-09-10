@@ -1,0 +1,9 @@
+{
+	t x = x
+};
+{
+	f y = {
+		g(z) & empty() = { u = t z }; u
+	}; g(y) & empty() 
+};
+f 3

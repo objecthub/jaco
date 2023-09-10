@@ -1,0 +1,15 @@
+{
+	id x = x,
+	ref(z) = {
+				get() & state(x) = x & state(x),
+				put(x) & state(y) = state(x)
+		  };
+			(get, put) & state(z),
+    r = ref(id),
+    succ x = x + 1,
+    get(g, _) = g(),
+	put((_, p), x) = p(x)
+};
+put(r, succ);
+get(r) true
+

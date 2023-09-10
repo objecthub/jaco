@@ -1,0 +1,39 @@
+{
+	new_cell(x) = {
+			set_prev(prev) & first() = () & inside(prev),
+			kill() & inside(prev) = (x, prev, false),
+			kill() & first() = (x, (set_prev, kill), true)
+		};
+		(set_prev, kill) & first(),
+	set((s, _), y) = s(y),
+	remove(_, r) = r(),
+	content(z, _, _) = z,
+	prev(_, z, _) = z,
+	last_cell(_, _, z) = z
+};
+{
+	fifo() = {
+			put(x) & empty() = {
+					fst = new_cell(x)
+				};
+				() & state(fst, fst),
+			put(x) & state(fst, lst) = {
+					new_fst = new_cell(x)
+				};
+				set(fst, new_fst);
+				() & state(new_fst, lst),
+			get() & state(fst, lst) = {
+					cell = remove(lst)
+				};
+				content(cell) &
+					if (last_cell(cell)) empty() else state(fst, prev(cell))
+		};
+		(put, get) & empty(),
+	put((p, _), x) = p(x),
+	get(_, g) = g()
+};
+{ list = fifo() };
+put(list, 2)//;
+//put(list, 4);
+//{ x = get(list) };
+//x / get(list)

@@ -1,0 +1,54 @@
+interface I {
+	void foo();
+}
+
+module M {
+	class AImpl implements I {
+		public void foo() {}
+	}
+    class A implements I = AImpl;
+    void bar(A a) {
+    	a.foo();
+    }
+}
+
+module N refines M {
+	interface J {
+		void goo(A a);
+	}
+	class BImpl extends AImpl implements I, J {
+		public BImpl() {
+			super();
+		}
+		public void goo(A a) {}
+	}
+    class A implements I, J = BImpl;
+    void tar(A a) {
+    	a.foo();
+    	a.goo(a);
+    }
+    void bar(A a) {
+    	super.bar(a);
+    	a.goo(a);
+    }
+}
+
+module O refines N {
+	interface K {
+		void binary(A a);
+	}
+	class CImpl extends BImpl implements I, J, K {
+		public void binary(A a) {
+			a.binary(a);	
+		}
+	}
+	class A implements I, J, K = N.BImpl {
+		private void funny() {}
+		public void binary(A a) {
+			a.binary(a);
+			a.binary(this);
+			this.funny();
+			super.goo(a);
+		}
+	}
+}

@@ -1,0 +1,28 @@
+____    /   _ _     JaCo
+    \  //\ / / \    -- an extensible compiler
+     \//  \\_\_/    (c) 1997-2002, Matthias Zenger
+           \____________________________________________________________
+
+
+JaCo is an extensible Java compiler. It is written in an extension
+of itself :-). This distribution contains two compilers: jaco and
+pico. pico is an extension of jaco, adding features that support
+the development of extensible software. In particular, it features
+Java with
+  
+  * extensible algebraic datatypes,
+  * covariant method overriding, and
+  * declaration/storage of meta data.
+
+The docs directory contains an introduction to algebraic datatypes
+in Java. Both, jaco and pico can be used as a replacement for Sun's
+javac. They implement the latest standards defined for the Java 2
+Software Development Kit 1.4.
+
+For installing the compilers just include the bin directory into
+your path. That's all. Have fun!
+
+-- Matthias
+
+________________________________________________________________________
+           Copyright 1997-2002, Matthias Zenger (matthias@objecthub.com)

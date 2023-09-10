@@ -1,0 +1,40 @@
+interface I {
+    interface K {
+        void foo();
+        J get(int i);
+    }
+    virtual interface J extends K {
+        J();
+        J get(int i);
+        virtual interface L {
+            L id(L l, J j);
+        }
+    }
+    int bar(J j);
+}
+/*
+interface M extends I {
+    virtual interface J overrides I.J {
+        void goo();
+    }
+}
+*/
+class A implements I {
+    public virtual class J implements I.K {
+        public J get(int i) {
+            return null;
+        }
+        public void foo() {
+        }
+        virtual class L {
+            int i = 3;
+            public L() {}
+            public L id(I.J.L l, I.J j) {
+                return null;
+            }
+        }
+    }
+    public int bar(I.J j) {
+        return 1;
+    }
+}

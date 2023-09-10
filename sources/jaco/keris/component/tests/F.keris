@@ -1,0 +1,28 @@
+abstract module M requires O {
+    module N;
+    interface I {
+    	I();
+    }
+    interface J {
+    }
+    class A extends N::O.B, O.B implements I, J, O.K;
+    A foo() { return null; }
+    void bar(N::O.B b) { }
+    void tar(O.B b) { }
+    void zar([I, J] ij) { }
+    void main() {
+    	bar(foo());
+    	tar(foo());
+    	zar(foo());
+    }
+}
+
+abstract module N {
+    module O;
+}
+
+abstract module O {
+	interface K {
+    }
+    class B implements K;
+}

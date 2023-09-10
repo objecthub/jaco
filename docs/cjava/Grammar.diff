@@ -1,0 +1,84 @@
+
+ADDED:
+
+  *Compound Types*
+
+  ClassOrInterfaceTypeNoCompound ::=  
+                Name 
+
+  CompoundType ::=
+	        "[" CompoundList "]"
+ 
+  CompoundList ::=
+	        ClassOrInterfaceType:n 
+	      | CompoundList "," ClassOrInterfaceType
+
+
+  *Aliases*
+
+   AliasDeclaration ::=
+	          Modifiers ( "class" | "interface" ) Name "=" ClassOrInterfaceType ";"
+
+   LocalAliasDeclarationStatement ::= Modifiers ( "class" | "interface" ) LocalAliasDeclarations ";"
+
+   LocalAliasDeclarations ::=
+                 Name "=" ClassOrInterfaceType
+               | LocalAliasDeclaration "," Name "=" ClassOrInterfaceType
+
+
+CHANGED: 
+
+  *Compound Types*
+  
+  ClassOrInterfaceType ::=
+	        ClassOrInterfaceTypeNoCompound 
+	      | CompoundType            
+
+
+  ClassDeclaration ::= Modifiers "class" Name 
+                        [ "extends" ClassOrInterfaceTypeNoCompounds ] 
+	                [ "implements" ClassOrInterfaceType { "," ClassOrInterfaceType } ] 
+	                ClassBody
+
+
+  ArrayType ::=
+	( PrimitiveTypeType | Name | CompoundType ) Dims
+
+
+  ClassInstanceCreationExpression ::=    
+	         [ Primary "." ] "new" ClassOrInterfaceTypeNoCompound "(" ArgumentList ")" [ ClassBody ]
+	         "new" ClassOrInterfaceTypeNoCompound "(" ArgumentList ")"
+
+  CastExpression ::= 
+               ... 
+              | "(" CompoundType [Dims] ")" UnaryExpressionNotPlusMinus
+
+  ClassOrArray ::= 
+	         Name			 
+               | ArrayType		 
+               | CompoundType		 
+
+
+  *Aliases*
+
+  
+  TypeDeclaration ::= 
+ 		 ClassDeclaration
+	       | InterfaceDeclaration
+               | AliasDeclaration
+	
+
+  BlockStatement ::= 	
+	         LocalVariableDeclarationStatement
+               | LocalAliasDeclarationStatement  
+      	       | Statement
+               | ClassDeclaration
+
+  ClassMemberDeclaration ::=
+         	 FieldDeclaration
+      	       | MethodDeclaration
+               | InnerClassDeclaration
+               | AliasDeclaration
+
+
+

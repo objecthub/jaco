@@ -1,0 +1,26 @@
+module M requires N {
+
+
+	void main() {
+		N.bar(N.foo());
+	}
+}
+
+module N requires O {
+	O.A foo() { return null; }
+	void bar(O.A x) {}
+}
+
+module R requires O1 {
+    void bar(O.A x) {
+	}
+	O.A foo() { return null; }
+}
+
+module O {
+	class A = Object;
+}
+
+module O1 refines O {
+    class A = Object;
+}

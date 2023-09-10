@@ -1,0 +1,7 @@
+{
+	f x = if (true) 0 else y (x - 1),
+	y = {
+			g x = f x
+		} ; g
+};
+f 2

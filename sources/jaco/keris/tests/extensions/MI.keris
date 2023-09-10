@@ -1,0 +1,11 @@
+module interface M {
+	module N;
+}
+
+module interface N {
+
+}
+
+module M2 implements M {
+
+}

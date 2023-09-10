@@ -1,0 +1,70 @@
+module M {
+    interface AI {
+        AI(); 
+        void print();
+    }
+    class AC implements AI {
+        public void print() {
+            System.out.println("AC");
+        }
+    }
+    class A implements AI = AC;
+}
+
+module M2 extends M {
+    interface BI { void disp(); }
+    class BC implements M.AI, BI {
+        public void print() {
+            System.out.println("BC");
+        }
+        public void disp() {
+            System.out.println("disp");
+        }
+    }
+    class A implements M.AI, BI = BC;
+    class C extends A {
+        
+    }
+}
+
+module N {
+
+}
+
+module O {
+    class OC = Object;
+}
+
+module P {
+  module M = new M;
+  
+  class B = Object;
+  
+  public void foo(B b) {
+  
+  }
+  
+  public void bar(M.A a) {
+    a.print();
+  }
+  
+}
+
+module Q extends P requires N {
+  module O = new O;
+  module M2 for M = new M2;
+  
+  class B = Object;
+  
+  void foo(B b) {
+  
+  }
+  
+  void bar(M2.A a) {
+    a.disp();
+  }
+  
+  String test(O.OC x) {
+    return x.toString();
+  }
+}

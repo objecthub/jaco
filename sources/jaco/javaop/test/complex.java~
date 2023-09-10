@@ -1,0 +1,80 @@
+
+class complex {
+
+    float re, im;
+
+    complex(float re, float im) {
+	this.re = re;
+	this.im = im;
+    }
+
+    complex this # (complex c) {
+	return new complex(c.re + re, c.im + im);
+    }
+
+    complex (float re) + this {
+	return new complex(this.re + re, im);
+    }
+
+    complex (complex c) + this {
+	return c;
+    }
+
+    complex this + (int i) {
+	return new complex(42,42);;
+    }
+
+    public static void main(String[] args) {
+	//int OP$$TMP$1;
+	complex c = new complex(1,1);
+	c = c + c;
+	//int i = (true || false) ? 2 : (1);
+	int j = 3;
+	c = c + j;
+	c = j + c;
+
+	c = j + (j + c);
+
+	String str = "" + c + " " + j;
+	System.out.println(str + " coucou");
+
+    }
+
+}
+
+/*
+class complex {
+   float re;
+   float im;
+   complex(float re, float im) {
+      super();
+      this.re = re;
+      this.im = im;
+   }
+    //   complex OP$$L$1(complex c) {
+    //return new complex(c.re + re, c.im + im);
+    //   }
+   complex OP$$R$$(float re) {
+      return new complex(this.re + re, im);
+   }
+   complex OP$$R$$(complex c){
+      return null;
+   }
+   complex  OP$$L$$(int i) {
+      return null;
+   }
+   public static void main(String[] args) {
+      complex OP$$TMP$1;
+      int OP$$TMP$2;
+      int OP$$TMP$3;
+      int OP$$TMP$4;
+      complex c = new complex(1, 1);
+      c = (OP$$TMP$1 = c) == OP$$TMP$1 ? c.OP$$R$$(OP$$TMP$1) : c.OP$$R$$(OP$$TMP$1);
+      int j = 3;
+      c = c.OP$$L$$(j);
+      c = (OP$$TMP$2 = j) == OP$$TMP$2 ? c.OP$$R$$(OP$$TMP$2) : c.OP$$R$$(OP$$TMP$2);
+      c = (OP$$TMP$4 = j) == OP$$TMP$4 ? ((OP$$TMP$3 = j) == OP$$TMP$3 ? c.OP$$R$$(OP$$TMP$3) : c.OP$$R$$(OP$$TMP$3)).OP$$R$$(OP$$TMP$4) : ((OP$$TMP$3 = j) == OP$$TMP$3 ? c.OP$$R$$(OP$$TMP$3) : c.OP$$R$$(OP$$TMP$3)).OP$$R$$(OP$$TMP$4);
+   }
+}
+
+*/

@@ -1,0 +1,26 @@
+module M implements MI, MJ {
+    public void foo() {
+    	System.out.println("foo of " + this);
+    }
+    public void bar() {
+    	System.out.println("bar of " + this);
+    }
+}
+
+module O implements MI {
+    public void foo() {
+    	System.out.println("foo of " + this);
+    }
+}
+
+module N {
+    module M implements MI, MJ;
+    public void main(String[] args) {
+        MI.foo();
+        MJ.bar();
+    }
+}
+
+module Nr refines N {
+    module O;
+}

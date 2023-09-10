@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<attributes version="1.0">
+   <fileobject name="SJTrees.java">
+      <attr name="class_dependency_jaco.java.component.Trees" stringvalue="SJTrees"/>
+   </fileobject>
+   <fileobject name="TransSJ.java">
+      <attr name="class_dependency_jaco.java.component.Translator" stringvalue="TransSJ"/>
+      <attr name="class_dependency_jaco.java.component.TypeConst" stringvalue="TransSJ"/>
+   </fileobject>
+   <fileobject name="SJPrettyPrinter.java">
+      <attr name="class_dependency_jaco.java.component.PrettyPrinter" stringvalue="SJPrettyPrinter"/>
+   </fileobject>
+   <fileobject name="SJAttribute.java">
+      <attr name="class_dependency_jaco.java.component.Attribute" stringvalue="SJAttribute"/>
+   </fileobject>
+   <fileobject name="TransSJ_Temp.java">
+      <attr name="class_dependency_jaco.java.component.Translator" stringvalue="TransSJ"/>
+   </fileobject>
+</attributes>

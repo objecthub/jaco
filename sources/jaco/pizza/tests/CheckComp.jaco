@@ -1,0 +1,22 @@
+public class CheckComp
+{
+	public static interface Intf
+	{
+		void goo();
+	}
+	
+	void bar() {}
+	
+	void do(Intf x) {}
+	
+	void foo()
+	{
+		do(new Intf()
+		{
+			void goo()
+			{
+				bar();
+			}
+		});
+	}
+}

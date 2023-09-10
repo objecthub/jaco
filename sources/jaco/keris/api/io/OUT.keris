@@ -1,0 +1,55 @@
+//                 _
+//   _  _____ _ __(_)___     Keris API
+//  | |/ / _ \ '__| / __|    (c) 2001 Matthias Zenger
+//  |   <  __/ |  | \__ \
+//  |_|\_\___|_|  |_|___/    Output module interface
+//                           
+//  [OPTIONS.keris (6262) 6-Jul-01 12:03 -> 6-Jul-01 16:09]
+
+package keris.io;
+
+
+public module interface OUT {
+
+    void write(int b);
+
+    void write(byte buf[], int off, int len);
+
+    void print(boolean b);
+
+    void print(char c);
+
+    void print(int i);
+
+    void print(long l);
+
+    void print(float f);
+
+    void print(double d);
+
+    void print(char s[]);
+
+    void print(String s);
+
+    void print(Object obj);
+
+    void println();
+
+    void println(boolean x);
+
+    void println(char x);
+
+    void println(int x);
+
+    void println(long x);
+
+    void println(float x);
+
+    void println(double x);
+
+    void println(char x[]);
+
+    void println(String x);
+
+    void println(Object x);
+}

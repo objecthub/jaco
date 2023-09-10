@@ -1,0 +1,386 @@
+package jaco.join.grammar;
+
+import jaco.join.struct.*;
+import jaco.java.struct.*;
+import jaco.java.component.*;
+import jaco.framework.*;
+
+
+action code
+{:
+	JTree.Factory	make;
+	Scanner			lexer;
+	ErrorHandler	report;
+	int				varnum;
+	
+	private static JTree at(int pos, JTree tree) {
+		tree.pos = pos;
+		return tree;
+	}
+	
+	private static JTree[] append(JTree[] ts, JTree t) {
+		if (t == null)
+			return ts;
+		else if (ts == null)
+			return new JTree[]{t};
+		JTree[]	newtrees = new JTree[ts.length + 1];
+		System.arraycopy(ts, 0, newtrees, 0, ts.length);
+		newtrees[ts.length] = t;
+		return newtrees;
+	}
+	
+	private JTree anonVar(int pos) {
+		return at(pos, make.Ident(Name.fromString("x$" + varnum++)));
+	}
+:};
+
+parser code
+{:
+/* other components of the jaco compiler
+ */
+	Scanner				lexer;
+	ErrorHandler		report;
+	Constant.Factory	mkConst;
+	
+	
+	public Parser(Scanner lexer)
+	{
+		this.lexer = lexer;
+		this.report = lexer.report;
+		this.mkConst = lexer.constants.make;
+	}
+	
+	public void report_error(String message, Object info)
+	{
+		if ((info instanceof jaco.framework.parser.Symbol) &&
+			(((jaco.framework.parser.Symbol)info).sym > 0))
+		{
+			if (((jaco.framework.parser.Symbol)info).left != -1)
+				report.error(((jaco.framework.parser.Symbol)info).left,
+						message + " (" +
+						((jaco.framework.parser.Symbol)info).sym + ")");
+			else
+				report.error(Position.NOPOS, message);
+		}
+		else
+			report.error(Position.NOPOS, message);
+	}
+	
+	public void report_fatal_error(String message, Object info) throws Exception
+	{
+		done_parsing();
+		report_error("fatal error: " + message, info);
+		throw new Exception();
+	}
+	
+	public void syntax_error(jaco.framework.parser.Symbol cur_token)
+	{
+		report_error("syntax error", cur_token);
+	}
+	
+	protected int error_sync_size()
+	{
+		return 2;
+	}
+:};
+
+init with
+{:
+	action_obj.lexer = lexer;
+	action_obj.make = lexer.jmake;
+	action_obj.report = report;
+	action_obj.varnum = 0;
+:};
+
+scan with
+{:
+	Object	obj = null;
+	switch (lexer.token)
+	{
+		case Symbols.IDENTIFIER:
+			obj = lexer.name;
+			break;
+				
+		case Symbols.CHARLIT:
+			obj = mkConst.IntConst((int)lexer.intVal, TypeConst.CHAR);
+			break;
+			
+		case Symbols.INTLIT:
+			obj = mkConst.IntConst((int)lexer.intVal);
+			break;
+			
+		case Symbols.LONGLIT:
+			obj = mkConst.LongConst(lexer.intVal);
+			break;
+			
+		case Symbols.FLOATLIT:
+			obj = mkConst.FloatConst((float)lexer.floatVal);
+			break;
+			
+		case Symbols.DOUBLELIT:
+			obj = mkConst.DoubleConst(lexer.floatVal);
+			break;
+			
+		case Symbols.STRLIT:
+			obj = mkConst.StringConst(lexer.name);
+			break;
+		
+		default:
+			obj = null;
+	}
+	jaco.framework.parser.Symbol	sym =
+		new jaco.framework.parser.Symbol(lexer.token,
+									lexer.pos,
+									Position.encode(lexer.cline, lexer.ccol),
+									obj);
+	lexer.nextToken();
+	return sym;
+:};
+
+
+/************ terminal symbols
+ */
+
+terminal				LPAREN, RPAREN, AMPERSAND, SEMICOLON, DOT,
+						EQUALS, COMMA, LBRACE, RBRACE, PLUS,
+						MINUS, TIMES, DIV, EQ, NOTEQ, GT, LT, GTEQ,
+						LTEQ, AND, OR, NOT, IF, ELSE, TRUE, FALSE,
+						ERROR, BAR, SUB, USUB;
+						
+terminal Constant		CHARLIT, INTLIT, LONGLIT, FLOATLIT, DOUBLELIT,
+						STRLIT;
+
+terminal Name			IDENTIFIER;
+
+
+/************ non terminal symbols
+ */
+
+non terminal JTree		Term, SemicolonTerm, IfTerm, ExpressionTerm,
+						ApplyTerm, SimpleTerm, Literal, TermTupel,
+						TopLevelDef, Definition, Name,
+						LeftHandSide, SimpleLhs, LhsTupel, UnaryExprTerm,
+						TopLevel;
+	
+non terminal JTree[]	Terms, Definitions, NamesOrTupels,
+						DefinitionsOpt;
+
+						
+/************ operator precedences
+ */
+
+precedence right		SEMICOLON;
+precedence left			COMMA;
+precedence nonassoc 	EQUALS;
+precedence left			AMPERSAND;
+precedence left			OR;
+precedence left			AND;
+precedence nonassoc		EQ, NOTEQ;
+precedence nonassoc		GT, LT, GTEQ, LTEQ;
+precedence left			PLUS, MINUS;
+precedence left			TIMES, DIV;
+
+
+/************ join grammar
+ */
+
+start with TopLevel;
+
+/* Terms */
+
+TopLevel ::=
+		  Term:t
+		  {: RESULT = at(tleft, make.TopLevel(new JTree[]{t}, null)); :}
+		;
+
+Term ::=
+		  SemicolonTerm:t
+		  {: RESULT = t; :}
+		| Term:l AMPERSAND:o Term:r
+		  {: RESULT = at(oleft, make.Join(l, r)); :}
+		;
+
+SemicolonTerm ::=
+		  IfTerm:t
+		  {: RESULT = t; :}
+		| Term:s SEMICOLON Term:t
+		  {: RESULT =
+		  		at(sleft, make.Let(
+					at(sleft, make.Decls(new JTree[]{
+		  				at(sleft, make.Decl(anonVar(sleft), s))})),
+					t)); :}
+		| TopLevelDef:d SEMICOLON:o Term:t
+		  {: RESULT = at(oleft, make.Let(d, t)); :}
+		;
+
+IfTerm ::=
+		  ExpressionTerm:t
+		  {: RESULT = t; :}
+		| IF:i LPAREN Term:c RPAREN Term:s ELSE IfTerm:t
+		  {: RESULT = at(ileft, make.If(c, s, t)); :}
+		;
+
+ExpressionTerm ::=
+		  ApplyTerm:t
+		  {: RESULT = t; :}
+		| ExpressionTerm:l PLUS:o ExpressionTerm:r
+		  {: RESULT = at(oleft, make.Oper(JoinConst.PLUS, l, r)); :}
+		| ExpressionTerm:l MINUS:o ExpressionTerm:r
+		  {: RESULT = at(oleft, make.Oper(JoinConst.MINUS, l, r)); :}
+		| ExpressionTerm:l TIMES:o ExpressionTerm:r
+		  {: RESULT = at(oleft, make.Oper(JoinConst.TIMES, l, r)); :}
+		| ExpressionTerm:l DIV:o ExpressionTerm:r
+		  {: RESULT = at(oleft, make.Oper(JoinConst.DIV, l, r)); :}
+		| ExpressionTerm:l AND:o ExpressionTerm:r
+		  {: RESULT = at(oleft, make.Oper(JoinConst.AND, l, r)); :}
+		| ExpressionTerm:l OR:o ExpressionTerm:r
+		  {: RESULT = at(oleft, make.Oper(JoinConst.OR, l, r)); :}
+		| ExpressionTerm:l EQ:o ExpressionTerm:r
+		  {: RESULT = at(oleft, make.Oper(JoinConst.EQ, l, r)); :}
+		| ExpressionTerm:l NOTEQ:o ExpressionTerm:r
+		  {: RESULT = at(oleft, make.Oper(JoinConst.NOTEQ, l, r)); :}
+		| ExpressionTerm:l GT:o ExpressionTerm:r
+		  {: RESULT = at(oleft, make.Oper(JoinConst.GT, l, r)); :}
+		| ExpressionTerm:l LT:o ExpressionTerm:r
+		  {: RESULT = at(oleft, make.Oper(JoinConst.LT, l, r)); :}
+		| ExpressionTerm:l GTEQ:o ExpressionTerm:r
+		  {: RESULT = at(oleft, make.Oper(JoinConst.GTEQ, l, r)); :}
+		| ExpressionTerm:l LTEQ:o ExpressionTerm:r
+		  {: RESULT = at(oleft, make.Oper(JoinConst.LTEQ, l, r)); :}
+		;
+
+ApplyTerm ::=
+		  UnaryExprTerm:t
+		  {: RESULT = t; :}
+		| ApplyTerm:f SimpleTerm:a
+		  {: RESULT = at(fleft, make.Apply(f, a)); :}
+		;
+
+UnaryExprTerm ::=
+		  SimpleTerm:t
+		  {: RESULT = t; :}
+		| NOT:o SimpleTerm:r
+		  {: RESULT = at(oleft, make.Oper(JoinConst.NOT, null, r)); :}
+		| MINUS:o SimpleTerm:r
+		  {: RESULT = at(oleft, make.Oper(JoinConst.NEG, null, r)); :}
+		;
+
+SimpleTerm ::=
+		  Name:t
+		  {: RESULT = t; :}
+		| Literal:l
+		  {: RESULT = l; :}
+		| SimpleTerm:q DOT:d IDENTIFIER:s
+		  {: RESULT = at(dleft, make.Select(q, s)); :}
+		| TermTupel:t
+		  {: RESULT = t; :}
+		;
+
+Name ::=
+		  IDENTIFIER:i
+		  {: RESULT = at(ileft, make.Ident(i)); :}
+		;
+
+Literal ::=
+		  CHARLIT:l {: RESULT = at(lleft, make.Literal(l)); :}
+		| INTLIT:l {: RESULT = at(lleft, make.Literal(l)); :}
+		| LONGLIT:l {: RESULT = at(lleft, make.Literal(l)); :}
+		| FLOATLIT:l {: RESULT = at(lleft, make.Literal(l)); :}
+		| DOUBLELIT:l {: RESULT = at(lleft, make.Literal(l)); :}
+		| STRLIT:l {: RESULT = at(lleft, make.Literal(l)); :}
+		| TRUE:l {: RESULT = at(lleft, make.SpecialLiteral(JoinConst.TRUE)); :}
+		| FALSE:l {: RESULT = at(lleft, make.SpecialLiteral(JoinConst.FALSE)); :}
+		| ERROR:l {: RESULT = at(lleft, make.SpecialLiteral(JoinConst.ERROR)); :}
+		;
+
+TermTupel ::=
+		  LPAREN:p RPAREN
+		  {: RESULT = at(pleft, make.Tupel(new JTree[0])); :}
+		| LPAREN:p Terms:ts RPAREN
+		  {: RESULT = (ts.length == 1) ?
+		  				ts[0] : at(pleft, make.Tupel(ts)); :}
+		;
+
+Terms ::=
+		  Term:t
+		  {: RESULT = new JTree[]{t}; :}
+		| Terms:ts COMMA Term:t
+		  {: RESULT = append(ts, t); :}
+		;
+
+/* Definitions */
+
+TopLevelDef	::=
+		  LBRACE:l DefinitionsOpt:d RBRACE
+		  {: RESULT = at(lleft, make.Decls(d)); :}
+		;
+
+DefinitionsOpt ::=
+		  /* empty */
+		  {: RESULT = new JTree[0]; :}
+		| Definitions:ds
+		  {: RESULT = ds; :}
+		;
+
+Definitions ::=
+		  Definition:d
+		  {: RESULT = new JTree[]{d}; :}
+		| Definitions:ds COMMA Definition:d
+		  {: RESULT = append(ds, d); :}
+		;
+
+Definition ::=
+		  LeftHandSide:l EQUALS:o Term:r
+		  {: RESULT = at(oleft, make.Decl(l, r)); :}
+		| Name:l EQUALS:o Term:r
+		  {: RESULT = at(oleft, make.Decl(l, r)); :}
+		| LhsTupel:l EQUALS:o Term:r
+		  {: RESULT = at(oleft, make.Decl(l, r)); :}
+		| Name:l EQUALS:o TopLevelDef:r
+		  {: RESULT = at(oleft, make.Decl(l, r)); :}
+		;
+
+LeftHandSide ::=
+		  Name:f Name:a
+		  {: RESULT = at(fleft, make.Apply(f, a)); :}
+		| Name:f SUB
+		  {: RESULT = at(fleft, make.Apply(f, anonVar(fleft))); :}
+		| Name:f LhsTupel:a
+		  {: RESULT = at(fleft, make.Apply(f, a)); :}
+		| LeftHandSide:l AMPERSAND:o SimpleLhs:r
+		  {: RESULT = at(oleft, make.Join(l, r)); :}
+		;
+
+SimpleLhs ::=
+		  Name:t
+		  {: RESULT = t; :}
+		| Name:f Name:a
+		  {: RESULT = at(fleft, make.Apply(f, a)); :}
+		| Name:f SUB
+		  {: RESULT = at(fleft, make.Apply(f, anonVar(fleft))); :}
+		| Name:f LhsTupel:a
+		  {: RESULT = at(fleft, make.Apply(f, a)); :}
+		;
+
+LhsTupel ::=
+		  LPAREN:p RPAREN
+		  {: RESULT = at(pleft, make.Tupel(new JTree[0])); :}
+		| LPAREN:p NamesOrTupels:is RPAREN
+		  {: RESULT = (is.length == 1) ?
+                                is[0] : at(pleft, make.Tupel(is)); :}
+		;
+
+NamesOrTupels ::=
+		  Name:t
+		  {: RESULT = new JTree[]{t}; :}
+		| LhsTupel:t
+		  {: RESULT = new JTree[]{t}; :}
+		| SUB:t
+		  {: RESULT = new JTree[]{anonVar(tleft)}; :}
+		| NamesOrTupels:is COMMA Name:t
+		  {: RESULT = append(is, t); :}
+		| NamesOrTupels:is COMMA LhsTupel:t
+		  {: RESULT = append(is, t); :}
+		| NamesOrTupels:is COMMA SUB:t
+		  {: RESULT = append(is, anonVar(tleft)); :}
+		;

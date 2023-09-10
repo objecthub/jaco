@@ -1,0 +1,51 @@
+module M requires N {
+	void id() {
+		System.out.println("M");
+		N.done();
+	}
+}
+module N requires M {
+	void id() {
+		System.out.println("N");
+		M.id();
+	}
+	void done() {
+		System.out.println(".");
+	}
+}
+module A {
+	module M;
+	module N;
+	
+	public void main(String[] args) {
+		N.id();
+	}
+}
+
+
+module O for M requires P for N {
+	void id() {
+		System.out.println("O");
+		super.id();
+	}
+}
+module P for N requires O for M {
+	void id() {
+		System.out.println("P");
+		super.id();
+	}
+	void done() {
+		System.out.println("!");
+	}
+}
+module B extends A {
+	module O for M;
+	module P for N;
+	module M;
+	module N;
+	
+	public void main(String[] args) {
+		P.id();
+		N.id();
+	}
+}
