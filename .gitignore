@@ -21,3 +21,27 @@ hs_err_pid*
 replay_pid*
 
 .DS_Store
+classes/jaco/cjava/grammar/Parser.tables
+classes/jaco/cjava/resources/Messages.properties
+classes/jaco/cjava/resources/Settings.properties
+classes/jaco/java/grammar/Parser.tables
+classes/jaco/java/resources/Messages.properties
+classes/jaco/java/resources/Settings.properties
+classes/jaco/javaop/grammar/Parser.tables
+classes/jaco/javaop/resources/Messages.properties
+classes/jaco/javaop/resources/Settings.properties
+classes/jaco/keris/grammar/XParser.tables
+classes/jaco/keris/resources/Messages.properties
+classes/jaco/keris/resources/Settings.properties
+classes/jaco/pizza/grammar/PizzaParser.tables
+classes/jaco/pizza/resources/Messages.properties
+classes/jaco/pizza/resources/Settings.properties
+classes/jaco/psc/grammar/Parser.tables
+classes/jaco/psc/resources/Messages.properties
+classes/jaco/psc/resources/Settings.properties
+classes/jaco/sjava/grammar/Parser.tables
+classes/jaco/sjava/resources/Messages.properties
+classes/jaco/sjava/resources/Settings.properties
+classes/jaco/stat/grammar/PizzaParser.tables
+classes/jaco/stat/resources/Messages.properties
+classes/jaco/stat/resources/Settings.properties
